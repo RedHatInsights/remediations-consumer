@@ -1,0 +1,32 @@
+---
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  labels:
+    app: remediations
+  name: remediations-consumer
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: remediations-consumer:latest
+  postCommit: {}
+  resources:
+    limits:
+      memory: 1Gi
+    requests:
+      memory: 1Gi
+  runPolicy: Serial
+  source:
+    git:
+      ref: master
+      uri: git@github.com:RedHatInsights/remediations-consumer
+    sourceSecret:
+      name: nachobot
+    type: Git
+  strategy:
+    dockerStrategy:
+      dockerfilePath: build/Dockerfile
+    type: Docker
+  triggers:
+  - type: ConfigChange
