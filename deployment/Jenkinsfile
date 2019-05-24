@@ -1,0 +1,51 @@
+#!/usr/bin/env groovy
+
+def notify(subject, body, color) {
+    message = subject
+    if (body != null) {
+        message += " | ${body}"
+    }
+
+    slackSend message: message, color: color, channel: '#remediations'
+}
+
+def notifyOnFailure(Closure step) {
+    try {
+        step()
+    } catch (e) {
+        notify("@jharting [${env.JOB_NAME.split('/')[-1]}] Build failed", "See ${env.BUILD_URL}console", "danger")
+        throw e
+    }
+}
+
+node('nodejs') {
+    notifyOnFailure {
+        notify("[${env.JOB_NAME.split('/')[-1]}] Build started", null, "#439FE0")
+
+        env.NODEJS_HOME = "${tool 'node-10'}"
+        env.PATH="${env.NODEJS_HOME}/bin:${env.PATH}"
+
+        checkout scm
+
+        sh 'git rev-parse HEAD'
+
+        stage('build') {
+            sh 'npm ci'
+        }
+
+        stage('verify') {
+            sh 'npm run verify'
+        }
+
+        stage('build image') {
+            timeout (10) {
+                openshift.withProject('buildfactory') {
+                    def build = openshift.selector('bc', 'remediations-consumer').startBuild()
+                    build.logs('-f')
+                }
+            }
+
+            notify("[${env.JOB_NAME.split('/')[-1]}] Build finished", null, "good")
+        }
+    }
+}
