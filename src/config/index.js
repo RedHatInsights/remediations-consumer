@@ -16,7 +16,7 @@ const config = convict({
     logging: {
         level: {
             format: String,
-            default: 'info',
+            default: 'trace',
             env: 'LOG_LEVEL'
         },
         pretty: {

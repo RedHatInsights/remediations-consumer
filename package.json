@@ -16,6 +16,7 @@
   },
   "author": "Jozef Hartinger",
   "dependencies": {
+    "@hapi/joi": "^15.0.3",
     "bluebird": "^3.5.4",
     "convict": "^5.0.0",
     "kafka-node": "^4.1.3",
