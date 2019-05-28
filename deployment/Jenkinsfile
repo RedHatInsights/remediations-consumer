@@ -1,5 +1,7 @@
 #!/usr/bin/env groovy
 
+NS='remediations-pr'
+
 def notify(subject, body, color) {
     message = subject
     if (body != null) {
@@ -27,14 +29,20 @@ node('nodejs') {
 
         checkout scm
 
+        def utils = load "./build/utils.groovy"
+
         sh 'git rev-parse HEAD'
 
         stage('build') {
             sh 'npm ci'
         }
 
-        stage('verify') {
-            sh 'npm run verify'
+        utils.withScaledEnv(NS) {
+            env.DB_HOST="postgres.${NS}.svc"
+
+            stage('verify') {
+                sh 'npm run verify'
+            }
         }
 
         stage('build image') {
