@@ -1,6 +1,19 @@
 'use strict';
 
 const convict = require('convict');
+const fs = require('fs');
+
+convict.addFormat({
+    name: 'file',
+    validate (path) {
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
+        return fs.existsSync(path);
+    },
+    coerce (path) {
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
+        return fs.readFileSync(path, 'utf8');
+    }
+});
 
 const config = convict({
     env: {
@@ -23,6 +36,40 @@ const config = convict({
             format: Boolean,
             default: false,
             env: 'LOG_PRETTY'
+        }
+    },
+
+    db: {
+        connection: {
+            user: {
+                format: String,
+                default: 'postgres',
+                env: 'DB_USERNAME'
+            },
+            password: {
+                format: String,
+                default: 'remediations',
+                env: 'DB_PASSWORD',
+                sensitive: true
+            },
+            database: {
+                format: String,
+                default: 'remediations_consumer_test',
+                env: 'DB_DATABASE'
+            },
+            host: {
+                format: String,
+                default: '127.0.0.1',
+                env: 'DB_HOST'
+            },
+            ssl: {
+                ca: {
+                    format: 'file',
+                    default: undefined,
+                    env: 'DB_CA',
+                    sensitive: true
+                }
+            }
         }
     },
     kafka: {

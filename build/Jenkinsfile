@@ -1,5 +1,7 @@
 #!/usr/bin/env groovy
 
+NS='remediations-pr'
+
 node('nodejs') {
 
     env.NODEJS_HOME = "${tool 'node-10'}"
@@ -7,13 +9,19 @@ node('nodejs') {
 
     checkout scm
 
+    def utils = load "./build/utils.groovy"
+
     sh 'git rev-parse HEAD'
 
     stage('build') {
         sh 'npm ci'
     }
 
-    stage('verify') {
-        sh 'npm run verify'
+    utils.withScaledEnv(NS) {
+        env.DB_HOST="postgres.${NS}.svc"
+
+        stage('verify') {
+            sh 'npm run verify'
+        }
     }
 }
