@@ -1,5 +1,6 @@
 'use strict';
 
+const log = require('../util/log');
 const P = require('bluebird');
 const kafka = require('kafka-node');
 const config = require('../config').get('kafka');
@@ -11,7 +12,8 @@ const consumer = P.promisifyAll(new kafka.ConsumerGroupStream({
     fromOffset: 'earliest',
     autoCommit: config.autoCommit,
     autoCommitIntervalMs: 5000,
-    protocol: ['roundrobin']
+    protocol: ['roundrobin'],
+    highWaterMark: 5
 }, config.topics.inventory.topic));
 
 exports.start = function () {
@@ -21,6 +23,16 @@ exports.start = function () {
     client.connect();
 
     consumer.resume();
+    consumer.consumerGroup.client.on('ready', async () => {
+        log.info('connected to Kafka');
+        const offset = P.promisifyAll(consumer.consumerGroup.getOffset());
+        const offsets = await offset.fetchLatestOffsetsAsync([config.topics.inventory.topic]);
+        log.debug(offsets, 'current offsets');
+    });
+    return consumer;
+};
+
+exports.get = function () {
     return consumer;
 };
 

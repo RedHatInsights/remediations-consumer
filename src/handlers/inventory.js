@@ -1,7 +1,9 @@
 'use strict';
 
+const db = require('../db');
 const log = require('../util/log');
 const Joi = require('@hapi/joi');
+const probes = require('../probes');
 
 // {"id": <host id>, "timestamp": <delete timestamp>, "type": "delete"}
 const schema = Joi.object().keys({
@@ -20,22 +22,44 @@ function validate (value) {
     return value;
 }
 
-module.exports = async function (message) {
-    log.debug(message, 'received inventory message');
+function parseMessage (message) {
+    try {
+        const parsed = JSON.parse(message.value);
 
-    let value = null;
+        if (!parsed || parsed.type !== EVENT_TYPE) {
+            log.debug(message, 'ignoring message');
+            return;
+        }
+
+        return validate(parsed);
+    } catch (e) {
+        probes.inventoryRemoveErrorParse(message, e);
+    }
+}
+
+module.exports = async function (message) {
+    probes.inventoryIncomingMessage(message);
+
+    const parsed = parseMessage(message);
+    if (!parsed) {
+        return;
+    }
+
+    module.exports.pending++;
+    const { id } = parsed;
 
     try {
-        value = validate(JSON.parse(message.value));
+        const result = await db.deleteSystem(id);
+        if (result > 0) {
+            probes.inventoryRemoveSuccess(id, result);
+        } else {
+            probes.inventoryRemoveUnknown(id);
+        }
     } catch (e) {
-        log.error(e, 'error parsing message');
-        return;
+        probes.inventoryRemoveError(id, e);
+    } finally {
+        module.exports.pending--;
     }
-
-    if (value.type !== EVENT_TYPE) {
-        log.debug(value, 'ignoring message');
-        return;
-    }
-
-    log.debug({ id: value.id }, 'about to delete host');
 };
+
+module.exports.pending = 0;

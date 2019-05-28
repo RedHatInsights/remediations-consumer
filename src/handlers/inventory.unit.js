@@ -1,9 +1,10 @@
 'use strict';
 /* eslint-disable max-len */
 
+require('../../test');
 const handler = require('./inventory');
 
-describe('inventory handler', function () {
+describe('inventory handler unit tests', function () {
     test('parses a message', async () => {
         const message = {
             topic: 'platform.inventory.events',
