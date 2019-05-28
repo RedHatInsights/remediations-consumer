@@ -23,12 +23,13 @@ exports.start = function () {
     client.connect();
 
     consumer.resume();
-    consumer.consumerGroup.client.on('ready', async () => {
-        log.info('connected to Kafka');
+    consumer.consumerGroup.client.on('ready', () => log.info('connected to Kafka'));
+    consumer.consumerGroup.on('rebalanced', async () => {
         const offset = P.promisifyAll(consumer.consumerGroup.getOffset());
         const offsets = await offset.fetchLatestOffsetsAsync([config.topics.inventory.topic]);
         log.debug(offsets, 'current offsets');
     });
+
     return consumer;
 };
 
