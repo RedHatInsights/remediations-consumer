@@ -70,6 +70,11 @@ const config = convict({
                     sensitive: true
                 }
             }
+        },
+        dryRun: {
+            format: Boolean,
+            default: false,
+            env: 'DB_DRY_RUN'
         }
     },
 
