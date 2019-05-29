@@ -72,6 +72,7 @@ const config = convict({
             }
         }
     },
+
     kafka: {
         host: {
             format: String,
@@ -96,6 +97,19 @@ const config = convict({
                     env: 'INVENTORY_CONSUMER_GROUP'
                 }
             }
+        }
+    },
+
+    metrics: {
+        prefix: {
+            format: String,
+            default: 'remediations_consumer_',
+            env: 'METRICS_PREFIX'
+        },
+        port: {
+            format: Number,
+            default: 9006,
+            env: 'METRICS_PORT'
         }
     }
 });
