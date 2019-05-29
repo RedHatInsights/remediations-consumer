@@ -4,7 +4,7 @@
 
 const fs = require('fs');
 const { version } = require('../../package.json');
-const config = require('../config');
+const config = require('../config').get();
 
 function getCommit () {
     if (config.commit) {
