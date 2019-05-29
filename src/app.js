@@ -4,6 +4,7 @@ const P = require('bluebird');
 const db = require('./db');
 const kafka = require('./kafka');
 const config = require('./config');
+const metrics = require('./metrics');
 const version = require('./util/version');
 const log = require('./util/log');
 const inventoryHandler = require('./handlers/inventory');
@@ -15,6 +16,8 @@ exports.start = async function () {
 
     await db.start();
     log.info('connected to database');
+
+    metrics.start();
 
     const consumer = kafka.start();
     consumer.on('data', inventoryHandler);
@@ -49,6 +52,7 @@ exports.stop = async function (e) {
 
         await kafka.stop();
         await db.stop();
+        metrics.stop();
     } finally {
         process.exit(e ? 1 : 0); // eslint-disable-line no-process-exit
     }

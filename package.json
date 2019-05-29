@@ -27,7 +27,8 @@
     "knex": "^0.16.5",
     "pg": "^7.11.0",
     "pino": "^5.12.5",
-    "pino-pretty": "^3.0.0"
+    "pino-pretty": "^3.0.0",
+    "prom-client": "^11.3.0"
   },
   "devDependencies": {
     "eslint": "^5.16.0",
