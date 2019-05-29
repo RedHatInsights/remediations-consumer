@@ -6,18 +6,18 @@ def scale (NS, count) {
 }
 
 def waitFor (NS, count, resource) {
-    println "waiting for ${resource} to scale to ${count}"
-
     openshift.withCluster() {
         openshift.withProject(NS) {
-            timeout(5) {
+            timeout(2) {
                 def latestDeploymentVersion = openshift.selector('dc', resource).object().status.latestVersion
-                def rc = openshift.selector('rc', "${resource}-${latestDeploymentVersion}")
-                rc.untilEach(1) {
-                    def rcMap = it.object()
-                    def ready = rcMap.status.readyReplicas == null ? 0 : rcMap.status.readyReplicas
-                    return (rcMap.status.replicas.equals(ready))
+                def ready = { openshift.selector('rc', "${resource}-${latestDeploymentVersion}").object().status.readyReplicas ?: 0 }
+
+                while (ready() != count) {
+                    println("Waiting for ${resource} to scale to ${count} (${ready()} available)")
+                    sleep (5)
                 }
+
+                println("${resource} succesfully scaled to ${ready()} replicas")
             }
         }
     }
