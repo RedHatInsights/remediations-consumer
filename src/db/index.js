@@ -1,6 +1,8 @@
 'use strict';
 
 const config = require('../config');
+const dryRun = require('../config').get('db').dryRun;
+const log = require('../util/log');
 
 const options = {
     client: 'pg',
@@ -33,7 +35,16 @@ exports.start = async function () {
 };
 
 exports.deleteSystem = async function (system_id) {
-    return exports.get()('remediation_issue_systems').where({ system_id }).delete();
+    const query = exports.get()('remediation_issue_systems').where({ system_id }).delete();
+    const sql = query.toSQL().toNative();
+
+    if (dryRun) {
+        log.debug(sql, 'not executing database query (dry run)');
+        return;
+    }
+
+    log.debug(sql, 'executing database query');
+    return query;
 };
 
 exports.stop = function () {
