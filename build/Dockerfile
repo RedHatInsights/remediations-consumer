@@ -8,5 +8,6 @@ RUN npm ci --only=production
 
 COPY . /opt/app-root/src
 
+EXPOSE 9006
 ENV NODE_ENV=production
 CMD [ "node", "src/app.js" ]
