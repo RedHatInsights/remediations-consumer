@@ -16,6 +16,15 @@ const consumer = P.promisifyAll(new kafka.ConsumerGroupStream({
     highWaterMark: 5
 }, config.topics.inventory.topic));
 
+async function resetOffsets (topic) {
+    log.info({ topic }, 'reseting offsets for topic');
+    const offset = P.promisifyAll(consumer.consumerGroup.getOffset());
+    const offsets = await offset.fetchEarliestOffsetsAsync([topic]);
+    Object.entries(offsets[topic]).forEach(setting => { // eslint-disable-line security/detect-object-injection
+        consumer.consumerGroup.setOffset(topic, parseInt(setting[0]), setting[1]);
+    });
+}
+
 exports.start = function () {
     const client = consumer.consumerGroup.client;
     consumer.pause();
@@ -25,6 +34,10 @@ exports.start = function () {
     consumer.resume();
     consumer.consumerGroup.client.on('ready', () => log.info('connected to Kafka'));
     consumer.consumerGroup.on('rebalanced', async () => {
+        if (config.topics.inventory.resetOffsets) {
+            await resetOffsets(config.topics.inventory.topic);
+        }
+
         const offset = P.promisifyAll(consumer.consumerGroup.getOffset());
         const offsets = await offset.fetchLatestOffsetsAsync([config.topics.inventory.topic]);
         log.debug(offsets, 'current offsets');

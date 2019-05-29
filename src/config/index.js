@@ -95,6 +95,11 @@ const config = convict({
                     format: String,
                     default: 'remediations-consumer',
                     env: 'INVENTORY_CONSUMER_GROUP'
+                },
+                resetOffsets: {
+                    format: Boolean,
+                    default: false,
+                    env: 'INVENTORY_RESET_OFFSETS'
                 }
             }
         }
