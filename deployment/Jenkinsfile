@@ -1,5 +1,7 @@
 #!/usr/bin/env groovy
 
+@Library("github.com/RedHatInsights/insights-pipeline-lib")
+
 NS='remediations-pr'
 
 def notify(subject, body, color) {
@@ -52,7 +54,19 @@ node('nodejs') {
                     build.logs('-f')
                 }
             }
+        }
 
+        stage('push image to stage') {
+            openShift.withNode(defaults: true) {
+                promoteImages(
+                    srcImages: [
+                        "remediations-consumer:latest"
+                    ],
+                    dstProject: "remediations-stage",
+                    dstSaUsername: "image-sync",
+                    dstSaTokenCredentialsId: "remediations-image-sync"
+                )
+            }
             notify("[${env.JOB_NAME.split('/')[-1]}] Build finished", null, "good")
         }
     }
