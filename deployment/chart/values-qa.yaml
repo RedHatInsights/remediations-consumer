@@ -4,6 +4,6 @@ imageNamespace: buildfactory
 logLevel: trace
 replicas: 1
 
-kafkaHost: platform-mq-ci-kafka-bootstrap.platform-mq-ci.svc:9092
+kafkaHost: platform-mq-qa-kafka-bootstrap.platform-mq-qa.svc:9092
 
 db: {}
