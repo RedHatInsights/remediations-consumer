@@ -2,8 +2,10 @@ imageRegistry: docker-registry.default.svc:5000
 imageNamespace: buildfactory
 
 logLevel: trace
-replicas: 1
+replicas: 2
 
-kafkaHost: platform-mq-ci-kafka-bootstrap.platform-mq-ci.svc:9092
+kafka:
+  host: platform-mq-ci-kafka-bootstrap.platform-mq-ci.svc:9092
+  logging: true
 
 db: {}
