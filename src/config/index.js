@@ -89,6 +89,11 @@ const config = convict({
             default: false,
             env: 'KAFKA_AUTOCOMMIT'
         },
+        logging: {
+            format: Boolean,
+            default: false,
+            env: 'KAFKA_LOGGING'
+        },
         topics: {
             inventory: {
                 topic: {

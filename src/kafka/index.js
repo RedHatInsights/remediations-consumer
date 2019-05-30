@@ -1,9 +1,25 @@
 'use strict';
 
+const config = require('../config').get('kafka');
 const log = require('../util/log');
+
+function kafkaLogger (type) {
+    const child = log.child({type});
+
+    return {
+        debug: child.debug.bind(child),
+        info: child.info.bind(child),
+        warn: child.warn.bind(child),
+        error: child.error.bind(child)
+    };
+}
+
+if (config.logging) {
+    require('kafka-node/logging').setLoggerProvider(kafkaLogger);
+}
+
 const P = require('bluebird');
 const kafka = require('kafka-node');
-const config = require('../config').get('kafka');
 
 const consumer = P.promisifyAll(new kafka.ConsumerGroupStream({
     kafkaHost: config.host,
