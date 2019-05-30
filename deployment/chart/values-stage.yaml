@@ -1,0 +1,14 @@
+imageRegistry: 172.30.217.42:5000
+imageNamespace: remediations-stage
+
+logLevel: trace
+replicas: 1
+
+kafka:
+  host: platform-mq-prod-kafka-bootstrap.platform-mq-prod.svc:9092
+
+db:
+  ca: rds-client-ca
+
+dryRun: true
+consumerGroup: remediations-consumer-stage
