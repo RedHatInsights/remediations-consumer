@@ -7,7 +7,7 @@ function kafkaLogger (type) {
     const child = log.child({type});
 
     return {
-        debug: child.debug.bind(child),
+        debug: child.trace.bind(child),
         info: child.info.bind(child),
         warn: child.warn.bind(child),
         error: child.error.bind(child)
