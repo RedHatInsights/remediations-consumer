@@ -10,6 +10,11 @@ const log = require('./util/log');
 const inventoryHandler = require('./handlers/inventory');
 const SHUTDOWN_DELAY = 5000;
 
+process.on('unhandledRejection', e => {
+    log.fatal(e);
+    throw e;
+});
+
 exports.start = async function () {
     log.info({env: config.env}, `${version.full} starting`);
     log.debug(config.toString());
