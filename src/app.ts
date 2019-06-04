@@ -4,7 +4,7 @@ import * as P from 'bluebird';
 import * as db from './db';
 import * as kafka from './kafka';
 import config from './config';
-import * as metrics from './metrics';
+import metrics from './metrics';
 import version from './util/version';
 import log from './util/log';
 import handler, {pending} from './handlers/inventory';
@@ -23,7 +23,7 @@ export default async function start () {
     await db.start();
     log.info('connected to database');
 
-    const stopMetrics = metrics.start();
+    const stopMetrics = metrics();
 
     const { consumer, stop: stopKafka } = kafka.start();
     consumer.on('data', handler);

@@ -124,3 +124,4 @@ rules:
   '@typescript-eslint/no-explicit-any': 0
 
   '@typescript-eslint/no-require-imports': 2
+  '@typescript-eslint/indent': 0

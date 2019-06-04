@@ -5,13 +5,21 @@ import 'should';
 beforeAll(() => db.start());
 afterAll(() => db.stop());
 
-export let sandbox = null;
+let sandbox: sinon.SinonSandbox | null = null;
+
+export function getSandbox (): sinon.SinonSandbox {
+    if (!sandbox) {
+        throw new Error('sandbox not defined');
+    }
+
+    return sandbox;
+}
 
 beforeEach(() => {
     sandbox = sinon.createSandbox();
 });
 
 afterEach(() => {
-    sandbox.restore();
+    getSandbox().restore();
     sandbox = null;
 });
