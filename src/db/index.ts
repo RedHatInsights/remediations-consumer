@@ -1,7 +1,6 @@
 import config from '../config';
 import log from '../util/log';
 import * as Knex from 'knex';
-const dryRun = config.db.dryRun;
 
 const opts = {
     client: 'pg',
@@ -33,16 +32,19 @@ export async function start (): Promise<Knex> {
     return knex;
 }
 
-export async function deleteSystem (system_id: string): Promise<number> {
-    const query = get()('remediation_issue_systems').where({ system_id }).delete();
-    const sql = query.toSQL().toNative();
+export async function deleteSystem (system_id: string, dryRun = false): Promise<number> {
+    const base = get()('remediation_issue_systems').where({ system_id });
 
     if (dryRun) {
-        log.debug(sql, 'not executing database query (dry run)');
-        return 0;
+        const query = base.count();
+        const sql = query.toSQL().toNative();
+        log.debug({ sql }, 'executing database query');
+        return parseInt((await query)[0].count);
     }
 
-    log.debug(sql, 'executing database query');
+    const query = base.delete();
+    const sql = query.toSQL().toNative();
+    log.debug({ sql }, 'executing database query');
     return query;
 }
 

@@ -1,17 +1,7 @@
 import * as convict from 'convict';
-import * as fs from 'fs';
+import formats from './formats';
 
-convict.addFormat({
-    name: 'file',
-    validate (path: string) {
-        // eslint-disable-next-line security/detect-non-literal-fs-filename
-        return fs.existsSync(path);
-    },
-    coerce (path: string) {
-        // eslint-disable-next-line security/detect-non-literal-fs-filename
-        return fs.readFileSync(path, 'utf8');
-    }
-});
+convict.addFormats(formats);
 
 const config = convict({
     env: {
@@ -127,6 +117,6 @@ const config = convict({
     }
 });
 
-config.validate();
+config.validate({ strict: true });
 
 export default config.get();

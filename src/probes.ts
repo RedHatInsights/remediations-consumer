@@ -1,12 +1,12 @@
 'use strict';
 
 import log from './util/log';
-const metrics = require('./metrics');
+import { client } from './metrics';
 import config from './config';
 import { Message } from 'kafka-node';
 
 function createCounter (name: string, help: string, ...labelNames: string[]) {
-    return new metrics.client.Counter({
+    return new client.Counter({
         name: `${config.metrics.prefix}${name}`, help, labelNames
     });
 }

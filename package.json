@@ -10,14 +10,14 @@
   "scripts": {
     "clean": "rm -r dist",
     "compile": "tsc",
-    "coverage": "tsc && npm run db:ims && NODE_ENV=test LOG_LEVEL=error jest -i --coverage",
+    "coverage": "tsc && npm run db:ims && NODE_ENV=test LOG_LEVEL=fatal jest -i --coverage",
     "db:ims": "NODE_ENV=test npm-run-all db:init db:migrate db:seed",
     "db:init": "DB_DATABASE=postgres node dist/test/init.js",
     "db:migrate": "knex migrate:latest",
     "db:seed": "knex seed:run",
     "lint": "eslint src/**/*.ts test/**/*.js",
     "start": "tsc && LOG_PRETTY=true node dist/src/app.js",
-    "test": "tsc && npm run db:ims && NODE_ENV=test LOG_LEVEL=error jest -i",
+    "test": "tsc && npm run db:ims && NODE_ENV=test LOG_LEVEL=fatal jest -i",
     "verify": "npm-run-all lint coverage"
   },
   "author": "Jozef Hartinger",
@@ -39,6 +39,8 @@
     "@types/kafka-node": "^2.0.8",
     "@types/node": "^12.0.4",
     "@types/pino": "^5.8.7",
+    "@types/sinon": "^7.0.12",
+    "@types/supertest": "^2.0.7",
     "@typescript-eslint/eslint-plugin": "^1.9.0",
     "@typescript-eslint/parser": "^1.9.0",
     "eslint": "^5.16.0",
@@ -48,6 +50,7 @@
     "npm-run-all": "^4.1.5",
     "should": "^13.2.3",
     "sinon": "^7.3.2",
+    "supertest": "^4.0.2",
     "ts-jest": "^24.0.2",
     "typescript": "^3.5.1"
   }

@@ -4,7 +4,7 @@ import config from '../config';
 
 export { client };
 
-export function start (): () => void {
+export default function start (): () => void {
     client.collectDefaultMetrics({
         prefix: config.metrics.prefix,
         timeout: 5000

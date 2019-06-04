@@ -3,6 +3,10 @@ module.exports = {
     testEnvironment: 'node',
 
     testMatch: [
-        '**/dist/**/?(*.)+(unit|integration).js'
-    ]
+        '**/?(*.)+(unit|integration).ts'
+    ],
+
+    transform: {
+        '^.+\\.tsx?$': 'ts-jest'
+    }
 };

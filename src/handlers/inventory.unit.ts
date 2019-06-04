@@ -1,7 +1,8 @@
 /* eslint-disable max-len */
 
-import '../../test';
+import { getSandbox } from '../../test';
 import handler from './inventory';
+import * as probes from '../probes';
 
 describe('inventory handler unit tests', function () {
     test('parses a message', async () => {
@@ -30,7 +31,7 @@ describe('inventory handler unit tests', function () {
         await handler(message);
     });
 
-    test('throws error on missing field', async () => {
+    test('throws error on missing field (1)', async () => {
         const message = {
             topic: 'platform.inventory.events',
             value: '{"timestamp": "2019-05-23T18:31:39.065368+00:00", "id": "6cfa75ee-5ba9-442e-9557-6dbbf33593c4"}',
@@ -41,5 +42,34 @@ describe('inventory handler unit tests', function () {
         };
 
         await handler(message);
+    });
+
+    test('throws error on missing field (2)', async () => {
+        const message = {
+            topic: 'platform.inventory.events',
+            value: '{"type": "delete", "timestamp": "2019-05-23T18:31:39.065368+00:00"}',
+            offset: 0,
+            partition: 58,
+            highWaterOffset: 1,
+            key: undefined
+        };
+
+        await handler(message);
+    });
+
+    test('throws error on invalid JSON', async () => {
+        const spy = getSandbox().spy(probes, 'inventoryRemoveErrorParse');
+
+        const message = {
+            topic: 'platform.inventory.events',
+            value: '{"timestamp": "2019',
+            offset: 0,
+            partition: 58,
+            highWaterOffset: 1,
+            key: undefined
+        };
+
+        await handler(message);
+        spy.callCount.should.equal(1);
     });
 });

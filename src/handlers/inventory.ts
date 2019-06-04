@@ -3,6 +3,7 @@ import log from '../util/log';
 import * as Joi from '@hapi/joi';
 import * as probes from '../probes';
 import { Message } from 'kafka-node';
+import config from '../config';
 
 interface RemoveMessage {
     id: string;
@@ -54,9 +55,13 @@ export default async function onMessage (message: Message) {
     const { id } = parsed;
 
     try {
-        const result = await db.deleteSystem(id);
+        const result = await db.deleteSystem(id, config.db.dryRun);
         if (result > 0) {
-            probes.inventoryRemoveSuccess(id, result);
+            if (config.db.dryRun) {
+                log.info({ id, references: result }, 'host would be removed (dry run)');
+            } else {
+                probes.inventoryRemoveSuccess(id, result);
+            }
         } else {
             probes.inventoryRemoveUnknown(id);
         }
