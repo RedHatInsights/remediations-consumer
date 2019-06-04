@@ -15,6 +15,7 @@ node('nodejs') {
 
     stage('build') {
         sh 'npm ci'
+        sh 'npm run compile'
     }
 
     utils.withScaledEnv(NS) {

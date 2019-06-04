@@ -1,9 +1,7 @@
-'use strict';
+import config from '../config';
+import log from '../util/log';
 
-const config = require('../config').get('kafka');
-const log = require('../util/log');
-
-function kafkaLogger (type) {
+function kafkaLogger (type: string) {
     const child = log.child({type});
 
     return {
@@ -14,34 +12,35 @@ function kafkaLogger (type) {
     };
 }
 
-if (config.logging) {
+if (config.kafka.logging) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('kafka-node/logging').setLoggerProvider(kafkaLogger);
 }
 
-const P = require('bluebird');
-const kafka = require('kafka-node');
+import * as P from 'bluebird';
+import * as kafka from 'kafka-node';
 
 const consumer = P.promisifyAll(new kafka.ConsumerGroupStream({
-    kafkaHost: config.host,
+    kafkaHost: config.kafka.host,
     autoConnect: false,
-    groupId: config.topics.inventory.consumerGroup,
+    groupId: config.kafka.topics.inventory.consumerGroup,
     fromOffset: 'earliest',
-    autoCommit: config.autoCommit,
+    autoCommit: config.kafka.autoCommit,
     autoCommitIntervalMs: 5000,
     protocol: ['roundrobin'],
     highWaterMark: 5
-}, config.topics.inventory.topic));
+}, config.kafka.topics.inventory.topic));
 
-async function resetOffsets (topic) {
+async function resetOffsets (topic: string) {
     log.info({ topic }, 'reseting offsets for topic');
     const offset = P.promisifyAll(consumer.consumerGroup.getOffset());
     const offsets = await offset.fetchEarliestOffsetsAsync([topic]);
-    Object.entries(offsets[topic]).forEach(setting => { // eslint-disable-line security/detect-object-injection
+    Object.entries<number>(offsets[topic]).forEach(setting => { // eslint-disable-line security/detect-object-injection
         consumer.consumerGroup.setOffset(topic, parseInt(setting[0]), setting[1]);
     });
 }
 
-exports.start = function () {
+export function start () {
     const client = consumer.consumerGroup.client;
     consumer.pause();
 
@@ -50,22 +49,19 @@ exports.start = function () {
     consumer.resume();
     consumer.consumerGroup.client.on('ready', () => log.info('connected to Kafka'));
     consumer.consumerGroup.on('rebalanced', async () => {
-        if (config.topics.inventory.resetOffsets) {
-            await resetOffsets(config.topics.inventory.topic);
+        if (config.kafka.topics.inventory.resetOffsets) {
+            await resetOffsets(config.kafka.topics.inventory.topic);
         }
 
         const offset = P.promisifyAll(consumer.consumerGroup.getOffset());
-        const offsets = await offset.fetchLatestOffsetsAsync([config.topics.inventory.topic]);
+        const offsets = await offset.fetchLatestOffsetsAsync([config.kafka.topics.inventory.topic]);
         log.debug(offsets, 'current offsets');
     });
 
-    return consumer;
-};
-
-exports.get = function () {
-    return consumer;
-};
-
-exports.stop = function () {
-    return consumer.closeAsync();
-};
+    return {
+        consumer,
+        stop () {
+            return consumer.closeAsync();
+        }
+    };
+}

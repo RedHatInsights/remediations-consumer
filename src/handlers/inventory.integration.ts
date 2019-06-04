@@ -1,10 +1,9 @@
-'use strict';
 /* eslint-disable max-len */
 
-const { getSandbox } = require('../../test');
-const handler = require('./inventory');
-const db = require('../db');
-const probes = require('../probes');
+import { sandbox } from '../../test';
+import handler from './inventory';
+import * as db from '../db';
+import * as probes from '../probes';
 
 describe('inventory handler integration tests', function () {
     test('removes system references', async () => {
@@ -14,10 +13,10 @@ describe('inventory handler integration tests', function () {
             offset: 0,
             partition: 58,
             highWaterOffset: 1,
-            key: null
+            key: undefined
         };
 
-        const spy = getSandbox().spy(probes, 'inventoryRemoveSuccess');
+        const spy = sandbox.spy(probes, 'inventoryRemoveSuccess');
 
         await handler(message);
         const [{ count }] = await db.get()('remediation_issue_systems').where({ system_id: 'dde971ae-0a39-4c2b-9041-a92e2d5a96cc' }).count();
@@ -32,10 +31,10 @@ describe('inventory handler integration tests', function () {
             offset: 0,
             partition: 12,
             highWaterOffset: 1,
-            key: null
+            key: undefined
         };
 
-        const spy = getSandbox().spy(probes, 'inventoryRemoveUnknown');
+        const spy = sandbox.spy(probes, 'inventoryRemoveUnknown');
 
         await handler(message);
         spy.callCount.should.equal(1);

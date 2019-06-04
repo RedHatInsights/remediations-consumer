@@ -1,11 +1,14 @@
-'use strict';
+import * as db from '../db';
+import log from '../util/log';
+import * as Joi from '@hapi/joi';
+import * as probes from '../probes';
+import { Message } from 'kafka-node';
 
-const db = require('../db');
-const log = require('../util/log');
-const Joi = require('@hapi/joi');
-const probes = require('../probes');
+interface RemoveMessage {
+    id: string;
+    type: string;
+}
 
-// {"id": <host id>, "timestamp": <delete timestamp>, "type": "delete"}
 const schema = Joi.object().keys({
     id: Joi.string().required(),
     type: Joi.string().required()
@@ -13,7 +16,7 @@ const schema = Joi.object().keys({
 
 const EVENT_TYPE = 'delete';
 
-function validate (value) {
+function validate (value: RemoveMessage): RemoveMessage {
     const { error } = Joi.validate(value, schema, {allowUnknown: true});
     if (error) {
         throw error;
@@ -22,9 +25,9 @@ function validate (value) {
     return value;
 }
 
-function parseMessage (message) {
+function parseMessage (message: Message): RemoveMessage | undefined {
     try {
-        const parsed = JSON.parse(message.value);
+        const parsed = JSON.parse(message.value.toString());
 
         if (!parsed || parsed.type !== EVENT_TYPE) {
             log.debug(message, 'ignoring message');
@@ -37,7 +40,9 @@ function parseMessage (message) {
     }
 }
 
-module.exports = async function (message) {
+export let pending = 0;
+
+export default async function onMessage (message: Message) {
     probes.inventoryIncomingMessage(message);
 
     const parsed = parseMessage(message);
@@ -45,7 +50,7 @@ module.exports = async function (message) {
         return;
     }
 
-    module.exports.pending++;
+    pending++;
     const { id } = parsed;
 
     try {
@@ -58,8 +63,6 @@ module.exports = async function (message) {
     } catch (e) {
         probes.inventoryRemoveError(id, e);
     } finally {
-        module.exports.pending--;
+        pending--;
     }
-};
-
-module.exports.pending = 0;
+}

@@ -1,8 +1,7 @@
-'use strict';
 /* eslint-disable max-len */
 
-require('../../test');
-const handler = require('./inventory');
+import '../../test';
+import handler from './inventory';
 
 describe('inventory handler unit tests', function () {
     test('parses a message', async () => {
@@ -12,7 +11,7 @@ describe('inventory handler unit tests', function () {
             offset: 0,
             partition: 58,
             highWaterOffset: 1,
-            key: null
+            key: undefined
         };
 
         await handler(message);
@@ -25,7 +24,7 @@ describe('inventory handler unit tests', function () {
             offset: 0,
             partition: 58,
             highWaterOffset: 1,
-            key: null
+            key: undefined
         };
 
         await handler(message);
@@ -38,7 +37,7 @@ describe('inventory handler unit tests', function () {
             offset: 0,
             partition: 58,
             highWaterOffset: 1,
-            key: null
+            key: undefined
         };
 
         await handler(message);
