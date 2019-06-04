@@ -120,3 +120,4 @@ const config = convict({
 config.validate({ strict: true });
 
 export default config.get();
+export const sanitized = config.toString();
