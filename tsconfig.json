@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "outDir": "./dist",
+        "allowJs": true,
+        "moduleResolution": "node",
+        "strict": true,
+        "resolveJsonModule": true,
+        "target": "es2017",
+        "baseUrl": ".",
+        "sourceMap": true
+    },
+    "include": [
+        "./src/**/*",
+        "./test/**/*"
+    ],
+    "types": [
+        "node"
+    ]
+}

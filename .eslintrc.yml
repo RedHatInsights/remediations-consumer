@@ -1,3 +1,4 @@
+parser: '@typescript-eslint/parser'
 parserOptions:
   ecmaVersion: 2018
 env:
@@ -6,10 +7,12 @@ env:
   jest: true
 plugins:
   - security
+  - '@typescript-eslint'
 extends:
   - eslint:recommended
   - plugin:jest/recommended
   - plugin:security/recommended
+  - plugin:@typescript-eslint/recommended
 rules:
 # possible errors
   no-template-curly-in-string: 2
@@ -112,3 +115,12 @@ rules:
   no-path-concat: 2
   no-process-env: 2
   no-process-exit: 2
+
+  no-console: 2
+
+# TypeScript
+  '@typescript-eslint/explicit-function-return-type': 0
+  '@typescript-eslint/camelcase': 0
+  '@typescript-eslint/no-explicit-any': 0
+
+  '@typescript-eslint/no-require-imports': 2

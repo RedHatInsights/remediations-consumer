@@ -1,15 +1,13 @@
-'use strict';
-
-const convict = require('convict');
-const fs = require('fs');
+import * as convict from 'convict';
+import * as fs from 'fs';
 
 convict.addFormat({
     name: 'file',
-    validate (path) {
+    validate (path: string) {
         // eslint-disable-next-line security/detect-non-literal-fs-filename
         return fs.existsSync(path);
     },
-    coerce (path) {
+    coerce (path: string) {
         // eslint-disable-next-line security/detect-non-literal-fs-filename
         return fs.readFileSync(path, 'utf8');
     }
@@ -131,4 +129,4 @@ const config = convict({
 
 config.validate();
 
-module.exports = config;
+export default config.get();

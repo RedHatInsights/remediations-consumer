@@ -1,12 +1,13 @@
 'use strict';
 
-const log = require('./util/log');
+import log from './util/log';
 const metrics = require('./metrics');
-const { prefix } = require('./config').get('metrics');
+import config from './config';
+import { Message } from 'kafka-node';
 
-function createCounter (name, help, ...labelNames) {
+function createCounter (name: string, help: string, ...labelNames: string[]) {
     return new metrics.client.Counter({
-        name: `${prefix}${name}`, help, labelNames
+        name: `${config.metrics.prefix}${name}`, help, labelNames
     });
 }
 
@@ -18,27 +19,27 @@ const counters = {
 // https://www.robustperception.io/existential-issues-with-metrics
 ['success', 'unknown', 'error', 'error_parse'].forEach(value => counters.remove.labels(value).inc(0));
 
-exports.inventoryIncomingMessage = function (message) {
+export function inventoryIncomingMessage (message: Object) {
     log.trace({ message }, 'incoming message');
     counters.incoming.inc();
 };
 
-exports.inventoryRemoveSuccess = function (id, references) {
+export function inventoryRemoveSuccess (id: string, references: number) {
     log.info({ id, references }, 'host removed');
     counters.remove.labels('success').inc();
 };
 
-exports.inventoryRemoveUnknown = function (id) {
+export function inventoryRemoveUnknown (id: string) {
     log.debug({ id }, 'host not known');
     counters.remove.labels('unknown').inc();
 };
 
-exports.inventoryRemoveError = function (id, err) {
+export function inventoryRemoveError (id: string, err: Error) {
     log.error({ id, err }, 'error removing host');
     counters.remove.labels('error').inc();
 };
 
-exports.inventoryRemoveErrorParse = function (message, err) {
+export function inventoryRemoveErrorParse (message: Message, err: Error) {
     log.error({ message, err }, 'error parsing message');
     counters.remove.labels('error_parse').inc();
 };

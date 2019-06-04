@@ -8,14 +8,16 @@
     "url": "git@github.com:RedHatInsights/remediations-consumer.git"
   },
   "scripts": {
-    "coverage": "npm run db:ims && NODE_ENV=test LOG_LEVEL=error jest -i --coverage",
+    "clean": "rm -r dist",
+    "compile": "tsc",
+    "coverage": "tsc && npm run db:ims && NODE_ENV=test LOG_LEVEL=error jest -i --coverage",
     "db:ims": "NODE_ENV=test npm-run-all db:init db:migrate db:seed",
-    "db:init": "DB_DATABASE=postgres node test/init.js",
+    "db:init": "DB_DATABASE=postgres node dist/test/init.js",
     "db:migrate": "knex migrate:latest",
     "db:seed": "knex seed:run",
-    "lint": "eslint src test knexfile.js",
-    "start": "LOG_PRETTY=true node src/app.js",
-    "test": "npm run db:ims && NODE_ENV=test LOG_LEVEL=error jest -i",
+    "lint": "eslint src/**/*.ts test/**/*.js",
+    "start": "tsc && LOG_PRETTY=true node dist/src/app.js",
+    "test": "tsc && npm run db:ims && NODE_ENV=test LOG_LEVEL=error jest -i",
     "verify": "npm-run-all lint coverage"
   },
   "author": "Jozef Hartinger",
@@ -31,12 +33,22 @@
     "prom-client": "^11.3.0"
   },
   "devDependencies": {
+    "@types/convict": "^4.2.1",
+    "@types/hapi__joi": "^15.0.1",
+    "@types/jest": "^24.0.13",
+    "@types/kafka-node": "^2.0.8",
+    "@types/node": "^12.0.4",
+    "@types/pino": "^5.8.7",
+    "@typescript-eslint/eslint-plugin": "^1.9.0",
+    "@typescript-eslint/parser": "^1.9.0",
     "eslint": "^5.16.0",
     "eslint-plugin-jest": "^22.6.4",
     "eslint-plugin-security": "^1.4.0",
     "jest": "^24.8.0",
     "npm-run-all": "^4.1.5",
     "should": "^13.2.3",
-    "sinon": "^7.3.2"
+    "sinon": "^7.3.2",
+    "ts-jest": "^24.0.2",
+    "typescript": "^3.5.1"
   }
 }

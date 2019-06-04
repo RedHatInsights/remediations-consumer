@@ -1,19 +1,17 @@
-'use strict';
-
-const sinon = require('sinon');
-const db = require('../src/db');
-require('should');
+import * as sinon from 'sinon';
+import * as db from '../src/db';
+import 'should';
 
 beforeAll(() => db.start());
 afterAll(() => db.stop());
 
+export let sandbox = null;
+
 beforeEach(() => {
-    exports.sandbox = sinon.createSandbox();
+    sandbox = sinon.createSandbox();
 });
 
-exports.getSandbox = () => exports.sandbox;
-
 afterEach(() => {
-    exports.sandbox.restore();
-    delete exports.sandbox;
+    sandbox.restore();
+    sandbox = null;
 });

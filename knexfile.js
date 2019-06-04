@@ -1,15 +1,15 @@
 'use strict';
 
-const config = require('./src/db').options;
+const config = require('./dist/src/db').options;
 
 const options = {
     ...config,
     migrations: {
         tableName: 'knex_migrations',
-        directory: 'test/migrations'
+        directory: 'dist/test/migrations'
     },
     seeds: {
-        directory: 'test/seeds'
+        directory: 'dist/test/seeds'
     }
 };
 

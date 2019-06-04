@@ -1,6 +1,4 @@
-'use strict';
-
-const db = require('../src/db');
+import * as db from '../src/db';
 
 async function run () {
     const knex = await db.start();
