@@ -5,7 +5,7 @@ import * as Knex from 'knex';
 const opts = {
     client: 'pg',
     connection: config.db.connection,
-    pool: { min: 2, max: 10 },
+    pool: config.db.pool,
     asyncStackTraces: true,
     acquireConnectionTimeout: 10000
 };

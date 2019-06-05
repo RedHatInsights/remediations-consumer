@@ -18,3 +18,9 @@ declare module 'kafka-node' {
         fetchLatestOffsetsAsync (topics: string[]): Promise<any>;
     }
 }
+
+declare module 'async' {
+    export interface AsyncQueue<T> {
+        unsaturated(handler: () => void): void ;
+    }
+}

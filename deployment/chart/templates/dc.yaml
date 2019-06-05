@@ -62,6 +62,8 @@ spec:
           value: /opt/certs/rds-cacert
 {{ end }}
 
+        - name: INVENTORY_CONCURRENCY
+          value: "{{ .Values.concurrency | default 1 }}"
         - name: INVENTORY_CONSUMER_GROUP
           value: {{ .Values.consumerGroup | default "remediations-consumer" }}
         - name: INVENTORY_RESET_OFFSETS
