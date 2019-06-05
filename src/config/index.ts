@@ -63,6 +63,18 @@ const config = convict({
             format: Boolean,
             default: false,
             env: 'DB_DRY_RUN'
+        },
+        pool: {
+            min: {
+                format: 'nat',
+                default: 2,
+                env: 'DB_POOL_MIN'
+            },
+            max: {
+                format: 'nat',
+                default: 5,
+                env: 'DB_POOL_MAX'
+            }
         }
     },
 
@@ -98,6 +110,11 @@ const config = convict({
                     format: Boolean,
                     default: false,
                     env: 'INVENTORY_RESET_OFFSETS'
+                },
+                concurrency: {
+                    format: 'nat',
+                    default: 1,
+                    env: 'INVENTORY_CONCURRENCY'
                 }
             }
         }
@@ -110,7 +127,7 @@ const config = convict({
             env: 'METRICS_PREFIX'
         },
         port: {
-            format: Number,
+            format: 'nat',
             default: 9006,
             env: 'METRICS_PORT'
         }

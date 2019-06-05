@@ -7,7 +7,8 @@ import config, { sanitized } from './config';
 import metrics from './metrics';
 import version from './util/version';
 import log from './util/log';
-import handler, {pending} from './handlers/inventory';
+import handler from './handlers/inventory';
+import { queue } from 'async';
 
 const SHUTDOWN_DELAY = 5000;
 
@@ -26,7 +27,12 @@ export default async function start () {
     const stopMetrics = metrics();
 
     const { consumer, stop: stopKafka } = kafka.start();
-    consumer.on('data', handler);
+
+    const q = queue(handler, config.kafka.topics.inventory.concurrency);
+    q.saturated(() => consumer.pause());
+    q.unsaturated(() => consumer.resume());
+
+    consumer.on('data', message => q.push(message));
 
     async function stop (e: Error | NodeJS.Signals | undefined) {
         consumer.off('error', stop);
@@ -40,14 +46,15 @@ export default async function start () {
         }
 
         try {
+            q.pause();
             consumer.pause();
-            if (pending > 0) {
-                log.info({ pending }, 'waiting for pending tasks to finish');
+            if (q.length() > 0) {
+                log.info({ pending: q.length() }, 'waiting for pending tasks to finish');
                 await P.delay(SHUTDOWN_DELAY);
-                if (pending > 0) {
-                    log.warn({ pending }, 'shutting down despite pending tasks');
+                if (q.length() > 0) {
+                    log.error({ pending: q.length() }, 'shutting down despite pending tasks');
                 } else {
-                    log.info({ pending }, 'all finished');
+                    log.info({ pending: q.length() }, 'all finished');
                 }
             }
 

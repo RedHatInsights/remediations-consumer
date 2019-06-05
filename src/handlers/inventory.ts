@@ -41,8 +41,6 @@ function parseMessage (message: Message): RemoveMessage | undefined {
     }
 }
 
-export let pending = 0;
-
 export default async function onMessage (message: Message) {
     probes.inventoryIncomingMessage(message);
 
@@ -51,7 +49,6 @@ export default async function onMessage (message: Message) {
         return;
     }
 
-    pending++;
     const { id } = parsed;
 
     try {
@@ -67,7 +64,5 @@ export default async function onMessage (message: Message) {
         }
     } catch (e) {
         probes.inventoryRemoveError(id, e);
-    } finally {
-        pending--;
     }
 }
