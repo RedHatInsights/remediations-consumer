@@ -1,5 +1,10 @@
+import { Message } from 'kafka-node';
+import { queue } from 'async';
+
 import config from '../config';
 import log from '../util/log';
+
+const SHUTDOWN_DELAY = 5000;
 
 function kafkaLogger (type: string) {
     const child = log.child({type});
@@ -40,7 +45,7 @@ async function resetOffsets (topic: string) {
     });
 }
 
-export function start () {
+function connect () {
     const client = consumer.consumerGroup.client;
     consumer.pause();
 
@@ -62,6 +67,35 @@ export function start () {
         consumer,
         stop () {
             return consumer.closeAsync();
+        }
+    };
+}
+
+export async function start (handler: (message: Message) => any, concurrency = 1) {
+    const {consumer, stop} = await connect();
+
+    const q = queue(handler, concurrency);
+    q.saturated(() => consumer.pause());
+    q.unsaturated(() => consumer.resume());
+
+    consumer.on('data', message => q.push(message));
+
+    return {
+        consumer,
+        async stop () {
+            q.pause();
+            consumer.pause();
+            if (q.length() > 0) {
+                log.info({ pending: q.length() }, 'waiting for pending tasks to finish');
+                await P.delay(SHUTDOWN_DELAY);
+                if (q.length() > 0) {
+                    log.error({ pending: q.length() }, 'shutting down despite pending tasks');
+                } else {
+                    log.info({ pending: q.length() }, 'all finished');
+                }
+            }
+
+            await stop();
         }
     };
 }
