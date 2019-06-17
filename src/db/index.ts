@@ -39,7 +39,12 @@ export async function deleteSystem (system_id: string, dryRun = false): Promise<
         const query = base.count();
         const sql = query.toSQL().toNative();
         log.debug({ sql }, 'executing database query');
-        return parseInt((await query)[0].count);
+        const result = (await query)[0].count;
+        if (typeof result === 'number') {
+            return result;
+        }
+
+        return parseInt(result);
     }
 
     const query = base.delete();
