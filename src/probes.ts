@@ -12,8 +12,9 @@ function createCounter (name: string, help: string, ...labelNames: string[]) {
 }
 
 const counters = {
-    incoming: createCounter('messages_total', 'Total number of messages processed'),
-    remove: createCounter('remove_total', 'Total number of inventory delete messages processed', 'result')
+    incoming: createCounter('messages_total', 'Total number of messages processed', 'result'),
+    remove: createCounter('remove_total', 'Total number of inventory delete messages processed', 'result'),
+    update: createCounter('update_total', 'Total number of receptor update messages processed', 'result')
 };
 
 // https://www.robustperception.io/existential-issues-with-metrics
@@ -21,7 +22,7 @@ const counters = {
 
 export function inventoryIncomingMessage (message: Object) {
     log.trace({ message }, 'incoming message');
-    counters.incoming.inc();
+    counters.incoming.labels('inventory').inc();
 };
 
 export function inventoryRemoveSuccess (id: string, references: number) {
@@ -40,6 +41,16 @@ export function inventoryRemoveError (id: string, err: Error) {
 };
 
 export function inventoryRemoveErrorParse (message: Message, err: Error) {
-    log.error({ message, err }, 'error parsing message');
+    log.error({ message, err }, 'error parsing inventory message');
     counters.remove.labels('error_parse').inc();
+};
+
+export function receptorIncomingMessage (message: Object) {
+    log.trace({ message }, 'incoming message');
+    counters.update.labels('receptor').inc();
+};
+
+export function receptorUpdateErrorParse (message: Message, err: Error) {
+    log.error({ message, err}, 'error parsing receptor message');
+    counters.update.labels('error_parse').inc();
 };

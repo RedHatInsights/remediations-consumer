@@ -1,4 +1,6 @@
-import { Message } from 'kafka-node';
+/* eslint-disable max-len */
+
+import * as _ from 'lodash';
 import { queue } from 'async';
 
 import config from '../config';
@@ -34,7 +36,7 @@ const consumer = P.promisifyAll(new kafka.ConsumerGroupStream({
     autoCommitIntervalMs: 5000,
     protocol: ['roundrobin'],
     highWaterMark: 5
-}, config.kafka.topics.inventory.topic));
+}, [config.kafka.topics.inventory.topic, config.kafka.topics.receptor.topic]));
 
 async function resetOffsets (topic: string) {
     log.info({ topic }, 'reseting offsets for topic');
@@ -58,8 +60,16 @@ function connect () {
             await resetOffsets(config.kafka.topics.inventory.topic);
         }
 
+        if (config.kafka.topics.receptor.resetOffsets) {
+            await resetOffsets(config.kafka.topics.receptor.topic);
+        }
+
         const offset = P.promisifyAll(consumer.consumerGroup.getOffset());
-        const offsets = await offset.fetchLatestOffsetsAsync([config.kafka.topics.inventory.topic]);
+        const offsets = await offset.fetchLatestOffsetsAsync([
+            config.kafka.topics.inventory.topic,
+            config.kafka.topics.receptor.topic
+        ]);
+
         log.debug(offsets, 'current offsets');
     });
 
@@ -71,31 +81,35 @@ function connect () {
     };
 }
 
-export async function start (handler: (message: Message) => any, concurrency = 1) {
+export async function start (topicDetails: any) {
     const {consumer, stop} = await connect();
 
-    const q = queue(handler, concurrency);
-    q.saturated(() => consumer.pause());
-    q.unsaturated(() => consumer.resume());
+    const results = _.map(topicDetails, details => {
+        const q = queue(details.handler, details.concurrency);
+        q.saturated(() => consumer.pause());
+        q.unsaturated(() => consumer.resume());
 
-    consumer.on('data', message => q.push(message));
+        consumer.on('message', message => q.push(message));
 
-    return {
-        consumer,
-        async stop () {
-            q.pause();
-            consumer.pause();
-            if (q.length() > 0) {
-                log.info({ pending: q.length() }, 'waiting for pending tasks to finish');
-                await P.delay(SHUTDOWN_DELAY);
+        return {
+            consumer,
+            async stop () {
+                q.pause();
+                consumer.pause();
                 if (q.length() > 0) {
-                    log.error({ pending: q.length() }, 'shutting down despite pending tasks');
-                } else {
-                    log.info({ pending: q.length() }, 'all finished');
+                    log.info({ pending: q.length() }, 'waiting for pending inventory tasks to finish');
+                    await P.delay(SHUTDOWN_DELAY);
+                    if (q.length() > 0) {
+                        log.error({ pending: q.length() }, 'shutting down despite pending inventory tasks');
+                    } else {
+                        log.info({ pending: q.length() }, 'all inventory tasks finished');
+                    }
                 }
-            }
 
-            await stop();
-        }
-    };
+                await stop();
+            }
+        };
+    });
+
+    return results;
 }
