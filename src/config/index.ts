@@ -81,7 +81,7 @@ const config = convict({
     kafka: {
         host: {
             format: String,
-            default: 'localhost:9092',
+            default: 'localhost:29092',
             env: 'KAFKA_HOST'
         },
         autoCommit: {
@@ -103,7 +103,7 @@ const config = convict({
                 },
                 consumerGroup: {
                     format: String,
-                    default: 'remediations-consumer',
+                    default: 'remediations-consumer-inventory',
                     env: 'INVENTORY_CONSUMER_GROUP'
                 },
                 resetOffsets: {
@@ -115,6 +115,28 @@ const config = convict({
                     format: 'nat',
                     default: 1,
                     env: 'INVENTORY_CONCURRENCY'
+                }
+            },
+            receptor: {
+                topic: {
+                    format: String,
+                    default: 'platform.receptor-controller.jobs',
+                    env: 'RECEPTOR_TOPIC'
+                },
+                consumerGroup: {
+                    format: String,
+                    default: 'remediations-consumer-receptor',
+                    env: 'RECEPTOR_CONSUMER_GROUP'
+                },
+                resetOffsets: {
+                    format: Boolean,
+                    default: false,
+                    env: 'RECEPTOR_RESET_OFFSETS'
+                },
+                concurrency: {
+                    format: 'nat',
+                    default: 1,
+                    env: 'RECEPTOR_CONCURRENCY'
                 }
             }
         }
