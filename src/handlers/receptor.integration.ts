@@ -1,8 +1,6 @@
 /* eslint-disable max-len */
 
-import { getSandbox } from '../../test';
 import handler from './receptor';
-import * as probes from '../probes';
 
 describe('receptor handler integration tests', function () {
     test('prints message to receptor probe', async () => {
@@ -15,9 +13,6 @@ describe('receptor handler integration tests', function () {
             key: undefined
         };
 
-        const spy = getSandbox().spy(probes, 'receptorIncomingMessage');
-
         await handler(message);
-        spy.callCount.should.equal(1);
     });
 });

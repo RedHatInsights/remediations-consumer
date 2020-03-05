@@ -17,6 +17,15 @@ declare module 'kafka-node' {
         fetchEarliestOffsetsAsync (topics: string[]): Promise<any>;
         fetchLatestOffsetsAsync (topics: string[]): Promise<any>;
     }
+
+    export interface Message {
+        topic: string;
+        value: string | Buffer;
+        offset?: number;
+        partition?: number;
+        highWaterOffset?: number;
+        key?: string | Buffer;
+    }
 }
 
 declare module 'async' {

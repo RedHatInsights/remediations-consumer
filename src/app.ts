@@ -1,5 +1,3 @@
-'use strict';
-
 import * as db from './db';
 import * as kafka from './kafka';
 import config, { sanitized } from './config';
@@ -7,8 +5,6 @@ import metrics from './metrics';
 import version from './util/version';
 import log from './util/log';
 import * as format from './format';
-
-const SHUTDOWN_DELAY = 5000;
 
 process.on('unhandledRejection', (reason: any) => {
     log.fatal(reason);
@@ -26,14 +22,12 @@ export default async function start () {
 
     const topicDetails = format.formatTopicDetails();
 
-    const kafkaTopics = await kafka.start(topicDetails);
+    const { consumer, stop: stopKafka } = await kafka.start(topicDetails);
 
     async function stop (e: Error | NodeJS.Signals | undefined) {
-        kafkaTopics.forEach(topic => {
-            topic.consumer.once('error', stop);
-            process.on('SIGINT', stop);
-            process.on('SIGTERM', stop);
-        });
+        consumer.off('error', stop);
+        process.off('SIGINT', stop);
+        process.off('SIGTERM', stop);
 
         if (e instanceof Error) {
             log.fatal(e, 'exiting due to error');
@@ -42,8 +36,7 @@ export default async function start () {
         }
 
         try {
-            await kafkaTopics[0].stop();
-            await kafkaTopics[1].stop();
+            await stopKafka();
             await db.stop();
             stopMetrics();
         } finally {
@@ -51,11 +44,9 @@ export default async function start () {
         }
     }
 
-    kafkaTopics.forEach(topic => {
-        topic.consumer.once('error', stop);
-        process.on('SIGINT', stop);
-        process.on('SIGTERM', stop);
-    });
+    consumer.once('error', stop);
+    process.on('SIGINT', stop);
+    process.on('SIGTERM', stop);
 }
 
 if (require.main === module) {

@@ -2,6 +2,7 @@ import log from '../util/log';
 import * as Joi from '@hapi/joi';
 import * as probes from '../probes';
 import { Message } from 'kafka-node';
+import { validate, parse } from './common';
 
 interface ReceptorMessage {
     account: string;
@@ -19,35 +20,26 @@ const schema = Joi.object().keys({
     payload: Joi.any().required()
 });
 
-function validate (value: ReceptorMessage): ReceptorMessage {
-    const { error } = Joi.validate(value, schema, {allowUnknown: true});
-    if (error) {
-        throw error;
-    }
-
-    return value;
-}
-
 function parseMessage (message: Message): ReceptorMessage | undefined {
     try {
-        const parsed = JSON.parse(message.value.toString());
+        const parsed = parse(message);
 
         if (!parsed) {
             log.debug(message, 'ignoring message');
             return;
         }
 
-        return validate(parsed);
+        return validate(parsed, schema);
     } catch (e) {
-        probes.receptorUpdateErrorParse(message, e);
+        probes.receptorErrorParse(message, e);
     }
 }
 
 export default async function onMessage (message: Message) {
-    probes.receptorIncomingMessage(message);
-
     const parsed = parseMessage(message);
     if (!parsed) {
         return;
     }
+
+    log.info({message, parsed}, 'receptor message');
 }

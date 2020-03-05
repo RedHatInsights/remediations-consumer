@@ -26,11 +26,13 @@ if (config.kafka.logging) {
 
 import * as P from 'bluebird';
 import * as kafka from 'kafka-node';
+import { TopicConfig } from '../format';
+import * as probes from '../probes';
 
 const consumer = P.promisifyAll(new kafka.ConsumerGroupStream({
     kafkaHost: config.kafka.host,
     autoConnect: false,
-    groupId: config.kafka.topics.inventory.consumerGroup,
+    groupId: config.kafka.consumerGroup,
     fromOffset: 'earliest',
     autoCommit: config.kafka.autoCommit,
     autoCommitIntervalMs: 5000,
@@ -47,7 +49,7 @@ async function resetOffsets (topic: string) {
     });
 }
 
-function connect () {
+function connect (topicConfig: TopicConfig[]) {
     const client = consumer.consumerGroup.client;
     consumer.pause();
 
@@ -56,13 +58,11 @@ function connect () {
     consumer.resume();
     consumer.consumerGroup.client.on('ready', () => log.info('connected to Kafka'));
     consumer.consumerGroup.on('rebalanced', async () => {
-        if (config.kafka.topics.inventory.resetOffsets) {
-            await resetOffsets(config.kafka.topics.inventory.topic);
-        }
-
-        if (config.kafka.topics.receptor.resetOffsets) {
-            await resetOffsets(config.kafka.topics.receptor.topic);
-        }
+        await P.mapSeries(topicConfig, topicConfig => {
+            if (topicConfig.resetOffsets) {
+                return resetOffsets(topicConfig.topic);
+            }
+        });
 
         const offset = P.promisifyAll(consumer.consumerGroup.getOffset());
         const offsets = await offset.fetchLatestOffsetsAsync([
@@ -81,35 +81,40 @@ function connect () {
     };
 }
 
-export async function start (topicDetails: any) {
-    const {consumer, stop} = await connect();
+export async function start (topicConfig: TopicConfig[]) {
+    const {consumer, stop} = await connect(topicConfig);
 
-    const results = _.map(topicDetails, details => {
-        const q = queue(details.handler, details.concurrency);
-        q.saturated(() => consumer.pause());
-        q.unsaturated(() => consumer.resume());
+    const handlers: Record<string, (message: kafka.Message) => void> =
+        _(topicConfig).keyBy('topic').mapValues(details => details.handler).value();
 
-        consumer.on('message', message => q.push(message));
+    const router: any = async (message: kafka.Message) => {
+        probes.incomingMessage(message);
+        const handler = handlers[message.topic];
+        await handler(message);
+    };
 
-        return {
-            consumer,
-            async stop () {
-                q.pause();
-                consumer.pause();
+    const q = queue(router, config.kafka.concurrency);
+    q.saturated(() => consumer.pause());
+    q.unsaturated(() => consumer.resume());
+
+    consumer.on('data', message => q.push(message));
+
+    return {
+        consumer,
+        async stop () {
+            q.pause();
+            consumer.pause();
+            if (q.length() > 0) {
+                log.info({ pending: q.length() }, 'waiting for pending inventory tasks to finish');
+                await P.delay(SHUTDOWN_DELAY);
                 if (q.length() > 0) {
-                    log.info({ pending: q.length() }, 'waiting for pending inventory tasks to finish');
-                    await P.delay(SHUTDOWN_DELAY);
-                    if (q.length() > 0) {
-                        log.error({ pending: q.length() }, 'shutting down despite pending inventory tasks');
-                    } else {
-                        log.info({ pending: q.length() }, 'all inventory tasks finished');
-                    }
+                    log.error({ pending: q.length() }, 'shutting down despite pending inventory tasks');
+                } else {
+                    log.info({ pending: q.length() }, 'all inventory tasks finished');
                 }
-
-                await stop();
             }
-        };
-    });
 
-    return results;
+            await stop();
+        }
+    };
 }

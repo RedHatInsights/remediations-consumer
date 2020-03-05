@@ -89,6 +89,16 @@ const config = convict({
             default: false,
             env: 'KAFKA_AUTOCOMMIT'
         },
+        concurrency: {
+            format: 'nat',
+            default: 1,
+            env: 'KAFKA_CONCURRENCY'
+        },
+        consumerGroup: {
+            format: String,
+            default: 'remediations-consumer',
+            env: 'KAFKA_CONSUMER_GROUP'
+        },
         logging: {
             format: Boolean,
             default: false,
@@ -101,20 +111,10 @@ const config = convict({
                     default: 'platform.inventory.events',
                     env: 'INVENTORY_TOPIC'
                 },
-                consumerGroup: {
-                    format: String,
-                    default: 'remediations-consumer-inventory',
-                    env: 'INVENTORY_CONSUMER_GROUP'
-                },
                 resetOffsets: {
                     format: Boolean,
                     default: false,
                     env: 'INVENTORY_RESET_OFFSETS'
-                },
-                concurrency: {
-                    format: 'nat',
-                    default: 1,
-                    env: 'INVENTORY_CONCURRENCY'
                 }
             },
             receptor: {
@@ -123,20 +123,10 @@ const config = convict({
                     default: 'platform.receptor-controller.jobs',
                     env: 'RECEPTOR_TOPIC'
                 },
-                consumerGroup: {
-                    format: String,
-                    default: 'remediations-consumer-receptor',
-                    env: 'RECEPTOR_CONSUMER_GROUP'
-                },
                 resetOffsets: {
                     format: Boolean,
                     default: false,
                     env: 'RECEPTOR_RESET_OFFSETS'
-                },
-                concurrency: {
-                    format: 'nat',
-                    default: 1,
-                    env: 'RECEPTOR_CONCURRENCY'
                 }
             }
         }

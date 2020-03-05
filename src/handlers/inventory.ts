@@ -4,6 +4,7 @@ import * as Joi from '@hapi/joi';
 import * as probes from '../probes';
 import { Message } from 'kafka-node';
 import config from '../config';
+import { validate, parse } from './common';
 
 interface RemoveMessage {
     id: string;
@@ -17,33 +18,22 @@ const schema = Joi.object().keys({
 
 const EVENT_TYPE = 'delete';
 
-function validate (value: RemoveMessage): RemoveMessage {
-    const { error } = Joi.validate(value, schema, {allowUnknown: true});
-    if (error) {
-        throw error;
-    }
-
-    return value;
-}
-
 function parseMessage (message: Message): RemoveMessage | undefined {
     try {
-        const parsed = JSON.parse(message.value.toString());
+        const parsed = parse(message);
 
         if (!parsed || parsed.type !== EVENT_TYPE) {
             log.debug(message, 'ignoring message');
             return;
         }
 
-        return validate(parsed);
+        return validate(parsed, schema);
     } catch (e) {
         probes.inventoryRemoveErrorParse(message, e);
     }
 }
 
 export default async function onMessage (message: Message) {
-    probes.inventoryIncomingMessage(message);
-
     const parsed = parseMessage(message);
     if (!parsed) {
         return;
