@@ -5,6 +5,13 @@ import handler from './receptor';
 import * as probes from '../probes';
 
 describe('receptor handler unit tests', function () {
+
+    let receptorErrorParse: any = null;
+
+    beforeEach(() => {
+        receptorErrorParse = getSandbox().spy(probes, 'receptorErrorParse');
+    });
+
     test('parses a message', async () => {
         const message = {
             topic: 'platform.receptor-controller.jobs',
@@ -16,6 +23,7 @@ describe('receptor handler unit tests', function () {
         };
 
         await handler(message);
+        receptorErrorParse.callCount.should.equal(0);
     });
 
     test('parses a message with extra field', async () => {
@@ -29,6 +37,7 @@ describe('receptor handler unit tests', function () {
         };
 
         await handler(message);
+        receptorErrorParse.callCount.should.equal(0);
     });
 
     test('throws error on missing field (1)', async () => {
@@ -42,6 +51,7 @@ describe('receptor handler unit tests', function () {
         };
 
         await handler(message);
+        receptorErrorParse.callCount.should.equal(1);
     });
 
     test('throws error on missing field (2)', async () => {
@@ -55,6 +65,7 @@ describe('receptor handler unit tests', function () {
         };
 
         await handler(message);
+        receptorErrorParse.callCount.should.equal(1);
     });
 
     test('throws error on missing field (3)', async () => {
@@ -68,6 +79,7 @@ describe('receptor handler unit tests', function () {
         };
 
         await handler(message);
+        receptorErrorParse.callCount.should.equal(1);
     });
 
     test('throws error on missing field (4)', async () => {
@@ -81,6 +93,7 @@ describe('receptor handler unit tests', function () {
         };
 
         await handler(message);
+        receptorErrorParse.callCount.should.equal(1);
     });
 
     test('throws error on missing field (5)', async () => {
@@ -94,6 +107,7 @@ describe('receptor handler unit tests', function () {
         };
 
         await handler(message);
+        receptorErrorParse.callCount.should.equal(1);
     });
 
     test('throws error on missing field (6)', async () => {
@@ -107,11 +121,10 @@ describe('receptor handler unit tests', function () {
         };
 
         await handler(message);
+        receptorErrorParse.callCount.should.equal(1);
     });
 
     test('throws error on invalid JSON', async () => {
-        const spy = getSandbox().spy(probes, 'receptorUpdateErrorParse');
-
         const message = {
             topic: 'platform.receptor-controller.jobs',
             value: '{"sender": "fifi',
@@ -122,6 +135,6 @@ describe('receptor handler unit tests', function () {
         };
 
         await handler(message);
-        spy.callCount.should.equal(1);
+        receptorErrorParse.callCount.should.equal(1);
     });
 });
