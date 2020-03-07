@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-@Library("github.com/RedHatInsights/insights-pipeline-lib")
+@Library("github.com/RedHatInsights/insights-pipeline-lib@v3")
 
 NS='remediations-pr'
 
@@ -40,26 +40,29 @@ node('nodejs') {
             sh 'npm run compile'
         }
 
-        utils.withScaledEnv(NS) {
-            env.DB_HOST="postgres.${NS}.svc"
+        openshift.withCluster() {
 
-            stage('verify') {
-                sh 'npm run verify'
+            utils.withScaledEnv(NS) {
+                env.DB_HOST="postgres.${NS}.svc"
+
+                stage('verify') {
+                    sh 'npm run verify'
+                }
             }
-        }
 
-        stage('build image') {
-            timeout (10) {
-                openshift.withProject('buildfactory') {
-                    def build = openshift.selector('bc', 'remediations-consumer').startBuild()
-                    build.logs('-f')
+            stage('build image') {
+                timeout (10) {
+                    openshift.withProject('buildfactory') {
+                        def build = openshift.selector('bc', 'remediations-consumer').startBuild()
+                        build.logs('-f')
+                    }
                 }
             }
         }
 
         stage('push image to stage') {
-            openShift.withNode(defaults: true) {
-                promoteImages(
+            openShiftUtils.withNode(image: "jenkins-deploy-slave:latest") {
+                deployUtils.promoteImages(
                     srcImages: [
                         "remediations-consumer:latest"
                     ],
