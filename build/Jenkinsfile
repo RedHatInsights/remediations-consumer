@@ -18,11 +18,13 @@ node('nodejs') {
         sh 'npm run compile'
     }
 
-    utils.withScaledEnv(NS) {
-        env.DB_HOST="postgres.${NS}.svc"
+    openshift.withCluster() {
+        utils.withScaledEnv(NS) {
+            env.DB_HOST="postgres.${NS}.svc"
 
-        stage('verify') {
-            sh 'npm run verify'
+            stage('verify') {
+                sh 'npm run verify'
+            }
         }
     }
 }
