@@ -120,7 +120,7 @@ const config = convict({
             receptor: {
                 topic: {
                     format: String,
-                    default: 'platform.receptor-controller.jobs',
+                    default: 'platform.receptor-controller.responses',
                     env: 'RECEPTOR_TOPIC'
                 },
                 resetOffsets: {
