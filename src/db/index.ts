@@ -10,7 +10,7 @@ const opts = {
     acquireConnectionTimeout: 10000
 };
 
-if (!opts.connection.ssl.ca) {
+if (!config.db.ssl.enabled || !opts.connection.ssl.ca) {
     delete opts.connection.ssl;
 }
 

@@ -75,6 +75,13 @@ const config = convict({
                 default: 5,
                 env: 'DB_POOL_MAX'
             }
+        },
+        ssl: {
+            enabled: {
+                format: Boolean,
+                default: true,
+                env: 'DB_SSL_ENABLED'
+            }
         }
     },
 
