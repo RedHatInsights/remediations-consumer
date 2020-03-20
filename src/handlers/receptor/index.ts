@@ -80,8 +80,6 @@ export default async function onMessage (message: Message) {
         return;
     }
 
-    log.info({message, envelope}, 'receptor message');
-
     const payloadType = getPayloadType(envelope.payload);
     switch (payloadType) {
         case 'playbook_run_ack': {
@@ -105,7 +103,12 @@ export default async function onMessage (message: Message) {
         }
 
         default: {
-            log.warn({type: payloadType}, 'ignoring unknown payload type');
+            if (payloadType === 'unknown') {
+                log.trace('ignoring message with missing payload type');
+            } else {
+                log.warn({type: payloadType}, 'ignoring unknown payload type');
+            }
+
         }
     }
 
