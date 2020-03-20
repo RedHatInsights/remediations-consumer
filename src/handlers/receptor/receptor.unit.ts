@@ -1,8 +1,8 @@
 /* eslint-disable max-len */
 
-import { getSandbox } from '../../test';
-import handler from './receptor';
-import * as probes from '../probes';
+import { getSandbox } from '../../../test';
+import handler from '.';
+import * as probes from '../../probes';
 
 const validAck = JSON.stringify({
     type: 'playbook_run_ack',
