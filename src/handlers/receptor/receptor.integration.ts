@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 
-import handler from './receptor';
+import handler from '.';
 
 describe('receptor handler integration tests', function () {
     test('prints message to receptor probe', async () => {
