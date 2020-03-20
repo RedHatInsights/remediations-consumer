@@ -19,7 +19,7 @@ const counters = {
 
 // https://www.robustperception.io/existential-issues-with-metrics
 ['success', 'unknown', 'error', 'error_parse'].forEach(value => counters.remove.labels(value).inc(0));
-['error_parse'].forEach(value => counters.receptor.labels(value).inc(0));
+['error', 'error_parse'].forEach(value => counters.receptor.labels(value).inc(0));
 
 export function incomingMessage (message: Message) {
     log.trace({ message }, 'incoming message');
