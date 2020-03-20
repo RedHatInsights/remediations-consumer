@@ -46,7 +46,12 @@ export function inventoryRemoveErrorParse (message: Message, err: Error) {
     counters.remove.labels('error_parse').inc();
 };
 
-export function receptorErrorParse (message: Message, err: Error) {
-    log.error({ message, err}, 'error parsing receptor message');
+export function receptorErrorParse (message: any, err: Error) {
+    log.error({ message, err }, 'error parsing receptor message');
     counters.receptor.labels('error_parse').inc();
+};
+
+export function receptorError (message: any, err: Error) {
+    log.error({ message, err }, 'error processing sat-receptor response');
+    counters.receptor.labels('error').inc();
 };
