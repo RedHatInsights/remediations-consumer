@@ -4,14 +4,14 @@ export function up (knex) {
         table.uuid('executor_id').notNullable();
         table.string('executor_name').notNullable();
         table.string('receptor_node_id').notNullable();
-        table.uuid('receptor_job_id').notNullable();
+        table.uuid('receptor_job_id');
         table.enum('status', [
             'pending',
             'acked',
             'running',
             'success',
             'failure',
-            'canceled']).defaultTo('pending').notNullable();
+            'canceled'], {useNative: true, enumName: 'enum_playbook_run_executors_status'}).defaultTo('pending').notNullable();
         table.datetime('updated_at').notNullable().defaultTo(knex.fn.now(6));
         table.text('playbook').notNullable();
         table.uuid('playbook_run_id').notNullable();

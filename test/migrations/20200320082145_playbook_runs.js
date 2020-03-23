@@ -7,7 +7,7 @@ export function up (knex) {
             'running',
             'success',
             'failure',
-            'canceled']).defaultTo('pending').notNullable();
+            'canceled'], {useNative: true, enumName: 'enum_playbook_runs_status'}).defaultTo('pending').notNullable();
         table.uuid('remediation_id').notNullable();
         table.string('created_by').notNullable();
         table.datetime('created_at').notNullable().defaultTo(knex.fn.now(6));
