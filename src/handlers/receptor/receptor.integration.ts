@@ -388,4 +388,174 @@ describe('receptor handler integration tests', function () {
         });
     });
 
+    describe('playbook_run_finished', function () {
+        function createFinishedPayload (runId: string, host: string, status: Status) {
+            return {
+                type: 'playbook_run_finished',
+                playbook_run_id: runId,
+                host,
+                status
+            };
+        }
+
+        [Status.SUCCESS, Status.FAILURE, Status.CANCELED].forEach(status =>
+            test(`updates records to ${status} (default state)`, async () => {
+                const data = await insertPlaybookRun();
+                const e = data.executors[0];
+                const s = e.systems[0];
+
+                const payload = createFinishedPayload(data.id, s.system_name, status);
+                const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
+                await onMessage(msg);
+
+                assertNoErrors();
+                await assertRun(data.id, status);
+                await assertExecutor(e.id, status);
+                await assertSystem(s.id, status);
+            })
+        );
+
+        [[Status.FAILURE, Status.SUCCESS], [Status.CANCELED, Status.FAILURE], [Status.FAILURE, Status.CANCELED]].forEach(([initial, status]) =>
+            test(`does not update records in final state (${initial})`, async () => {
+                const data = await insertPlaybookRun(run => {
+                    run.status = initial;
+                    run.executors[0].status = initial;
+                    run.executors[0].systems[0].status = initial;
+                });
+
+                const e = data.executors[0];
+                const s = e.systems[0];
+
+                const payload = createFinishedPayload(data.id, s.system_name, status);
+                const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
+                await onMessage(msg);
+
+                assertNoErrors();
+                await assertRun(data.id, initial);
+                await assertExecutor(e.id, initial);
+                await assertSystem(s.id, initial);
+            })
+        );
+
+        [Status.SUCCESS, Status.FAILURE, Status.CANCELED].forEach((status) =>
+            test(`executor state not updated until all systems finish (${status})`, async () => {
+                const data = await insertPlaybookRun(undefined, 1, 2);
+                const e = data.executors[0];
+
+                const payload1 = createFinishedPayload(data.id, e.systems[0].system_name, status);
+                const payload2 = createFinishedPayload(data.id, e.systems[1].system_name, status);
+
+                await onMessage(createKafkaMessage(responseEnvelope(payload1, e.receptor_job_id, e.receptor_node_id)));
+                assertNoErrors();
+                await assertExecutor(e.id, Status.PENDING);
+                await assertSystem(e.systems[0].id, status);
+
+                await onMessage(createKafkaMessage(responseEnvelope(payload2, e.receptor_job_id, e.receptor_node_id)));
+                assertNoErrors();
+                await assertExecutor(e.id, status);
+                await assertSystem(e.systems[1].id, status);
+            })
+        );
+
+        [Status.SUCCESS, Status.FAILURE, Status.CANCELED].forEach((status) =>
+            test(`run state not updated until all systems finish (${status})`, async () => {
+                const data = await insertPlaybookRun(undefined, 2, 1);
+
+                const payload1 = createFinishedPayload(data.id, data.executors[0].systems[0].system_name, status);
+                const payload2 = createFinishedPayload(data.id, data.executors[1].systems[0].system_name, status);
+
+                await onMessage(createKafkaMessage(responseEnvelope(payload1, data.executors[0].receptor_job_id, data.executors[0].receptor_node_id)));
+                assertNoErrors();
+                await assertRun(data.id, Status.PENDING);
+                await assertSystem(data.executors[0].systems[0].id, status);
+
+                await onMessage(createKafkaMessage(responseEnvelope(payload2, data.executors[1].receptor_job_id, data.executors[1].receptor_node_id)));
+                assertNoErrors();
+                await assertRun(data.id, status);
+                await assertSystem(data.executors[1].systems[0].id, status);
+            })
+        );
+
+        test('if a system in canceled then the entire executor is canceled (assuming no failure)', async () => {
+            const data = await insertPlaybookRun(undefined, 1, 2);
+            const e = data.executors[0];
+
+            const payload1 = createFinishedPayload(data.id, e.systems[0].system_name, Status.CANCELED);
+            const payload2 = createFinishedPayload(data.id, e.systems[1].system_name, Status.SUCCESS);
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload1, e.receptor_job_id, e.receptor_node_id)));
+            assertNoErrors();
+            await assertExecutor(e.id, Status.PENDING);
+            await assertSystem(e.systems[0].id, Status.CANCELED);
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload2, e.receptor_job_id, e.receptor_node_id)));
+            assertNoErrors();
+            await assertExecutor(e.id, Status.CANCELED);
+            await assertSystem(e.systems[1].id, Status.SUCCESS);
+        });
+
+        test('if a system fails then the entire executor fails', async () => {
+            const data = await insertPlaybookRun(undefined, 1, 3);
+            const e = data.executors[0];
+
+            const payload1 = createFinishedPayload(data.id, e.systems[0].system_name, Status.CANCELED);
+            const payload2 = createFinishedPayload(data.id, e.systems[1].system_name, Status.FAILURE);
+            const payload3 = createFinishedPayload(data.id, e.systems[2].system_name, Status.SUCCESS);
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload1, e.receptor_job_id, e.receptor_node_id)));
+            assertNoErrors();
+            await assertExecutor(e.id, Status.PENDING);
+            await assertSystem(e.systems[0].id, Status.CANCELED);
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload2, e.receptor_job_id, e.receptor_node_id)));
+            assertNoErrors();
+            await assertExecutor(e.id, Status.PENDING);
+            await assertSystem(e.systems[1].id, Status.FAILURE);
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload3, e.receptor_job_id, e.receptor_node_id)));
+            assertNoErrors();
+            await assertExecutor(e.id, Status.FAILURE);
+            await assertSystem(e.systems[2].id, Status.SUCCESS);
+        });
+
+        test('if a system is canceled then the entire run is canceled (assuming no failure)', async () => {
+            const data = await insertPlaybookRun(undefined, 2, 1);
+
+            const payload1 = createFinishedPayload(data.id, data.executors[0].systems[0].system_name, Status.CANCELED);
+            const payload2 = createFinishedPayload(data.id, data.executors[1].systems[0].system_name, Status.SUCCESS);
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload1, data.executors[0].receptor_job_id, data.executors[0].receptor_node_id)));
+            assertNoErrors();
+            await assertRun(data.id, Status.PENDING);
+            await assertSystem(data.executors[0].systems[0].id, Status.CANCELED);
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload2, data.executors[1].receptor_job_id, data.executors[1].receptor_node_id)));
+            assertNoErrors();
+            await assertRun(data.id, Status.CANCELED);
+            await assertSystem(data.executors[1].systems[0].id, Status.SUCCESS);
+        });
+
+        test('if a system fails then the entire run fails', async () => {
+            const data = await insertPlaybookRun(undefined, 3, 1);
+
+            const payload1 = createFinishedPayload(data.id, data.executors[0].systems[0].system_name, Status.CANCELED);
+            const payload2 = createFinishedPayload(data.id, data.executors[1].systems[0].system_name, Status.FAILURE);
+            const payload3 = createFinishedPayload(data.id, data.executors[2].systems[0].system_name, Status.SUCCESS);
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload1, data.executors[0].receptor_job_id, data.executors[0].receptor_node_id)));
+            assertNoErrors();
+            await assertRun(data.id, Status.PENDING);
+            await assertSystem(data.executors[0].systems[0].id, Status.CANCELED);
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload2, data.executors[1].receptor_job_id, data.executors[1].receptor_node_id)));
+            assertNoErrors();
+            await assertRun(data.id, Status.PENDING);
+            await assertSystem(data.executors[1].systems[0].id, Status.FAILURE);
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload3, data.executors[2].receptor_job_id, data.executors[2].receptor_node_id)));
+            assertNoErrors();
+            await assertRun(data.id, Status.FAILURE);
+            await assertSystem(data.executors[2].systems[0].id, Status.SUCCESS);
+        });
+    });
 });
