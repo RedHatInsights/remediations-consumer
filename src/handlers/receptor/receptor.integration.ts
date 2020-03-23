@@ -152,6 +152,143 @@ describe('receptor handler integration tests', function () {
         await assertSystem(s.id);
     });
 
+    describe('playbook_run_ack', function () {
+        function createAckPayload (runId: string){
+            return {
+                type: 'playbook_run_ack',
+                playbook_run_id: runId
+            };
+        }
+
+        test('acks executor', async () => {
+            const data = await insertPlaybookRun();
+            const e = data.executors[0];
+
+            const payload = createAckPayload(data.id);
+
+            const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
+            await onMessage(msg);
+
+            assertNoErrors();
+            await assertExecutor(e.id, Status.ACKED);
+        });
+
+        test('does not ack (running state)', async () => {
+            const data = await insertPlaybookRun(run => {
+                run.executors[0].status = Status.RUNNING;
+            });
+            const e = data.executors[0];
+
+            const payload = createAckPayload(data.id);
+
+            const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
+            await onMessage(msg);
+
+            assertNoErrors();
+            await assertExecutor(e.id, Status.RUNNING);   
+        });
+
+        test('does not ack in final state (canceled state)', async () => {
+            const data = await insertPlaybookRun(run => {
+                run.executors[0].status = Status.CANCELED;
+            });
+            const e = data.executors[0];
+
+            const payload = createAckPayload(data.id);
+
+            const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
+            await onMessage(msg);
+
+            assertNoErrors();
+            await assertExecutor(e.id, Status.CANCELED);   
+        });
+
+        test('does not ack in final state (success)', async () => {
+            const data = await insertPlaybookRun(run => {
+                run.executors[0].status = Status.SUCCESS;
+            });
+            const e = data.executors[0];
+
+            const payload = createAckPayload(data.id);
+
+            const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
+            await onMessage(msg);
+
+            assertNoErrors();
+            await assertExecutor(e.id, Status.SUCCESS);   
+        });
+
+        test('does not ack in final state (failure)', async () => {
+            const data = await insertPlaybookRun(run => {
+                run.executors[0].status = Status.FAILURE;
+            });
+            const e = data.executors[0];
+
+            const payload = createAckPayload(data.id);
+
+            const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
+            await onMessage(msg);
+
+            assertNoErrors();
+            await assertExecutor(e.id, Status.FAILURE);   
+        });
+
+        test('multiple messages', async () => {
+            const data = await insertPlaybookRun();
+            const e = data.executors[0];
+
+            const payload1 = createAckPayload(data.id);
+            const payload2 = createAckPayload(data.id);
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload1, e.receptor_job_id, e.receptor_node_id)));
+            await onMessage(createKafkaMessage(responseEnvelope(payload2, e.receptor_job_id, e.receptor_node_id)));
+
+            assertNoErrors();
+            await assertExecutor(e.id, Status.ACKED);
+        });
+
+        test('does not ack executor (receptor_node_is mismatch)', async () => {
+            const data = await insertPlaybookRun();
+            const e = data.executors[0];
+
+            const payload1 = createAckPayload(data.id);
+            const payload2 = createAckPayload(data.id);
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload2, e.receptor_job_id, 'fifi')));
+
+            assertNoErrors();
+            await assertExecutor(e.id);
+        });
+
+        test('does not ack executor (receptor_job_is mismatch)', async () => {
+            const data = await insertPlaybookRun();
+            const e = data.executors[0];
+
+            const payload1 = createAckPayload(data.id);
+            const payload2 = createAckPayload(data.id);
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload2, 'e333fc77-b7d3-4404-a224-abee2903af70', e.receptor_node_id)));
+
+            assertNoErrors();
+            await assertExecutor(e.id);
+        });
+
+        test('does not ack neighbouring executors', async () => {
+            const data = await insertPlaybookRun(undefined, 2, 2);
+            const e = data.executors[0];
+
+            const payload = createAckPayload(data.id);
+            await onMessage(createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id)));
+
+            assertNoErrors();
+            await assertExecutor(e.id, Status.ACKED);
+            await assertExecutor(data.executors[1].id, Status.PENDING);
+            await assertSystem(data.executors[0].systems[1].id, Status.PENDING);
+            await assertSystem(data.executors[1].systems[0].id, Status.PENDING);
+            await assertSystem(data.executors[1].systems[1].id, Status.PENDING);
+        });
+    });
+
     describe('playbook_run_update', function () {
         function createUpdatePayload (runId: string, host: string, sequence = 1, console = 'console text output') {
             return {
