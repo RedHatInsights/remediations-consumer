@@ -3,9 +3,12 @@ export function up (knex) {
         table.uuid('id').primary().notNullable();
         table.uuid('system_id').notNullable();
         table.string('system_name').notNullable();
-        table.enum('status', ['pending', 'running', 'success', 'failure', 'canceled']).defaultTo('pending').notNullable();
+        table.enum('status',
+            ['pending', 'running', 'success', 'failure', 'canceled'],
+            {useNative: true, enumName: 'enum_playbook_run_systems_status'}
+        ).defaultTo('pending').notNullable();
         table.integer('sequence').notNullable().defaultTo(-1);
-        table.string('console').notNullable();
+        table.text('console').defaultTo('').notNullable();
         table.datetime('updated_at').notNullable().defaultTo(knex.fn.now(6));
         table.uuid('playbook_run_executor_id').notNullable();
         table.foreign('playbook_run_executor_id').references('playbook_run_executors.id');
