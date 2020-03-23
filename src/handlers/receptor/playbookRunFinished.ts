@@ -3,8 +3,9 @@ import * as db from '../../db';
 import * as _ from 'lodash';
 import {SatReceptorResponse, ReceptorMessage} from '.';
 import * as Joi from '@hapi/joi';
-import { PlaybookRunExecutor, PlaybookRunSystem, Status, PlaybookRun } from './models';
+import { PlaybookRunExecutor, PlaybookRunSystem, Status } from './models';
 import * as Knex from 'knex';
+import { updateExecutorById, updatePlaybookRun, findExecutorByReceptorIds } from './queries';
 
 const INCOMPLETE_SYSTEM_STATUSES = [Status.PENDING, Status.RUNNING];
 
@@ -45,18 +46,13 @@ function getFinalStatusForParent (stats: Record<string, number>) {
     return Status.SUCCESS;
 }
 
-// TODO: better code reuse
 // TODO: logging/monitoring
 export async function handle (message: ReceptorMessage<PlaybookRunFinished>) {
     log.info({message}, 'received playbook_run_finished');
 
     const knex = db.get();
 
-    const executor = await knex(PlaybookRunExecutor.TABLE)
-    .select([PlaybookRunExecutor.id, PlaybookRunExecutor.playbook_run_id, PlaybookRunExecutor.status])
-    .where(PlaybookRunExecutor.receptor_job_id, message.in_response_to)
-    .where(PlaybookRunExecutor.receptor_node_id, message.sender)
-    .first();
+    const executor = await findExecutorByReceptorIds(knex, message.in_response_to, message.sender);
 
     if (!executor) {
         log.warn({job_id: message.in_response_to}, 'no executor matched');
@@ -80,13 +76,8 @@ export async function handle (message: ReceptorMessage<PlaybookRunFinished>) {
 
     // all systems for the executor reached the final status
     // it's time that we update the status of the executor
-    await knex(PlaybookRunExecutor.TABLE)
-    .where(PlaybookRunExecutor.id, executor.id)
-    .whereIn(PlaybookRunExecutor.status, [Status.PENDING, Status.ACKED, Status.RUNNING])
-    .update({
-        [PlaybookRunExecutor.status]: getFinalStatusForParent(perExecutorSystemStats),
-        [PlaybookRunExecutor.updated_at]: knex.fn.now()
-    });
+    await updateExecutorById(
+        knex, executor.id, [Status.PENDING, Status.ACKED, Status.RUNNING], getFinalStatusForParent(perExecutorSystemStats));
 
     // it may also be that all systems across the entire playbook_run (i.e. across all executors) reached the final status
     // let's check if that's the case
@@ -101,11 +92,6 @@ export async function handle (message: ReceptorMessage<PlaybookRunFinished>) {
 
     // all systems across all playbook_run executors are in the final state
     // let's update the playbook_run.status
-    await knex(PlaybookRun.TABLE)
-    .where(PlaybookRun.id, executor.playbook_run_id)
-    .whereIn(PlaybookRun.status, [Status.PENDING, Status.RUNNING])
-    .update({
-        [PlaybookRun.status]: getFinalStatusForParent(perRunStats),
-        [PlaybookRun.updated_at]: knex.fn.now()
-    });
+    await updatePlaybookRun(
+        knex, executor.playbook_run_id, [Status.PENDING, Status.RUNNING], getFinalStatusForParent(perRunStats));
 }

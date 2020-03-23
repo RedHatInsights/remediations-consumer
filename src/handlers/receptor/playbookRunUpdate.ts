@@ -2,17 +2,12 @@ import log from '../../util/log';
 import {SatReceptorResponse, ReceptorMessage} from '.';
 import * as Joi from '@hapi/joi';
 import * as db from '../../db';
-import { Status, PlaybookRunExecutor, PlaybookRun, PlaybookRunSystem } from './models';
+import { Status, PlaybookRunSystem } from './models';
+import { updateExecutorById, updatePlaybookRun, findExecutorByReceptorIds } from './queries';
 
 const LT = '<';
 
-/*
- * This is an optimization. Only the first playbook_run_update message for a given executor/run should be updating
- * the status (subsequent updates would have no effect). Therefore, if the sequence is higher than the threshold we
- * can be pretty sure the status has already been updated and therefore we do not need to issue the UPDATE statements
- * for executor/run anymore.
- */
-const PARENT_UPDATE_THRESHOLD = 5;
+const ACTIONABLE_STATUSES = [Status.PENDING, Status.ACKED];
 
 export interface PlaybookRunUpdate extends SatReceptorResponse {
     playbook_run_id: string;
@@ -34,36 +29,11 @@ export async function handle (message: ReceptorMessage<PlaybookRunUpdate>) {
 
     const knex = db.get();
 
-    const executors = await knex(PlaybookRunExecutor.TABLE)
-    .select([PlaybookRunExecutor.id, PlaybookRunExecutor.playbook_run_id])
-    .where(PlaybookRunExecutor.receptor_job_id, message.in_response_to)
-    .where(PlaybookRunExecutor.receptor_node_id, message.sender);
+    const executor = await findExecutorByReceptorIds(knex, message.in_response_to, message.sender);
 
-    if (executors.length > 1) {
-        throw new Error(`multiple executors matched ${message.in_response_to}`);
-    } else if (executors.length === 0) {
+    if (!executor) {
         log.warn({job_id: message.in_response_to}, 'no executor matched');
         return;
-    }
-
-    const executor = executors[0];
-
-    if (message.payload.sequence < PARENT_UPDATE_THRESHOLD) {
-        await knex(PlaybookRunExecutor.TABLE)
-        .where(PlaybookRunExecutor.id, executor.id)
-        .whereIn(PlaybookRunExecutor.status, [Status.PENDING, Status.ACKED])
-        .update({
-            [PlaybookRunExecutor.status]: Status.RUNNING,
-            [PlaybookRunExecutor.updated_at]: knex.fn.now()
-        });
-
-        await knex(PlaybookRun.TABLE)
-        .where(PlaybookRun.id, executor.playbook_run_id)
-        .where(PlaybookRun.status, Status.PENDING)
-        .update({
-            [PlaybookRun.status]: Status.RUNNING,
-            [PlaybookRun.updated_at]: knex.fn.now()
-        });
     }
 
     // update the system table
@@ -78,4 +48,11 @@ export async function handle (message: ReceptorMessage<PlaybookRunUpdate>) {
         [PlaybookRunSystem.sequence]: message.payload.sequence,
         [PlaybookRunSystem.console]: message.payload.console
     });
+
+    if (!ACTIONABLE_STATUSES.includes(executor.status)) {
+        return;
+    }
+
+    await updateExecutorById(knex, executor.id, [Status.PENDING, Status.ACKED], Status.RUNNING);
+    await updatePlaybookRun(knex, executor.playbook_run_id, [Status.PENDING], Status.RUNNING);
 }
