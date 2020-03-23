@@ -29,6 +29,7 @@ export function get (): Knex {
 export async function start (): Promise<Knex> {
     knex = Knex(opts);
     await knex.raw('SELECT 1 AS result');
+    knex.on('query', (data: any) => log.trace({sql: data.sql, bindings: data.bindings}, 'executing SQL query'));
     return knex;
 }
 
