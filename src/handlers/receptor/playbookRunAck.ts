@@ -2,7 +2,8 @@ import log from '../../util/log';
 import {SatReceptorResponse, ReceptorMessage} from '.';
 import * as Joi from '@hapi/joi';
 import * as db from '../../db';
-import { Status, PlaybookRunExecutor } from './models';
+import { Status } from './models';
+import { updateExecutorByReceptorIds } from './queries';
 
 export interface PlaybookRunAck extends SatReceptorResponse {
     playbook_run_id: string;
@@ -18,15 +19,8 @@ export async function handle (message: ReceptorMessage<PlaybookRunAck>) {
 
     const knex = db.get();
 
-    // Move this code to db once all implementations are in
-    const executors = await knex(PlaybookRunExecutor.TABLE)
-    .where(PlaybookRunExecutor.receptor_job_id, message.in_response_to)
-    .where(PlaybookRunExecutor.receptor_node_id, message.sender)
-    .where(PlaybookRunExecutor.status, Status.PENDING)
-    .update({
-        [PlaybookRunExecutor.status]: Status.ACKED,
-        [PlaybookRunExecutor.updated_at]: knex.fn.now()
-    });
+    const executors = await updateExecutorByReceptorIds(
+        knex, message.in_response_to, message.sender, Status.PENDING, Status.ACKED);
 
     if (executors === 0) {
         log.warn({job_id: message.in_response_to}, 'no executor matched');
