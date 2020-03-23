@@ -26,6 +26,7 @@ export enum PlaybookRunExecutor {
 
 export enum PlaybookRunSystem {
     TABLE = 'playbook_run_systems',
+    id = 'id',
     playbook_run_executor_id = 'playbook_run_executor_id',
     sequence = 'sequence',
     status = 'status',
