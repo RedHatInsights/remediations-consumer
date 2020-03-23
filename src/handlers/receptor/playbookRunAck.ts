@@ -4,7 +4,6 @@ import * as Joi from '@hapi/joi';
 import * as db from '../../db';
 import { Status, PlaybookRunExecutor } from './models';
 
-
 export interface PlaybookRunAck extends SatReceptorResponse {
     playbook_run_id: string;
 }
@@ -30,7 +29,7 @@ export async function handle (message: ReceptorMessage<PlaybookRunAck>) {
     });
 
     if (executors === 0) {
-            log.warn({job_id: message.in_response_to}, 'no executor matched');
-            return;
-        }
+        log.warn({job_id: message.in_response_to}, 'no executor matched');
+        return;
+    }
 }
