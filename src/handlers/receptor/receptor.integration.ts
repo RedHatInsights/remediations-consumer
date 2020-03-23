@@ -153,7 +153,7 @@ describe('receptor handler integration tests', function () {
     });
 
     describe('playbook_run_ack', function () {
-        function createAckPayload (runId: string){
+        function createAckPayload (runId: string) {
             return {
                 type: 'playbook_run_ack',
                 playbook_run_id: runId
@@ -173,65 +173,22 @@ describe('receptor handler integration tests', function () {
             await assertExecutor(e.id, Status.ACKED);
         });
 
-        test('does not ack (running state)', async () => {
-            const data = await insertPlaybookRun(run => {
-                run.executors[0].status = Status.RUNNING;
-            });
-            const e = data.executors[0];
+        [Status.RUNNING, Status.CANCELED, Status.SUCCESS, Status.FAILURE].forEach(status =>
+            test(`does not ack (${status})`, async () => {
+                const data = await insertPlaybookRun(run => {
+                    run.executors[0].status = status;
+                });
+                const e = data.executors[0];
 
-            const payload = createAckPayload(data.id);
+                const payload = createAckPayload(data.id);
 
-            const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
-            await onMessage(msg);
+                const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
+                await onMessage(msg);
 
-            assertNoErrors();
-            await assertExecutor(e.id, Status.RUNNING);   
-        });
-
-        test('does not ack in final state (canceled state)', async () => {
-            const data = await insertPlaybookRun(run => {
-                run.executors[0].status = Status.CANCELED;
-            });
-            const e = data.executors[0];
-
-            const payload = createAckPayload(data.id);
-
-            const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
-            await onMessage(msg);
-
-            assertNoErrors();
-            await assertExecutor(e.id, Status.CANCELED);   
-        });
-
-        test('does not ack in final state (success)', async () => {
-            const data = await insertPlaybookRun(run => {
-                run.executors[0].status = Status.SUCCESS;
-            });
-            const e = data.executors[0];
-
-            const payload = createAckPayload(data.id);
-
-            const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
-            await onMessage(msg);
-
-            assertNoErrors();
-            await assertExecutor(e.id, Status.SUCCESS);   
-        });
-
-        test('does not ack in final state (failure)', async () => {
-            const data = await insertPlaybookRun(run => {
-                run.executors[0].status = Status.FAILURE;
-            });
-            const e = data.executors[0];
-
-            const payload = createAckPayload(data.id);
-
-            const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
-            await onMessage(msg);
-
-            assertNoErrors();
-            await assertExecutor(e.id, Status.FAILURE);   
-        });
+                assertNoErrors();
+                await assertExecutor(e.id, status);
+            })
+        );
 
         test('multiple messages', async () => {
             const data = await insertPlaybookRun();
@@ -251,10 +208,9 @@ describe('receptor handler integration tests', function () {
             const data = await insertPlaybookRun();
             const e = data.executors[0];
 
-            const payload1 = createAckPayload(data.id);
-            const payload2 = createAckPayload(data.id);
+            const payload = createAckPayload(data.id);
 
-            await onMessage(createKafkaMessage(responseEnvelope(payload2, e.receptor_job_id, 'fifi')));
+            await onMessage(createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, 'fifi')));
 
             assertNoErrors();
             await assertExecutor(e.id);
@@ -264,10 +220,9 @@ describe('receptor handler integration tests', function () {
             const data = await insertPlaybookRun();
             const e = data.executors[0];
 
-            const payload1 = createAckPayload(data.id);
-            const payload2 = createAckPayload(data.id);
+            const payload = createAckPayload(data.id);
 
-            await onMessage(createKafkaMessage(responseEnvelope(payload2, 'e333fc77-b7d3-4404-a224-abee2903af70', e.receptor_node_id)));
+            await onMessage(createKafkaMessage(responseEnvelope(payload, 'e333fc77-b7d3-4404-a224-abee2903af70', e.receptor_node_id)));
 
             assertNoErrors();
             await assertExecutor(e.id);
@@ -300,100 +255,49 @@ describe('receptor handler integration tests', function () {
             };
         }
 
-        test('updates records (default state)', async () => {
-            const data = await insertPlaybookRun();
-            const e = data.executors[0];
-            const s = e.systems[0];
+        [Status.PENDING, Status.ACKED].forEach(status =>
+            test(`updates records (${status})`, async () => {
+                const data = await insertPlaybookRun(run => {
+                    run.executors[0].status = status;
+                });
+                const e = data.executors[0];
+                const s = e.systems[0];
 
-            const log = 'test01';
-            const payload = createUpdatePayload(data.id, s.system_name, 2, log);
+                const log = 'test01';
+                const payload = createUpdatePayload(data.id, s.system_name, 2, log);
 
-            const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
-            await onMessage(msg);
+                const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
+                await onMessage(msg);
 
-            assertNoErrors();
-            await assertRun(data.id, Status.RUNNING);
-            await assertExecutor(e.id, Status.RUNNING);
-            await assertSystem(s.id, Status.RUNNING, 2, log);
-        });
+                assertNoErrors();
+                await assertRun(data.id, Status.RUNNING);
+                await assertExecutor(e.id, Status.RUNNING);
+                await assertSystem(s.id, Status.RUNNING, 2, log);
+            })
+        );
 
-        test('updates executor (acked state)', async () => {
-            const data = await insertPlaybookRun(run => {
-                run.executors[0].status = Status.ACKED;
-            });
+        [Status.SUCCESS, Status.FAILURE, Status.CANCELED].forEach(status =>
+            test(`does not update records in final state (${status})`, async () => {
+                const data = await insertPlaybookRun(run => {
+                    run.status = status;
+                    run.executors[0].status = status;
+                    run.executors[0].systems[0].status = status;
+                });
 
-            const e = data.executors[0];
-            const s = e.systems[0];
-            const log = 'test02';
-            const payload = createUpdatePayload(data.id, s.system_name, 2, log);
+                const e = data.executors[0];
+                const s = e.systems[0];
+                const log = 'test03';
+                const payload = createUpdatePayload(data.id, s.system_name, 2, log);
 
-            const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
-            await onMessage(msg);
+                const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
+                await onMessage(msg);
 
-            assertNoErrors();
-            assertExecutor(e.id, Status.RUNNING);
-        });
-
-        test('does not update records in final state (success)', async () => {
-            const data = await insertPlaybookRun(run => {
-                run.status = Status.SUCCESS;
-                run.executors[0].status = Status.SUCCESS;
-                run.executors[0].systems[0].status = Status.SUCCESS;
-            });
-
-            const e = data.executors[0];
-            const s = e.systems[0];
-            const log = 'test03';
-            const payload = createUpdatePayload(data.id, s.system_name, 2, log);
-
-            const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
-            await onMessage(msg);
-
-            assertNoErrors();
-            await assertRun(data.id, Status.SUCCESS);
-            await assertExecutor(e.id, Status.SUCCESS);
-            await assertSystem(s.id, Status.SUCCESS);
-        });
-
-        test('does not update records in final state (failure)', async () => {
-            const data = await insertPlaybookRun(run => {
-                run.status = Status.FAILURE;
-                run.executors[0].status = Status.FAILURE;
-                run.executors[0].systems[0].status = Status.FAILURE;
-            });
-
-            const e = data.executors[0];
-            const s = e.systems[0];
-            const log = 'test03';
-            const payload = createUpdatePayload(data.id, s.system_name, 2, log);
-
-            await onMessage(createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id)));
-
-            assertNoErrors();
-            await assertRun(data.id, Status.FAILURE);
-            await assertExecutor(e.id, Status.FAILURE);
-            await assertSystem(s.id, Status.FAILURE);
-        });
-
-        test('does not update records in final state (canceled)', async () => {
-            const data = await insertPlaybookRun(run => {
-                run.status = Status.CANCELED;
-                run.executors[0].status = Status.CANCELED;
-                run.executors[0].systems[0].status = Status.CANCELED;
-            });
-
-            const e = data.executors[0];
-            const s = e.systems[0];
-            const log = 'test03';
-            const payload = createUpdatePayload(data.id, s.system_name, 2, log);
-
-            await onMessage(createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id)));
-
-            assertNoErrors();
-            await assertRun(data.id, Status.CANCELED);
-            await assertExecutor(e.id, Status.CANCELED);
-            await assertSystem(s.id, Status.CANCELED);
-        });
+                assertNoErrors();
+                await assertRun(data.id, status);
+                await assertExecutor(e.id, status);
+                await assertSystem(s.id, status);
+            })
+        );
 
         test('multiple messages', async () => {
             const data = await insertPlaybookRun();
