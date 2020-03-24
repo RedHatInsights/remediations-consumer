@@ -70,7 +70,10 @@ async function handleSatResponse<T extends SatReceptorResponse> (
         await handler.handle(message);
     } catch (e) {
         probes.receptorError(message, e);
+        return;
     }
+
+    probes.receptorProcessed(message.payload.type);
 }
 
 export default async function onMessage (message: Message) {

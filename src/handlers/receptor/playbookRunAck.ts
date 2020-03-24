@@ -2,6 +2,7 @@ import log from '../../util/log';
 import {SatReceptorResponse, ReceptorMessage} from '.';
 import * as Joi from '@hapi/joi';
 import * as db from '../../db';
+import * as probes from '../../probes';
 import { Status } from './models';
 import { updateExecutorByReceptorIds } from './queries';
 
@@ -23,7 +24,7 @@ export async function handle (message: ReceptorMessage<PlaybookRunAck>) {
         knex, message.in_response_to, message.sender, Status.PENDING, Status.ACKED);
 
     if (executors === 0) {
-        log.warn({job_id: message.in_response_to}, 'no executor matched');
+        probes.noExecutorFound(message.payload.type, {job_id: message.in_response_to, node_id: message.sender});
         return;
     }
 }
