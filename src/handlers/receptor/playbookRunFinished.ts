@@ -3,6 +3,7 @@ import * as db from '../../db';
 import * as _ from 'lodash';
 import {SatReceptorResponse, ReceptorMessage} from '.';
 import * as Joi from '@hapi/joi';
+import * as probes from '../../probes';
 import { PlaybookRunExecutor, PlaybookRunSystem, Status } from './models';
 import * as Knex from 'knex';
 import { updateExecutorById, updatePlaybookRun, findExecutorByReceptorIds } from './queries';
@@ -46,7 +47,6 @@ function getFinalStatusForParent (stats: Record<string, number>) {
     return Status.SUCCESS;
 }
 
-// TODO: logging/monitoring
 export async function handle (message: ReceptorMessage<PlaybookRunFinished>) {
     log.info({message}, 'received playbook_run_finished');
 
@@ -55,7 +55,7 @@ export async function handle (message: ReceptorMessage<PlaybookRunFinished>) {
     const executor = await findExecutorByReceptorIds(knex, message.in_response_to, message.sender);
 
     if (!executor) {
-        log.warn({job_id: message.in_response_to}, 'no executor matched');
+        probes.noExecutorFound(message.payload.type, {job_id: message.in_response_to, node_id: message.sender});
         return;
     }
 
@@ -71,6 +71,7 @@ export async function handle (message: ReceptorMessage<PlaybookRunFinished>) {
 
     const perExecutorSystemStats = await countSystemsByStatus(knex, [executor.id]);
     if (!allFinished(perExecutorSystemStats)) {
+        log.trace({stats: perExecutorSystemStats}, 'executor not finished yet');
         return;
     }
 
@@ -87,6 +88,7 @@ export async function handle (message: ReceptorMessage<PlaybookRunFinished>) {
 
     const perRunStats = await countSystemsByStatus(knex, executorsInRun.map(executor => executor.id));
     if (!allFinished(perRunStats)) {
+        log.trace({stats: perRunStats}, 'run not finished yet');
         return;
     }
 
