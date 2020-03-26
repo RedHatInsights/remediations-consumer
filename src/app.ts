@@ -15,7 +15,7 @@ export default async function start () {
     log.info({env: config.env}, `${version.full} starting`);
     log.debug(sanitized, 'configuration');
 
-    await db.start();
+    await db.start(config.db);
     log.info('connected to database');
 
     const stopMetrics = metrics();

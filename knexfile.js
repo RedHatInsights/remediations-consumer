@@ -1,9 +1,10 @@
 'use strict';
 
-const config = require('./dist/src/db').options;
+const config = require('./dist/src/config').default.db;
+const buildConfiguration = require('./dist/src/db').buildConfiguration;
 
 const options = {
-    ...config,
+    ...buildConfiguration(config),
     migrations: {
         tableName: 'knex_migrations',
         directory: 'dist/test/migrations'
