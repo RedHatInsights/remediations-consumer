@@ -1,20 +1,27 @@
-import config from '../config';
 import log from '../util/log';
 import * as Knex from 'knex';
 
-const opts = {
-    client: 'pg',
-    connection: config.db.connection,
-    pool: config.db.pool,
-    asyncStackTraces: true,
-    acquireConnectionTimeout: 10000
-};
-
-if (!config.db.ssl.enabled || !opts.connection.ssl.ca) {
-    delete opts.connection.ssl;
+interface DbConfig {
+    connection: Record<'user' | 'password' | 'database'| 'host', string> & Record<'ssl', Record<'ca', string | undefined>>;
+    ssl: Record<'enabled', boolean>;
+    pool: Record<'min' | 'max', number>;
 }
 
-export const options = Object.freeze(opts);
+export function buildConfiguration (config: DbConfig) {
+    const opts = {
+        client: 'pg',
+        connection: config.connection,
+        pool: config.pool,
+        asyncStackTraces: true,
+        acquireConnectionTimeout: 10000
+    };
+
+    if (!config.ssl.enabled || !opts.connection.ssl.ca) {
+        delete opts.connection.ssl;
+    }
+
+    return Object.freeze(opts);
+}
 
 let knex: any = null;
 
@@ -26,8 +33,8 @@ export function get (): Knex {
     return knex;
 }
 
-export async function start (): Promise<Knex> {
-    knex = Knex(opts);
+export async function start (config: DbConfig): Promise<Knex> {
+    knex = Knex(buildConfiguration(config));
     await knex.raw('SELECT 1 AS result');
     knex.on('query', (data: any) => log.trace({sql: data.sql, bindings: data.bindings}, 'executing SQL query'));
     return knex;
