@@ -1,7 +1,7 @@
 export async function seed (knex) {
-    await knex('playbook_runs').del();
-    await knex('playbook_run_executors').del();
     await knex('playbook_run_systems').del();
+    await knex('playbook_run_executors').del();
+    await knex('playbook_runs').del();
 
     await knex('playbook_runs').insert([{
         id: '88d0ba73-0015-4e7d-a6d6-4b530cbfb5bc',

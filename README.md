@@ -36,5 +36,18 @@ npm run verify
 
 Run `node test/producer.js` to produce a test message and send it to Kafka.
 
+## Cleaner script
+
+In addition to the consumer itself this repository also hosts [a script](./src/cleaner/run.ts) that cleans up `playbook_runs`, `playbook_run_executors` and `playbook_run_systems` that failed to reach a final state. More specifically, it:
+* looks for `playbook_run_systems` that haven't received an updated in more than 6 hours and failed to reach one of the final statuses (success, failure, canceled). These records are set the `canceled` status.
+* looks for `playbook_run_executors` that haven't received an update in more than 15 minutes and did not reach one of the final statuses despite all their `playbook_run_systems` being finished. The status of these records is set based on the status of its systems:
+  * `failure` if any of the systems failed
+  * `canceled` if any of the systems was canceled
+  * `success` otherwise
+* looks for `playbook_runs` that haven't received an update in more than 15 minutes and did not reach one of the final statuses despite their `playbook_run_executors` being finished. The status of these records is set based on the status of its executors:
+  * `failure` if any of the executors failed
+  * `canceled` if any of the executors was canceled
+  * `success` otherwise
+
 ## Contact
 For questions or comments join **#insights-remediations** at ansible.slack.com or contact [Jozef Hartinger](https://github.com/jharting) directly.
