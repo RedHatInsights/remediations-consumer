@@ -86,7 +86,7 @@ const config = convict({
     metrics: {
         prefix: {
             format: String,
-            default: 'remediations_consumer_',
+            default: 'remediations_cleaner_',
             env: 'METRICS_PREFIX'
         },
         pushGateway: {
