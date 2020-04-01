@@ -36,7 +36,7 @@ export async function updateEntities (type: 'systems' | 'executors' | 'runs', fn
 }
 
 export async function pushMetrics () {
-    const gateway: any = new client.Pushgateway(config.cleaner.pushGateway);
+    const gateway: any = new client.Pushgateway(config.metrics.pushGateway);
     const asyncGateway = P.promisifyAll(gateway);
 
     const jobName = `${config.namespace}/${os.hostname}`;
