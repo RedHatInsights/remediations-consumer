@@ -39,7 +39,11 @@ export async function pushMetrics () {
     const gateway: any = new client.Pushgateway(config.metrics.pushGateway);
     const asyncGateway = P.promisifyAll(gateway);
 
-    const jobName = `${config.namespace}/${os.hostname}`;
+    const jobName = `${config.namespace}|${os.hostname}`;
     logger.info({jobName}, 'pushing metrics');
-    await asyncGateway.pushAddAsync({jobName});
+
+    const resp = await asyncGateway.pushAsync({jobName});
+    if (resp.statusCode !== 200) {
+        throw new Error(`failed to push metrics ${resp.statusCode}`);
+    }
 }
