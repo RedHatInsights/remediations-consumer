@@ -26,5 +26,10 @@ async function run () {
 }
 
 if (require.main === module) {
+    process.on('unhandledRejection', (reason: any) => {
+        log.fatal(reason);
+        throw reason;
+    });
+
     run();
 }
