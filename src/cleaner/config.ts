@@ -89,10 +89,10 @@ const config = convict({
             default: 'remediations_consumer_',
             env: 'METRICS_PREFIX'
         },
-        port: {
-            format: 'nat',
-            default: 9006,
-            env: 'METRICS_PORT'
+        pushGateway: {
+            format: 'url',
+            default: 'http://localhost:9091',
+            env: 'METRICS_PUSH_GATEWAY'
         }
     },
 
@@ -111,11 +111,6 @@ const config = convict({
             format: 'nat',
             default: 15,
             env: 'CLEANER_TIMEOUT_RUNS'
-        },
-        pushGateway: {
-            format: 'url',
-            default: 'http://localhost:9091',
-            env: 'CLEANER_PUSH_GATEWAY'
         }
     }
 });
