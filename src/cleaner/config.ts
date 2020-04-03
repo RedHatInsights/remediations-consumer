@@ -27,6 +27,49 @@ const config = convict({
             format: Boolean,
             default: false,
             env: 'LOG_PRETTY'
+        },
+        cloudwatch: {
+            enabled: {
+                format: Boolean,
+                default: true,
+                env: 'LOG_CW_ENABLED'
+            },
+            level: {
+                format: String,
+                default: 'debug',
+                env: 'LOG_CW_LEVEL'
+            },
+            group: {
+                format: String,
+                default: 'remediations-local',
+                env: 'LOG_CW_GROUP'
+            },
+            prefix: {
+                format: String,
+                default: 'remediations-cleaner-',
+                env: 'LOG_CW_PREFIX'
+            },
+            interval: {
+                format: Number,
+                default: 1000,
+                env: 'LOG_CW_INTERVAL'
+            },
+            key: {
+                format: String,
+                default: undefined,
+                env: 'LOG_CW_KEY'
+            },
+            secret: {
+                format: String,
+                default: undefined,
+                env: 'LOG_CW_SECRET',
+                sensitive: true
+            },
+            region: {
+                format: String,
+                default: 'us-east-1',
+                env: 'LOG_CW_REGION'
+            }
         }
     },
 
