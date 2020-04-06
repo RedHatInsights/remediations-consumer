@@ -4,11 +4,13 @@ import * as Joi from '@hapi/joi';
 
 export interface PlaybookRunCancelAck extends SatReceptorResponse {
     playbook_run_id: string;
+    status: string;
 }
 
 export const schema = Joi.object().keys({
     type: Joi.string().valid('playbook_run_cancel_ack').required(),
-    playbook_run_id: Joi.string().guid().required()
+    playbook_run_id: Joi.string().guid().required(),
+    status: Joi.string().required()
 });
 
 export async function handle (message: ReceptorMessage<PlaybookRunCancelAck>) {

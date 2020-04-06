@@ -26,7 +26,8 @@ const validFinished = JSON.stringify({
 
 const validCancel = JSON.stringify({
     type: 'playbook_run_cancel_ack',
-    playbook_run_id: '4b407690-e2f8-4563-96a6-6191f1df8901'
+    playbook_run_id: '4b407690-e2f8-4563-96a6-6191f1df8901',
+    status: 'cancelling'
 });
 
 function createInvalidPayload (type: string): string {
