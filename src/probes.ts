@@ -4,6 +4,8 @@ import log from './util/log';
 import { client } from './metrics';
 import config from './config';
 import { Message } from 'kafka-node';
+import { ReceptorMessage } from './handlers/receptor';
+import { PlaybookRunCancelAck } from './handlers/receptor/playbookRunCancelAck';
 
 function createCounter (name: string, help: string, ...labelNames: string[]) {
     return new client.Counter({
@@ -16,7 +18,8 @@ const counters = {
     remove: createCounter('remove_total', 'Total number of inventory delete messages processed', 'result'),
     receptor: createCounter('receptor_total', 'Total number of receptor messages processed', 'result', 'type'),
     executorNotFound: createCounter(
-        'receptor_executor_not_found', 'Total number of cases when an executor is not found in a query', 'result')
+        'receptor_executor_not_found', 'Total number of cases when an executor is not found in a query', 'result'),
+    receptorCancelAck: createCounter('receptor_cancel_ack_total', 'Total number of playbook_run_cancel_ack messages', 'status')
 };
 
 // https://www.robustperception.io/existential-issues-with-metrics
@@ -27,6 +30,8 @@ const counters = {
     });
 });
 ['playbook_run_ack', 'playbook_run_update', 'playbook_run_finished'].forEach(value => counters.executorNotFound.labels(value).inc(0));
+
+['cancelling', 'finished', 'failure'].forEach(value => counters.receptorCancelAck.labels(value).inc(0));
 
 export function incomingMessage (message: Message) {
     log.trace({ message }, 'incoming message');
@@ -70,4 +75,9 @@ export function receptorProcessed (type: string) {
 export function noExecutorFound (responseType: string, criteria: Record<string, string>) {
     log.warn({responseType, criteria}, 'no executor matched');
     counters.executorNotFound.labels(responseType).inc();
+}
+
+export function receptorPlaybookRunCancelAck (message: ReceptorMessage<PlaybookRunCancelAck>) {
+    log.info({message}, 'received playbook_run_cancel_ack');
+    counters.receptorCancelAck.labels(message.payload.status).inc();
 }
