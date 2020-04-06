@@ -1,4 +1,5 @@
 import log from '../../util/log';
+import * as probes from '../../probes';
 import {SatReceptorResponse, ReceptorMessage} from '.';
 import * as Joi from '@hapi/joi';
 
@@ -14,5 +15,5 @@ export const schema = Joi.object().keys({
 });
 
 export async function handle (message: ReceptorMessage<PlaybookRunCancelAck>) {
-    log.info({message}, 'received playbook_run_cancel_ack');
+    probes.receptorPlaybookRunCancelAck(message);
 }
