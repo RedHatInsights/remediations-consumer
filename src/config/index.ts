@@ -28,7 +28,7 @@ const config = convict({
         cloudwatch: {
             enabled: {
                 format: Boolean,
-                default: true,
+                default: false,
                 env: 'LOG_CW_ENABLED'
             },
             level: {
@@ -43,7 +43,7 @@ const config = convict({
             },
             prefix: {
                 format: String,
-                default: 'remediations-consumer-',
+                default: 'remediations-consumer',
                 env: 'LOG_CW_PREFIX'
             },
             interval: {
