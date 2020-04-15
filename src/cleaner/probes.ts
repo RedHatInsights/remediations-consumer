@@ -24,12 +24,12 @@ const duration = createGauge('update_duration_seconds', 'Total time spent runnin
 ['systems', 'executors', 'runs'].forEach(value => updated.labels(value).inc(0));
 ['systems', 'executors', 'runs'].forEach(value => duration.labels(value).inc(0));
 
-export async function updateEntities (type: 'systems' | 'executors' | 'runs', fn: () => Promise<number>) {
+export async function updateEntities (type: 'systems' | 'executors' | 'runs', fn: () => Promise<any[]>) {
     const stop = duration.labels(type).startTimer();
     try {
-        const count = await fn();
-        updated.labels(type).inc(count);
-        logger.info({count}, `updated ${type}`);
+        const updatedRows = await fn();
+        updated.labels(type).inc(updatedRows.length);
+        logger.info({count: updatedRows.length}, `updated ${type}`);
     } finally {
         stop();
     }

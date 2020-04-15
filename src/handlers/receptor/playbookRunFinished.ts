@@ -1,14 +1,18 @@
 import log from '../../util/log';
+import * as assert from 'assert';
 import * as db from '../../db';
-import * as _ from 'lodash';
 import {SatReceptorResponse, ReceptorMessage} from '.';
 import * as Joi from '@hapi/joi';
 import * as probes from '../../probes';
-import { PlaybookRunExecutor, PlaybookRunSystem, Status } from './models';
+import { PlaybookRunExecutor, PlaybookRunSystem, Status, PlaybookRun } from './models';
 import * as Knex from 'knex';
-import { updateExecutorById, updatePlaybookRun, findExecutorByReceptorIds } from './queries';
-
-const INCOMPLETE_SYSTEM_STATUSES = [Status.PENDING, Status.RUNNING];
+import { findExecutorByReceptorIds } from './queries';
+import {
+    whereUnfinishedExecutorsWithFinishedSystems,
+    updateStatusExecutors,
+    updateStatusRuns,
+    whereUnfinishedRunsWithFinishedExecutors
+} from './sharedQueries';
 
 export interface PlaybookRunFinished extends SatReceptorResponse {
     playbook_run_id: string;
@@ -23,28 +27,18 @@ export const schema = Joi.object().keys({
     status: Joi.string().valid('success', 'failure', 'canceled').required()
 });
 
-async function countSystemsByStatus (knex: Knex, executorIds: string[]) {
-    const data = await knex(PlaybookRunSystem.TABLE)
-    .whereIn(PlaybookRunSystem.playbook_run_executor_id, executorIds)
-    .groupBy(PlaybookRunSystem.status)
-    .select('status')
-    .count('id');
+function tryUpdateExecutor (knex: Knex, id: string) {
+    const query = whereUnfinishedExecutorsWithFinishedSystems(knex)
+    .where(PlaybookRunExecutor.id, id);
 
-    return _(data).keyBy('status').mapValues(value => parseInt(value.count as string)).value();
+    return updateStatusExecutors(knex, query);
 }
 
-function allFinished (stats: Record<string, number>) {
-    return INCOMPLETE_SYSTEM_STATUSES.every(status => !_.has(stats, status));
-}
+function tryUpdateRun (knex: Knex, id: string) {
+    const query = whereUnfinishedRunsWithFinishedExecutors(knex)
+    .where(PlaybookRun.id, id);
 
-function getFinalStatusForParent (stats: Record<string, number>) {
-    if (_.has(stats, Status.FAILURE)) {
-        return Status.FAILURE;
-    } else if (_.has(stats, Status.CANCELED)) {
-        return Status.CANCELED;
-    }
-
-    return Status.SUCCESS;
+    return updateStatusRuns(knex, query);
 }
 
 export async function handle (message: ReceptorMessage<PlaybookRunFinished>) {
@@ -69,31 +63,21 @@ export async function handle (message: ReceptorMessage<PlaybookRunFinished>) {
         [PlaybookRunSystem.updated_at]: knex.fn.now()
     });
 
-    const perExecutorSystemStats = await countSystemsByStatus(knex, [executor.id]);
-    if (!allFinished(perExecutorSystemStats)) {
-        log.trace({stats: perExecutorSystemStats}, 'executor not finished yet');
+    const executorUpdated = await tryUpdateExecutor(knex, executor.id);
+    if (!executorUpdated.length) {
+        log.debug('executor not finished yet');
         return;
     }
 
-    // all systems for the executor reached the final status
-    // it's time that we update the status of the executor
-    await updateExecutorById(
-        knex, executor.id, [Status.PENDING, Status.ACKED, Status.RUNNING], getFinalStatusForParent(perExecutorSystemStats));
+    assert.equal(executorUpdated.length, 1); // it should never happen that this updates more than one row but just in case
+    log.info({id: executorUpdated[0].id, status: executorUpdated[0].status }, 'executor finished');
 
-    // it may also be that all systems across the entire playbook_run (i.e. across all executors) reached the final status
-    // let's check if that's the case
-    const executorsInRun = await knex(PlaybookRunExecutor.TABLE)
-    .where(PlaybookRunExecutor.playbook_run_id, executor.playbook_run_id)
-    .select(PlaybookRunExecutor.id);
-
-    const perRunStats = await countSystemsByStatus(knex, executorsInRun.map(executor => executor.id));
-    if (!allFinished(perRunStats)) {
-        log.trace({stats: perRunStats}, 'run not finished yet');
+    const runUpdated = await tryUpdateRun(knex, executor.playbook_run_id);
+    if (!runUpdated.length) {
+        log.debug('run not finished yet');
         return;
     }
 
-    // all systems across all playbook_run executors are in the final state
-    // let's update the playbook_run.status
-    await updatePlaybookRun(
-        knex, executor.playbook_run_id, [Status.PENDING, Status.RUNNING], getFinalStatusForParent(perRunStats));
+    assert.equal(runUpdated.length, 1); // it should never happen that this updates more than one row but just in case
+    log.info({id: runUpdated[0].id, status: runUpdated[0].status }, 'run finished');
 }
