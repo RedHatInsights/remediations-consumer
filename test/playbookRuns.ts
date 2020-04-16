@@ -24,7 +24,8 @@ function createExecutor (runId: string): any {
         receptor_node_id: v4(),
         receptor_job_id: v4(),
         playbook: '---',
-        playbook_run_id: runId
+        playbook_run_id: runId,
+        text_update_full: true
     };
 }
 
