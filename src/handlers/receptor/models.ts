@@ -21,7 +21,8 @@ export enum PlaybookRunExecutor {
     receptor_job_id = 'receptor_job_id',
     receptor_node_id = 'receptor_node_id',
     status = 'status',
-    updated_at = 'updated_at'
+    updated_at = 'updated_at',
+    text_update_full = 'text_update_full'
 }
 
 export enum PlaybookRunSystem {

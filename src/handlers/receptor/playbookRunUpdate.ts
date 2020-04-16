@@ -1,14 +1,14 @@
 import log from '../../util/log';
+import * as _ from 'lodash';
 import {SatReceptorResponse, ReceptorMessage} from '.';
 import * as Joi from '@hapi/joi';
 import * as db from '../../db';
 import * as probes from '../../probes';
-import { Status, PlaybookRunSystem } from './models';
-import { updateExecutorById, updatePlaybookRun, findExecutorByReceptorIds } from './queries';
-
-const LT = '<';
+import { Status } from './models';
+import {updateExecutorById, updatePlaybookRun, findExecutorByReceptorIds, updateSystemFull, updateSystemDiff, updateSystemMissing} from './queries';
 
 const ACTIONABLE_STATUSES = [Status.PENDING, Status.ACKED];
+const MISSING_LOGS = '\n\u2026\n';
 
 export interface PlaybookRunUpdate extends SatReceptorResponse {
     playbook_run_id: string;
@@ -37,18 +37,21 @@ export async function handle (message: ReceptorMessage<PlaybookRunUpdate>) {
         return;
     }
 
-    // update the system table
-    await knex(PlaybookRunSystem.TABLE)
-    .where(PlaybookRunSystem.playbook_run_executor_id, executor.id)
-    .whereIn(PlaybookRunSystem.status, [Status.PENDING, Status.RUNNING])
-    .where(PlaybookRunSystem.system_name, message.payload.host)
-    .where(PlaybookRunSystem.sequence, LT, message.payload.sequence)
-    .update({
-        [PlaybookRunSystem.status]: Status.RUNNING,
-        [PlaybookRunSystem.updated_at]: knex.fn.now(),
-        [PlaybookRunSystem.sequence]: message.payload.sequence,
-        [PlaybookRunSystem.console]: message.payload.console
-    });
+    if (executor.text_update_full) {
+        // Full mode
+        await updateSystemFull(knex, executor.id, message);
+    } else {
+        // Diff mode
+        const firstAttempt = await updateSystemDiff(knex, executor.id, message, message.payload.console);
+        
+        if (firstAttempt !== 1) {
+            const secondAttempt = await updateSystemMissing(knex, executor.id, message, message.payload.console, MISSING_LOGS);
+
+            if (secondAttempt === 1) {
+                probes.lostUpdateMessage(message);
+            }
+        }
+    }
 
     if (!ACTIONABLE_STATUSES.includes(executor.status)) {
         return;

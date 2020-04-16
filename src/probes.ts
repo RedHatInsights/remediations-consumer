@@ -6,6 +6,7 @@ import config from './config';
 import { Message } from 'kafka-node';
 import { ReceptorMessage } from './handlers/receptor';
 import { PlaybookRunCancelAck } from './handlers/receptor/playbookRunCancelAck';
+import { PlaybookRunUpdate } from './handlers/receptor/playbookRunUpdate';
 
 function createCounter (name: string, help: string, ...labelNames: string[]) {
     return new client.Counter({
@@ -19,7 +20,8 @@ const counters = {
     receptor: createCounter('receptor_total', 'Total number of receptor messages processed', 'result', 'type'),
     executorNotFound: createCounter(
         'receptor_executor_not_found', 'Total number of cases when an executor is not found in a query', 'result'),
-    receptorCancelAck: createCounter('receptor_cancel_ack_total', 'Total number of playbook_run_cancel_ack messages', 'status')
+    receptorCancelAck: createCounter('receptor_cancel_ack_total', 'Total number of playbook_run_cancel_ack messages', 'status'),
+    lostMessage: createCounter('lost_messages_total', 'Total number of updates lost when in DIFF mode')
 };
 
 // https://www.robustperception.io/existential-issues-with-metrics
@@ -80,4 +82,9 @@ export function noExecutorFound (responseType: string, criteria: Record<string, 
 export function receptorPlaybookRunCancelAck (message: ReceptorMessage<PlaybookRunCancelAck>) {
     log.info({message}, 'received playbook_run_cancel_ack');
     counters.receptorCancelAck.labels(message.payload.status).inc();
+}
+
+export function lostUpdateMessage (message: ReceptorMessage<PlaybookRunUpdate>) {
+    log.warn({message}, 'lost update message before given message in sequence');
+    counters.lostMessage.inc()
 }

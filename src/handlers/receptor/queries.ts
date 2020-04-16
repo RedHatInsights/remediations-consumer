@@ -1,5 +1,10 @@
 import * as Knex from 'knex';
-import { PlaybookRunExecutor, Status, PlaybookRun } from './models';
+import { PlaybookRunExecutor, PlaybookRunSystem, Status, PlaybookRun } from './models';
+import { ReceptorMessage } from '.';
+import { PlaybookRunUpdate } from './playbookRunUpdate';
+
+const LT = '<';
+const EQ = '=';
 
 export function updateExecutorByReceptorIds (
     knex: Knex, jobId: string, nodeId: string, expectedStatus: Status, targetStatus: Status
@@ -34,9 +39,52 @@ export function updatePlaybookRun (knex: Knex, id: string, expectedStatuses: Sta
     });
 }
 
+export function updateSystemFull (knex: Knex, executor_id: string, message: ReceptorMessage<PlaybookRunUpdate>) {
+ 
+    return knex(PlaybookRunSystem.TABLE)
+    .where(PlaybookRunSystem.playbook_run_executor_id, executor_id)
+    .whereIn(PlaybookRunSystem.status, [Status.PENDING, Status.RUNNING])
+    .where(PlaybookRunSystem.system_name, message.payload.host)
+    .where(PlaybookRunSystem.sequence, LT, message.payload.sequence)
+    .update({
+        [PlaybookRunSystem.status]: Status.RUNNING,
+        [PlaybookRunSystem.updated_at]: knex.fn.now(),
+        [PlaybookRunSystem.sequence]: message.payload.sequence,
+        [PlaybookRunSystem.console]: message.payload.console
+    });
+}
+
+export function updateSystemMissing (knex: Knex, executor_id: string, message: ReceptorMessage<PlaybookRunUpdate>, data: string, missingLogs: string) {
+    return knex(PlaybookRunSystem.TABLE)
+    .where(PlaybookRunSystem.playbook_run_executor_id, executor_id)
+    .whereIn(PlaybookRunSystem.status, [Status.PENDING, Status.RUNNING])
+    .where(PlaybookRunSystem.system_name, message.payload.host)
+    .where(PlaybookRunSystem.sequence, LT, message.payload.sequence)
+    .update({
+        [PlaybookRunSystem.status]: Status.RUNNING,
+        [PlaybookRunSystem.updated_at]: knex.fn.now(),
+        [PlaybookRunSystem.sequence]: message.payload.sequence,
+        [PlaybookRunSystem.console]: knex.raw('?? || ?', [PlaybookRunSystem.console, (data = missingLogs + data)])
+    });
+}
+
+export function updateSystemDiff (knex: Knex, executor_id: string, message: ReceptorMessage<PlaybookRunUpdate>, data: string) {
+    return knex(PlaybookRunSystem.TABLE)
+    .where(PlaybookRunSystem.playbook_run_executor_id, executor_id)
+    .whereIn(PlaybookRunSystem.status, [Status.PENDING, Status.RUNNING])
+    .where(PlaybookRunSystem.system_name, message.payload.host)
+    .where(PlaybookRunSystem.sequence, EQ, message.payload.sequence - 1)
+    .update({
+        [PlaybookRunSystem.status]: Status.RUNNING,
+        [PlaybookRunSystem.updated_at]: knex.fn.now(),
+        [PlaybookRunSystem.sequence]: message.payload.sequence,
+        [PlaybookRunSystem.console]: knex.raw('?? || ?', [PlaybookRunSystem.console, data])
+    });
+}
+
 export function findExecutorByReceptorIds (knex: Knex, jobId: string, nodeId: string) {
     return knex(PlaybookRunExecutor.TABLE)
-    .select([PlaybookRunExecutor.id, PlaybookRunExecutor.playbook_run_id, PlaybookRunExecutor.status])
+    .select([PlaybookRunExecutor.id, PlaybookRunExecutor.playbook_run_id, PlaybookRunExecutor.status, PlaybookRunExecutor.text_update_full])
     .where(PlaybookRunExecutor.receptor_job_id, jobId)
     .where(PlaybookRunExecutor.receptor_node_id, nodeId)
     .first();

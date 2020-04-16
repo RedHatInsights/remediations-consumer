@@ -161,7 +161,7 @@ describe('receptor handler integration tests', function () {
         }
 
         [Status.PENDING, Status.ACKED].forEach(status =>
-            test(`updates records (${status})`, async () => {
+            test(`updates records FULL (${status})`, async () => {
                 const data = await insertPlaybookRun(run => {
                     run.executors[0].status = status;
                 });
@@ -181,8 +181,30 @@ describe('receptor handler integration tests', function () {
             })
         );
 
+        [Status.PENDING, Status.ACKED].forEach(status =>
+            test(`updates records DIFF (${status})`, async () => {
+                const data = await insertPlaybookRun(run => {
+                    run.executors[0].status = status;
+                    run.executors[0].text_update_full = false;
+                });
+                const e = data.executors[0];
+                const s = e.systems[0];
+
+                const log = 'test01append';
+                const payload = createUpdatePayload(data.id, s.system_name, 1, log);
+
+                const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
+                await onMessage(msg);
+
+                assertNoErrors();
+                await assertRun(data.id, Status.RUNNING);
+                await assertExecutor(e.id, Status.RUNNING);
+                await assertSystem(s.id, Status.RUNNING, 1, log);
+            })
+        );
+
         [Status.SUCCESS, Status.FAILURE, Status.CANCELED].forEach(status =>
-            test(`does not update records in final state (${status})`, async () => {
+            test(`does not update records in final state FULL (${status})`, async () => {
                 const data = await insertPlaybookRun(run => {
                     run.status = status;
                     run.executors[0].status = status;
@@ -204,37 +226,117 @@ describe('receptor handler integration tests', function () {
             })
         );
 
-        test('multiple messages', async () => {
+        [Status.SUCCESS, Status.FAILURE, Status.CANCELED].forEach(status =>
+            test(`does not update records in final state DIFF (${status})`, async () => {
+                const data = await insertPlaybookRun(run => {
+                    run.status = status;
+                    run.executors[0].status = status;
+                    run.executors[0].text_update_full = false;
+                    run.executors[0].systems[0].status = status;
+                });
+
+                const e = data.executors[0];
+                const s = e.systems[0];
+                const log = 'test02append';
+                const payload = createUpdatePayload(data.id, s.system_name, 1, log);
+
+                const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
+                await onMessage(msg);
+
+                assertNoErrors();
+                await assertRun(data.id, status);
+                await assertExecutor(e.id, status);
+                await assertSystem(s.id, status);
+            })
+        );
+
+        test('multiple messages FULL', async () => {
             const data = await insertPlaybookRun();
             const e = data.executors[0];
             const s = e.systems[0];
 
-            const payload1 = createUpdatePayload(data.id, s.system_name, 2, '1234');
-            const payload2 = createUpdatePayload(data.id, s.system_name, 3, '12345678');
+            const payload1 = createUpdatePayload(data.id, s.system_name, 1, '1234');
+            const payload2 = createUpdatePayload(data.id, s.system_name, 2, '12345678');
 
             await onMessage(createKafkaMessage(responseEnvelope(payload1, e.receptor_job_id, e.receptor_node_id)));
             await onMessage(createKafkaMessage(responseEnvelope(payload2, e.receptor_job_id, e.receptor_node_id)));
 
             assertNoErrors();
-            await assertSystem(s.id, Status.RUNNING, 3, '12345678');
+            await assertSystem(s.id, Status.RUNNING, 2, '12345678');
         });
 
-        test('out-of-order message does not override more recent update', async () => {
+        test('multiple messages DIFF', async () => {
+            getSandbox
+            const data = await insertPlaybookRun(run => {
+                run.executors[0].text_update_full = false;
+            });
+            const e = data.executors[0];
+            const s = e.systems[0];
+
+            const payload1 = createUpdatePayload(data.id, s.system_name, 1, '1234');
+            const payload2 = createUpdatePayload(data.id, s.system_name, 2, '5678');
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload1, e.receptor_job_id, e.receptor_node_id)));
+            await onMessage(createKafkaMessage(responseEnvelope(payload2, e.receptor_job_id, e.receptor_node_id)));
+
+            assertNoErrors();
+            await assertSystem(s.id, Status.RUNNING, 2, '12345678'); // change this later
+        });
+
+        test('out-of-order message does not override more recent update FULL', async () => {
             const data = await insertPlaybookRun();
             const e = data.executors[0];
             const s = e.systems[0];
 
-            const payload1 = createUpdatePayload(data.id, s.system_name, 2, '1234');
-            const payload2 = createUpdatePayload(data.id, s.system_name, 3, '12345678');
+            const payload1 = createUpdatePayload(data.id, s.system_name, 1, '1234');
+            const payload2 = createUpdatePayload(data.id, s.system_name, 2, '12345678');
 
             await onMessage(createKafkaMessage(responseEnvelope(payload2, e.receptor_job_id, e.receptor_node_id)));
             await onMessage(createKafkaMessage(responseEnvelope(payload1, e.receptor_job_id, e.receptor_node_id)));
 
             assertNoErrors();
-            await assertSystem(s.id, Status.RUNNING, 3, '12345678');
+            await assertSystem(s.id, Status.RUNNING, 2, '12345678');
         });
 
-        test('does not update anything (receptor_node_id mismatch)', async () => {
+        test('out-of-order message does not override more recent update DIFF', async () => {
+            const lostMessage = getSandbox().spy(probes, 'lostUpdateMessage');
+            const data = await insertPlaybookRun(run => {
+                run.executors[0].text_update_full = false;
+            });
+            const e = data.executors[0];
+            const s = e.systems[0];
+
+            const payload1 = createUpdatePayload(data.id, s.system_name, 1, '1234');
+            const payload2 = createUpdatePayload(data.id, s.system_name, 2, '12345678');
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload2, e.receptor_job_id, e.receptor_node_id)));
+            await onMessage(createKafkaMessage(responseEnvelope(payload1, e.receptor_job_id, e.receptor_node_id)));
+
+            assertNoErrors();
+            await assertSystem(s.id, Status.RUNNING, 2, '\n\u2026\n12345678');
+            lostMessage.callCount.should.eql(1);
+        });
+        
+        test('Missing messages are logged in console DIFF', async () => {
+            const lostMessage = getSandbox().spy(probes, 'lostUpdateMessage');
+            const data = await insertPlaybookRun(run => {
+                run.executors[0].text_update_full = false;
+            });
+            const e = data.executors[0];
+            const s = e.systems[0];
+
+            const payload1 = createUpdatePayload(data.id, s.system_name, 1, '1234');
+            const payload2 = createUpdatePayload(data.id, s.system_name, 3, '5678');
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload1, e.receptor_job_id, e.receptor_node_id)));
+            await onMessage(createKafkaMessage(responseEnvelope(payload2, e.receptor_job_id, e.receptor_node_id)));
+
+            assertNoErrors();
+            await assertSystem(s.id, Status.RUNNING, 3, '1234\n\u2026\n5678');
+            lostMessage.callCount.should.eql(1);
+        });
+
+        test('does not update anything (receptor_node_id mismatch) FULL', async () => {
             const data = await insertPlaybookRun();
             const e = data.executors[0];
             const s = e.systems[0];
@@ -248,7 +350,23 @@ describe('receptor handler integration tests', function () {
             await assertSystem(s.id);
         });
 
-        test('does not update anything (receptor_job_id mismatch)', async () => {
+        test('does not update anything (receptor_node_id mismatch) DIFF', async () => {
+            const data = await insertPlaybookRun(run => {
+                run.executors[0].text_update_full = false;
+            });
+            const e = data.executors[0];
+            const s = e.systems[0];
+
+            const payload = createUpdatePayload(data.id, s.system_name, 2, 'nope');
+            await onMessage(createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, 'fifi')));
+
+            assertNoErrors();
+            await assertRun(data.id);
+            await assertExecutor(e.id);
+            await assertSystem(s.id);
+        });
+
+        test('does not update anything (receptor_job_id mismatch) FULL', async () => {
             const data = await insertPlaybookRun();
             const e = data.executors[0];
             const s = e.systems[0];
@@ -262,8 +380,38 @@ describe('receptor handler integration tests', function () {
             await assertSystem(s.id);
         });
 
-        test('does not update system (system_name mismatch)', async () => {
+        test('does not update anything (receptor_job_id mismatch) DIFF', async () => {
+            const data = await insertPlaybookRun(run => {
+                run.executors[0].text_update_full = false;
+            });
+            const e = data.executors[0];
+            const s = e.systems[0];
+
+            const payload = createUpdatePayload(data.id, s.system_name, 2, 'nope');
+            await onMessage(createKafkaMessage(responseEnvelope(payload, 'e333fc77-b7d3-4404-a224-abee2903af70', e.receptor_node_id)));
+
+            assertNoErrors();
+            await assertRun(data.id);
+            await assertExecutor(e.id);
+            await assertSystem(s.id);
+        });
+
+        test('does not update system (system_name mismatch) FULL', async () => {
             const data = await insertPlaybookRun();
+            const e = data.executors[0];
+            const s = e.systems[0];
+
+            const payload = createUpdatePayload(data.id, 'foo.example.com', 2, 'nope');
+            await onMessage(createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id)));
+
+            assertNoErrors();
+            await assertSystem(s.id);
+        });
+
+        test('does not update system (system_name mismatch) DIFF', async () => {
+            const data = await insertPlaybookRun(run => {
+                run.executors[0].text_update_full = false;
+            });
             const e = data.executors[0];
             const s = e.systems[0];
 
