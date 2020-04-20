@@ -2,7 +2,10 @@ import log from '../util/log';
 import * as Knex from 'knex';
 
 interface DbConfig {
-    connection: Record<'user' | 'password' | 'database'| 'host', string> & Record<'ssl', Record<'ca', string | undefined>>;
+    connection:
+        Record<'user' | 'password' | 'database'| 'host', string> &
+        Record<'port', number> &
+        Record<'ssl', Record<'ca', string | undefined>>;
     ssl: Record<'enabled', boolean>;
     pool: Record<'min' | 'max', number>;
 }

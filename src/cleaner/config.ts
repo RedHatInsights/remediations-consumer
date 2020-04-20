@@ -96,6 +96,11 @@ const config = convict({
                 default: '127.0.0.1',
                 env: 'DB_HOST'
             },
+            port: {
+                format: 'port',
+                default: 5432,
+                env: 'DB_PORT'
+            },
             ssl: {
                 ca: {
                     format: 'file',
