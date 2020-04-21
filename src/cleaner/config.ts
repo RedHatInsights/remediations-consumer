@@ -147,7 +147,7 @@ const config = convict({
     cleaner: {
         timeoutSystems: {
             format: 'nat',
-            default: 3 * 60,
+            default: 1 * 60,
             env: 'CLEANER_TIMEOUT_SYSTEMS'
         },
         timeoutExecutors: {
