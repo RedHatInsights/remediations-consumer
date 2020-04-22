@@ -4,7 +4,6 @@ import { ReceptorMessage } from '.';
 import { PlaybookRunUpdate } from './playbookRunUpdate';
 
 const LT = '<';
-const EQ = '=';
 
 export function updateExecutorByReceptorIds (
     knex: Knex, jobId: string, nodeId: string, expectedStatus: Status, targetStatus: Status
@@ -40,7 +39,7 @@ export function updatePlaybookRun (knex: Knex, id: string, expectedStatuses: Sta
 }
 
 export function updateSystemFull (knex: Knex, executor_id: string, message: ReceptorMessage<PlaybookRunUpdate>) {
- 
+
     return knex(PlaybookRunSystem.TABLE)
     .where(PlaybookRunSystem.playbook_run_executor_id, executor_id)
     .whereIn(PlaybookRunSystem.status, [Status.PENDING, Status.RUNNING])
@@ -54,7 +53,7 @@ export function updateSystemFull (knex: Knex, executor_id: string, message: Rece
     });
 }
 
-export function updateSystemMissing (knex: Knex, executor_id: string, message: ReceptorMessage<PlaybookRunUpdate>, data: string, missingLogs: string) {
+export function updateSystemMissing (knex: Knex, executor_id: string, message: ReceptorMessage<PlaybookRunUpdate>, missingLogs: string) {
     return knex(PlaybookRunSystem.TABLE)
     .where(PlaybookRunSystem.playbook_run_executor_id, executor_id)
     .whereIn(PlaybookRunSystem.status, [Status.PENDING, Status.RUNNING])
@@ -64,21 +63,24 @@ export function updateSystemMissing (knex: Knex, executor_id: string, message: R
         [PlaybookRunSystem.status]: Status.RUNNING,
         [PlaybookRunSystem.updated_at]: knex.fn.now(),
         [PlaybookRunSystem.sequence]: message.payload.sequence,
-        [PlaybookRunSystem.console]: knex.raw('?? || ?', [PlaybookRunSystem.console, (data = missingLogs + data)])
+        [PlaybookRunSystem.console]: knex.raw(
+            `"console" || REPEAT(?, (? - "sequence" - 1)) || ?`,
+            [missingLogs, message.payload.sequence, message.payload.console]
+        )
     });
 }
 
-export function updateSystemDiff (knex: Knex, executor_id: string, message: ReceptorMessage<PlaybookRunUpdate>, data: string) {
+export function updateSystemDiff (knex: Knex, executor_id: string, message: ReceptorMessage<PlaybookRunUpdate>) {
     return knex(PlaybookRunSystem.TABLE)
     .where(PlaybookRunSystem.playbook_run_executor_id, executor_id)
     .whereIn(PlaybookRunSystem.status, [Status.PENDING, Status.RUNNING])
     .where(PlaybookRunSystem.system_name, message.payload.host)
-    .where(PlaybookRunSystem.sequence, EQ, message.payload.sequence - 1)
+    .where(PlaybookRunSystem.sequence, message.payload.sequence - 1)
     .update({
         [PlaybookRunSystem.status]: Status.RUNNING,
         [PlaybookRunSystem.updated_at]: knex.fn.now(),
         [PlaybookRunSystem.sequence]: message.payload.sequence,
-        [PlaybookRunSystem.console]: knex.raw('?? || ?', [PlaybookRunSystem.console, data])
+        [PlaybookRunSystem.console]: knex.raw('"console" || ?', [message.payload.console])
     });
 }
 

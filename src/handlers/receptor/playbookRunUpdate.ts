@@ -42,10 +42,10 @@ export async function handle (message: ReceptorMessage<PlaybookRunUpdate>) {
         await updateSystemFull(knex, executor.id, message);
     } else {
         // Diff mode
-        const firstAttempt = await updateSystemDiff(knex, executor.id, message, message.payload.console);
-        
+        const firstAttempt = await updateSystemDiff(knex, executor.id, message);
+
         if (firstAttempt !== 1) {
-            const secondAttempt = await updateSystemMissing(knex, executor.id, message, message.payload.console, MISSING_LOGS);
+            const secondAttempt = await updateSystemMissing(knex, executor.id, message, MISSING_LOGS);
 
             if (secondAttempt === 1) {
                 probes.lostUpdateMessage(message);

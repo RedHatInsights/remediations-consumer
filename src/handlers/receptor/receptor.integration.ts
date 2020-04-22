@@ -266,7 +266,6 @@ describe('receptor handler integration tests', function () {
         });
 
         test('multiple messages DIFF', async () => {
-            getSandbox
             const data = await insertPlaybookRun(run => {
                 run.executors[0].text_update_full = false;
             });
@@ -316,7 +315,26 @@ describe('receptor handler integration tests', function () {
             await assertSystem(s.id, Status.RUNNING, 2, '\n\u2026\n12345678');
             lostMessage.callCount.should.eql(1);
         });
-        
+
+        test('multiple missing messages DIFF', async () => {
+            const lostMessage = getSandbox().spy(probes, 'lostUpdateMessage');
+            const data = await insertPlaybookRun(run => {
+                run.executors[0].text_update_full = false;
+            });
+            const e = data.executors[0];
+            const s = e.systems[0];
+
+            const payload1 = createUpdatePayload(data.id, s.system_name, 1, '1');
+            const payload2 = createUpdatePayload(data.id, s.system_name, 8, '8');
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload1, e.receptor_job_id, e.receptor_node_id)));
+            await onMessage(createKafkaMessage(responseEnvelope(payload2, e.receptor_job_id, e.receptor_node_id)));
+
+            assertNoErrors();
+            await assertSystem(s.id, Status.RUNNING, 8, '1\n\u2026\n\n\u2026\n\n\u2026\n\n\u2026\n\n\u2026\n\n\u2026\n8');
+            lostMessage.callCount.should.eql(1);
+        });
+
         test('Missing messages are logged in console DIFF', async () => {
             const lostMessage = getSandbox().spy(probes, 'lostUpdateMessage');
             const data = await insertPlaybookRun(run => {
