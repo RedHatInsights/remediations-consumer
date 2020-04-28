@@ -16,7 +16,7 @@ export const schema = Joi.object().keys({
 });
 
 export async function handle (message: ReceptorMessage<PlaybookRunAck>) {
-    log.info({message}, 'received playbook_run_ack');
+    log.debug({message}, 'received playbook_run_ack');
 
     const knex = db.get();
 
