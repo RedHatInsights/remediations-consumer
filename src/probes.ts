@@ -80,7 +80,7 @@ export function noExecutorFound (responseType: string, criteria: Record<string, 
 }
 
 export function receptorPlaybookRunCancelAck (message: ReceptorMessage<PlaybookRunCancelAck>) {
-    log.info({message}, 'received playbook_run_cancel_ack');
+    log.debug({message}, 'received playbook_run_cancel_ack');
     counters.receptorCancelAck.labels(message.payload.status).inc();
 }
 

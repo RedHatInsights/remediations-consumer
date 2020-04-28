@@ -42,7 +42,7 @@ function tryUpdateRun (knex: Knex, id: string) {
 }
 
 export async function handle (message: ReceptorMessage<PlaybookRunFinished>) {
-    log.info({message}, 'received playbook_run_finished');
+    log.debug({message}, 'received playbook_run_finished');
 
     const knex = db.get();
 
