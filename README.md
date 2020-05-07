@@ -49,5 +49,12 @@ In addition to the consumer itself this repository also hosts [a script](./src/c
   * `canceled` if any of the executors was canceled
   * `success` otherwise
 
+## Releases
+
+Upon any change in the master branch the branch is tested, an image is built and deployed in CI and QA environments automatically.
+This process is controlled by the [deployment Jenkinsfile](./deployment/Jenkinsfile).
+
+The image can then be promoted to production using a [Jenkins job](https://jenkins-insights-jenkins.1b13.insights.openshiftapps.com/job/remediations/job/remediations-consumer-release/). Use the git commit SHA as the REVISION when running the job.
+
 ## Contact
-For questions or comments join **#insights-remediations** at ansible.slack.com or contact [Jozef Hartinger](https://github.com/jharting) directly.
+For questions or comments join **#platform-automation-standup** at ansible.slack.com.
