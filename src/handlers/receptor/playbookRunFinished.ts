@@ -4,7 +4,7 @@ import * as db from '../../db';
 import {SatReceptorResponse, ReceptorMessage} from '.';
 import * as Joi from '@hapi/joi';
 import * as probes from '../../probes';
-import { PlaybookRunExecutor, PlaybookRunSystem, Status, PlaybookRun } from './models';
+import { PlaybookRunExecutor, PlaybookRunSystem, Status, PlaybookRun } from '../models';
 import * as Knex from 'knex';
 import { findExecutorByReceptorIds } from './queries';
 import {

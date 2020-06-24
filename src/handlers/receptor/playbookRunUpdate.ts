@@ -4,7 +4,7 @@ import {SatReceptorResponse, ReceptorMessage} from '.';
 import * as Joi from '@hapi/joi';
 import * as db from '../../db';
 import * as probes from '../../probes';
-import { Status } from './models';
+import { Status } from '../models';
 import {updateExecutorById, updatePlaybookRun, findExecutorByReceptorIds, updateSystemFull, updateSystemDiff, updateSystemMissing} from './queries';
 
 const ACTIONABLE_STATUSES = [Status.PENDING, Status.ACKED];

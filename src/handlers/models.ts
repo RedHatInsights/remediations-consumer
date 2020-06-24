@@ -7,6 +7,21 @@ export enum Status {
     CANCELED = 'canceled'
 }
 
+export enum RemediationIssues {
+    TABLE = 'remediation_issues',
+    id = 'id',
+    issue_id = 'issue_id',
+    remediation_id = 'remediation_id',
+    resolution = 'resolution'
+}
+
+export enum RemediationIssueSystems {
+    TABLE = 'remediation_issue_systems',
+    remediation_issue_id = 'remediation_issue_id',
+    system_id = 'system_id',
+    resolved = 'resolved'
+}
+
 export enum PlaybookRun {
     TABLE = 'playbook_runs',
     id = 'id',

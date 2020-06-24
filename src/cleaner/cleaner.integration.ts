@@ -2,7 +2,7 @@ import '../../test';
 import { insertPlaybookRun, assertSystem, assertExecutor, assertRun } from '../../test/playbookRuns';
 import { cancelSystems, cancelExecutors, cancelRuns } from './queries';
 import * as db from '../db';
-import { Status } from '../handlers/receptor/models';
+import { Status } from '../handlers/models';
 
 describe('sat-receptor cleaner script', function () {
     describe('cancelSystems', function () {

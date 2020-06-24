@@ -1,10 +1,10 @@
-import * as db from '../db';
-import log from '../util/log';
+import * as db from '../../db';
+import log from '../../util/log';
 import * as Joi from '@hapi/joi';
-import * as probes from '../probes';
+import * as probes from '../../probes';
 import { Message } from 'kafka-node';
-import config from '../config';
-import { validate, parse } from './common';
+import config from '../../config';
+import { validate, parse } from '../common';
 
 interface RemoveMessage {
     id: string;

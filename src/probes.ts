@@ -21,11 +21,20 @@ const counters = {
     executorNotFound: createCounter(
         'receptor_executor_not_found', 'Total number of cases when an executor is not found in a query', 'result'),
     receptorCancelAck: createCounter('receptor_cancel_ack_total', 'Total number of playbook_run_cancel_ack messages', 'status'),
-    lostMessage: createCounter('lost_messages_total', 'Total number of updates lost when in DIFF mode')
+    lostMessage: createCounter('lost_messages_total', 'Total number of updates lost when in DIFF mode'),
+    advisor: createCounter('advisor_total', 'Total number of advisor update messages processed', 'result'),
+    compliance: createCounter('compliance_total', 'Total number of compliance update messages processed', 'result'),
+    patch: createCounter('patch_total', 'Total number of patch update messages processed', 'result'),
+    vulnerability: createCounter(
+        'vulnerability_total', 'Total number of vulnerability update messages processed', 'result')
 };
 
 // https://www.robustperception.io/existential-issues-with-metrics
 ['success', 'unknown', 'error', 'error_parse'].forEach(value => counters.remove.labels(value).inc(0));
+['success', 'unknown', 'error', 'error_parse'].forEach(value => counters.advisor.labels(value).inc(0));
+['success', 'unknown', 'error', 'error_parse'].forEach(value => counters.compliance.labels(value).inc(0));
+['success', 'unknown', 'error', 'error_parse'].forEach(value => counters.patch.labels(value).inc(0));
+['success', 'unknown', 'error', 'error_parse'].forEach(value => counters.vulnerability.labels(value).inc(0));
 ['error', 'error_parse', 'processed'].forEach(value => {
     ['playbook_run_ack', 'playbook_run_update', 'playbook_run_finished', 'playbook_run_cancel_ack', 'unknown'].forEach(type => {
         counters.receptor.labels(value, type).inc(0);
@@ -88,3 +97,83 @@ export function lostUpdateMessage (message: ReceptorMessage<PlaybookRunUpdate>) 
     log.warn({message}, 'lost update message before given message in sequence');
     counters.lostMessage.inc()
 }
+
+export function advisorUpdateSuccess (host_id: string, issue_id: string, references: number) {
+    log.info({ host_id, issue_id, references }, 'advisor issue updated');
+    counters.advisor.labels('success').inc();
+};
+
+export function advisorUpdateUnknown (host_id: string, issue_id: string) {
+    log.debug({ host_id, issue_id }, 'host_id or issue_id not known');
+    counters.advisor.labels('unknown').inc();
+};
+
+export function advisorUpdateError (host_id: string, issue_id: string, err: Error) {
+    log.error({ host_id, issue_id, err }, 'error updating advisor issue');
+    counters.advisor.labels('error').inc();
+};
+
+export function advisorUpdateErrorParse (message: Message, err: Error) {
+    log.error({ message, err }, 'error parsing advisor message');
+    counters.compliance.labels('error_parse').inc();
+};
+
+export function complianceUpdateSuccess (host_id: string, issue_id: string, references: number) {
+    log.info({ host_id, issue_id, references }, 'compliance issue updated');
+    counters.compliance.labels('success').inc();
+};
+
+export function complianceUpdateUnknown (host_id: string, issue_id: string) {
+    log.debug({ host_id, issue_id }, 'host_id or issue_id not known');
+    counters.compliance.labels('unknown').inc();
+};
+
+export function complianceUpdateError (host_id: string, issue_id: string, err: Error) {
+    log.error({ host_id, issue_id, err }, 'error updating compliance issue');
+    counters.compliance.labels('error').inc();
+};
+
+export function complianceUpdateErrorParse (message: Message, err: Error) {
+    log.error({ message, err }, 'error parsing compliance message');
+    counters.compliance.labels('error_parse').inc();
+};
+
+export function patchUpdateSuccess (host_id: string, issue_id: string, references: number) {
+    log.info({ host_id, issue_id, references }, 'patch issue updated');
+    counters.patch.labels('success').inc();
+};
+
+export function patchUpdateUnknown (host_id: string, issue_id: string) {
+    log.debug({ host_id, issue_id }, 'host_id or issue_id not known');
+    counters.patch.labels('unknown').inc();
+};
+
+export function patchUpdateError (host_id: string, issue_id: string, err: Error) {
+    log.error({ host_id, issue_id, err }, 'error updating patch issue');
+    counters.patch.labels('error').inc();
+};
+
+export function patchUpdateErrorParse (message: Message, err: Error) {
+    log.error({ message, err }, 'error parsing patch message');
+    counters.patch.labels('error_parse').inc();
+};
+
+export function vulnerabilityUpdateSuccess (host_id: string, issue_id: string, references: number) {
+    log.info({ host_id, issue_id, references }, 'vulnerability issue updated');
+    counters.vulnerability.labels('success').inc();
+};
+
+export function vulnerabilityUpdateUnknown (host_id: string, issue_id: string) {
+    log.debug({ host_id, issue_id }, 'host_id or issue_id not known');
+    counters.vulnerability.labels('unknown').inc();
+};
+
+export function vulnerabilityUpdateError (host_id: string, issue_id: string, err: Error) {
+    log.error({ host_id, issue_id, err }, 'error updating vulnerability issue');
+    counters.vulnerability.labels('error').inc();
+};
+
+export function vulnerabilityUpdateErrorParse (message: Message, err: Error) {
+    log.error({ message, err }, 'error parsing vulnerability message');
+    counters.vulnerability.labels('error_parse').inc();
+};

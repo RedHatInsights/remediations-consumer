@@ -160,6 +160,30 @@ const config = convict({
             env: 'KAFKA_LOGGING'
         },
         topics: {
+            advisor: {
+                topic: {
+                    format: String,
+                    default: 'platform.remediation-updates.advisor',
+                    env: 'ADVISOR_TOPIC'
+                },
+                resetOffsets: {
+                    format: Boolean,
+                    default: false,
+                    env: 'ADVISOR_RESET_OFFSETS'
+                }
+            },
+            compliance: {
+                topic: {
+                    format: String,
+                    default: 'platform.remediation-updates.compliance',
+                    env: 'COMPLIANCE_TOPIC'
+                },
+                resetOffsets: {
+                    format: Boolean,
+                    default: false,
+                    env: 'COMPLIANCE_RESET_OFFSETS'
+                }
+            },
             inventory: {
                 topic: {
                     format: String,
@@ -172,6 +196,18 @@ const config = convict({
                     env: 'INVENTORY_RESET_OFFSETS'
                 }
             },
+            patch: {
+                topic: {
+                    format: String,
+                    default: 'platform.remediation-updates.patch',
+                    env: 'PATCH_TOPIC'
+                },
+                resetOffsets: {
+                    format: Boolean,
+                    default: false,
+                    env: 'PATCH_RESET_OFFSETS'
+                }
+            },
             receptor: {
                 topic: {
                     format: String,
@@ -182,6 +218,18 @@ const config = convict({
                     format: Boolean,
                     default: false,
                     env: 'RECEPTOR_RESET_OFFSETS'
+                }
+            },
+            vulnerability: {
+                topic: {
+                    format: String,
+                    default: 'platform.remediation-updates.vulnerability',
+                    env: 'VULNERABILITY_TOPIC'
+                },
+                resetOffsets: {
+                    format: Boolean,
+                    default: false,
+                    env: 'VULNERABILITY_RESET_OFFSETS'
                 }
             }
         }

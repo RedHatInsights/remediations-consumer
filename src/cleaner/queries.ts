@@ -1,5 +1,5 @@
 import * as Knex from 'knex';
-import { PlaybookRunSystem, Status } from '../handlers/receptor/models';
+import { PlaybookRunSystem, Status } from '../handlers/models';
 import {
     whereUnfinishedExecutorsWithFinishedSystems,
     updateStatusExecutors,

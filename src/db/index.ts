@@ -1,5 +1,8 @@
 import log from '../util/log';
 import * as Knex from 'knex';
+import { RemediationIssues, RemediationIssueSystems } from '../handlers/models';
+
+const EQ = '=';
 
 interface DbConfig {
     connection:
@@ -62,6 +65,23 @@ export async function deleteSystem (system_id: string, dryRun = false): Promise<
     const sql = query.toSQL().toNative();
     log.debug({ sql }, 'executing database query');
     return query;
+}
+
+export async function findHostIssue (knex: Knex, host_id: string, issue: string) {
+    return knex(RemediationIssues.TABLE)
+    .select(RemediationIssues.id)
+    .join(RemediationIssueSystems.TABLE, RemediationIssueSystems.remediation_issue_id, RemediationIssues.id)
+    .where(RemediationIssueSystems.system_id, EQ, host_id)
+    .where(RemediationIssues.issue_id, EQ, issue);
+}
+
+export async function updateIssue (knex: Knex, host_id: string, id: number) {
+    return knex(RemediationIssueSystems.TABLE)
+    .where(RemediationIssueSystems.remediation_issue_id, EQ, id)
+    .where(RemediationIssueSystems.system_id, EQ, host_id)
+    .update({
+        [RemediationIssueSystems.resolved]: knex.raw(`NOT "resolved"`)
+    });
 }
 
 export function stop () {

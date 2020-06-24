@@ -38,7 +38,14 @@ const consumer = P.promisifyAll(new kafka.ConsumerGroupStream({
     autoCommitIntervalMs: 5000,
     protocol: ['roundrobin'],
     highWaterMark: 5
-}, [config.kafka.topics.inventory.topic, config.kafka.topics.receptor.topic]));
+}, [
+    config.kafka.topics.advisor.topic,
+    config.kafka.topics.compliance.topic,
+    config.kafka.topics.inventory.topic,
+    config.kafka.topics.patch.topic,
+    config.kafka.topics.receptor.topic,
+    config.kafka.topics.vulnerability.topic
+]));
 
 async function resetOffsets (topic: string) {
     log.info({ topic }, 'reseting offsets for topic');
