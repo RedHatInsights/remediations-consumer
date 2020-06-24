@@ -3,7 +3,7 @@
 import onMessage, { SatReceptorResponse, ReceptorMessage } from '.';
 import {getSandbox} from '../../../test';
 import * as probes from '../../probes';
-import { Status } from './models';
+import { Status } from '../models';
 import { insertPlaybookRun, assertRun, assertExecutor, assertSystem } from '../../../test/playbookRuns';
 
 describe('receptor handler integration tests', function () {

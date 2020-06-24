@@ -29,6 +29,34 @@ const messages = [
             in_response_to: '65c0ba21-1015-4e7d-a6d6-4b530cbfb5bd',
             serial: 2
         })
+    },
+    {
+        topic: 'platform.remediation-updates.advisor',
+        messages: JSON.stringify({
+            host_id: 'a910d22d-ff4b-4178-9eec-2f04424983ff',
+            issues: ['advisor:CVE_2017_6074_kernel|KERNEL_CVE_2017_6074', 'advisor:CVE_2017_6074_kernel|KERNEL_CVE_2018_6075']
+        })
+    },
+    {
+        topic: 'platform.remediation-updates.compliance',
+        messages: JSON.stringify({
+            host_id: 'a910d22d-ff4b-4178-9eec-2f04424983ff',
+            issues: ['ssg:rhel7|standard|xccdf_org.ssgproject.content_rule_service_autofs_disabled']
+        })
+    },
+    {
+        topic: 'platform.remediation-updates.patch',
+        messages: JSON.stringify({
+            host_id: 'a910d22d-ff4b-4178-9eec-2f04424983ff',
+            issues: ['patch:CVE_2017_6074_kernel|KERNEL_CVE_2017_6074']
+        })
+    },
+    {
+        topic: 'platform.remediation-updates.vulnerability',
+        messages: JSON.stringify({
+            host_id: 'a910d22d-ff4b-4178-9eec-2f04424983ff',
+            issues: ['vulnerabilities:RHSA-2018:0502', 'vulnerabilities:CVE-2017-5715']
+        })
     }
 ];
 

@@ -1,8 +1,8 @@
 /* eslint-disable max-len */
 
-import { getSandbox } from '../../test';
-import handler from './inventory';
-import * as probes from '../probes';
+import { getSandbox } from '../../../test';
+import handler from '.';
+import * as probes from '../../probes';
 
 describe('inventory handler unit tests', function () {
     let inventoryRemoveErrorParse: any = null;

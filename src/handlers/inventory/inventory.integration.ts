@@ -1,10 +1,10 @@
 /* eslint-disable max-len */
 
-import { getSandbox } from '../../test';
-import handler from './inventory';
-import * as db from '../db';
-import * as probes from '../probes';
-import config from '../config';
+import { getSandbox } from '../../../test';
+import handler from '.';
+import * as db from '../../db';
+import * as probes from '../../probes';
+import config from '../../config';
 
 describe('inventory handler integration tests', function () {
     test('removes system references', async () => {
