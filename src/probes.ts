@@ -109,7 +109,7 @@ export function advisorUpdateUnknown (host_id: string, issue_id: string) {
 };
 
 export function advisorUpdateError (host_id: string, issue_id: string, err: Error) {
-    log.error({ host_id, issue_id, err }, 'error updating advisor issue');
+    log.debug({ host_id, issue_id, err }, 'error updating advisor issue');
     counters.advisor.labels('error').inc();
 };
 
