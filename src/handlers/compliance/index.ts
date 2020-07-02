@@ -38,19 +38,32 @@ export default async function onMessage (message: Message) {
     }
 
     const { host_id, issues } = parsed;
+    try {
+        const pastIssues = await db.findHostIssues(knex, host_id);
 
-    for (const issue of issues) {
-        try {
-            const searchResult = await db.findHostIssue(knex, host_id, issue);
-
-            if (searchResult.length > 0) {
-                const updateResult = await db.updateIssue(knex, host_id, searchResult[0].id);
-                probes.complianceUpdateSuccess(host_id, issue, updateResult);
-            } else {
-                probes.complianceUpdateUnknown(host_id, issue);
-            }
-        } catch (e) {
-            probes.complianceUpdateError(host_id, issue, e);
+        if (_.isEmpty(pastIssues)) {
+            probes.complianceHostUnknown(host_id);
+            return;
         }
+
+        for (const issue of pastIssues) {
+            if (_.find(issues, update => update === issue.issue_id)) {
+                const result = await db.updateToUnresolved(knex, host_id, issue.issue_id);
+
+                if (!_.isEmpty(result)) {
+                    probes.complianceIssueUnknown(host_id, issue.issue_id);
+                }
+                probes.complianceUpdateSuccess(host_id, issue.issue_id, result.length);
+            } else {
+                const result = await db.updateToResolved(knex, host_id, issue.issue_id);
+                
+                if (!_.isEmpty(result)) {
+                    probes.complianceIssueUnknown(host_id, issue.issue_id);
+                }
+                probes.complianceUpdateSuccess(host_id, issue.issue_id, result.length);
+            }
+        }
+    } catch (e) {
+        probes.complianceUpdateError(host_id, issues, e);
     }
 }

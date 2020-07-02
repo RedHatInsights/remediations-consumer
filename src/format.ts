@@ -15,6 +15,22 @@ export function formatTopicDetails(): TopicConfig[] {
         topic: config.kafka.topics.receptor.topic,
         handler: receptorHandler,
         resetOffsets: config.kafka.topics.receptor.resetOffsets
+    }, {
+        topic: config.kafka.topics.advisor.topic,
+        handler: advisorHandler,
+        resetOffsets: config.kafka.topics.advisor.resetOffsets
+    }, {
+        topic: config.kafka.topics.compliance.topic,
+        handler: complianceHandler,
+        resetOffsets: config.kafka.topics.compliance.resetOffsets
+    }, {
+        topic: config.kafka.topics.patch.topic,
+        handler: patchHandler,
+        resetOffsets: config.kafka.topics.patch.resetOffsets
+    }, {
+        topic: config.kafka.topics.vulnerability.topic,
+        handler: vulnerabilityHandler,
+        resetOffsets: config.kafka.topics.vulnerability.resetOffsets
     }];
 }
 

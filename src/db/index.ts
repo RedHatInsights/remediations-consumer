@@ -3,6 +3,8 @@ import * as Knex from 'knex';
 import { RemediationIssues, RemediationIssueSystems } from '../handlers/models';
 
 const EQ = '=';
+const UNRESOLVED = 'false';
+const RESOLVED = 'true';
 
 interface DbConfig {
     connection:
@@ -67,21 +69,33 @@ export async function deleteSystem (system_id: string, dryRun = false): Promise<
     return query;
 }
 
-export async function findHostIssue (knex: Knex, host_id: string, issue: string) {
+export async function findHostIssues (knex: Knex, host_id: string) {
     return knex(RemediationIssues.TABLE)
-    .select(RemediationIssues.id)
+    .select(RemediationIssues.issue_id)
     .join(RemediationIssueSystems.TABLE, RemediationIssueSystems.remediation_issue_id, RemediationIssues.id)
-    .where(RemediationIssueSystems.system_id, EQ, host_id)
-    .where(RemediationIssues.issue_id, EQ, issue);
+    .where(RemediationIssueSystems.system_id, EQ, host_id);
 }
 
-export async function updateIssue (knex: Knex, host_id: string, id: number) {
-    return knex(RemediationIssueSystems.TABLE)
-    .where(RemediationIssueSystems.remediation_issue_id, EQ, id)
-    .where(RemediationIssueSystems.system_id, EQ, host_id)
-    .update({
-        [RemediationIssueSystems.resolved]: knex.raw(`NOT "resolved"`)
-    });
+function createUpdateQuery (host_id: string, issue_id: string, update: string) {
+    const updateQuery = `UPDATE remediation_issue_systems SET resolved = ${update} ` +
+    `FROM remediation_issues ` +
+    `WHERE remediation_issues.id = remediation_issue_systems.remediation_issue_id ` +
+    `AND issue_id = '${issue_id}' ` +
+    `AND remediation_issue_systems.system_id = '${host_id}'`;
+
+    return updateQuery;
+}
+
+export async function updateToUnresolved (knex: Knex, host_id: string, issue_id: string) {
+    const QUERY = createUpdateQuery(host_id, issue_id, UNRESOLVED);
+
+    return knex.raw(QUERY);
+}
+
+export async function updateToResolved (knex: Knex, host_id: string, issue_id: string) {
+    const QUERY = createUpdateQuery(host_id, issue_id, RESOLVED);
+
+    return knex.raw(QUERY);
 }
 
 export function stop () {

@@ -40,7 +40,11 @@ const consumer = P.promisifyAll(new kafka.ConsumerGroupStream({
     highWaterMark: 5
 }, [
     config.kafka.topics.inventory.topic,
-    config.kafka.topics.receptor.topic
+    config.kafka.topics.receptor.topic,
+    config.kafka.topics.advisor.topic,
+    config.kafka.topics.compliance.topic,
+    config.kafka.topics.patch.topic,
+    config.kafka.topics.vulnerability.topic
 ]));
 
 async function resetOffsets (topic: string) {
@@ -70,7 +74,11 @@ function connect (topicConfig: TopicConfig[]) {
         const offset = P.promisifyAll(consumer.consumerGroup.getOffset());
         const offsets = await offset.fetchLatestOffsetsAsync([
             config.kafka.topics.inventory.topic,
-            config.kafka.topics.receptor.topic
+            config.kafka.topics.receptor.topic,
+            config.kafka.topics.advisor.topic,
+            config.kafka.topics.compliance.topic,
+            config.kafka.topics.patch.topic,
+            config.kafka.topics.vulnerability.topic
         ]);
 
         log.debug(offsets, 'current offsets');
