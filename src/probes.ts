@@ -30,11 +30,11 @@ const counters = {
 };
 
 // https://www.robustperception.io/existential-issues-with-metrics
-['success', 'unknown', 'error', 'error_parse'].forEach(value => counters.remove.labels(value).inc(0));
-['success', 'unknown', 'error', 'error_parse'].forEach(value => counters.advisor.labels(value).inc(0));
-['success', 'unknown', 'error', 'error_parse'].forEach(value => counters.compliance.labels(value).inc(0));
-['success', 'unknown', 'error', 'error_parse'].forEach(value => counters.patch.labels(value).inc(0));
-['success', 'unknown', 'error', 'error_parse'].forEach(value => counters.vulnerability.labels(value).inc(0));
+['success', 'unknown_host', 'unknown_issue', 'error', 'error_parse'].forEach(value => counters.remove.labels(value).inc(0));
+['success', 'unknown_host', 'unknown_issue', 'error', 'error_parse'].forEach(value => counters.advisor.labels(value).inc(0));
+['success', 'unknown_host', 'unknown_issue', 'error', 'error_parse'].forEach(value => counters.compliance.labels(value).inc(0));
+['success', 'unknown_host', 'unknown_issue', 'error', 'error_parse'].forEach(value => counters.patch.labels(value).inc(0));
+['success', 'unknown_host', 'unknown_issue', 'error', 'error_parse'].forEach(value => counters.vulnerability.labels(value).inc(0));
 ['error', 'error_parse', 'processed'].forEach(value => {
     ['playbook_run_ack', 'playbook_run_update', 'playbook_run_finished', 'playbook_run_cancel_ack', 'unknown'].forEach(type => {
         counters.receptor.labels(value, type).inc(0);
@@ -103,13 +103,18 @@ export function advisorUpdateSuccess (host_id: string, issue_id: string, referen
     counters.advisor.labels('success').inc();
 };
 
-export function advisorUpdateUnknown (host_id: string, issue_id: string) {
-    log.debug({ host_id, issue_id }, 'host_id or issue_id not known');
-    counters.advisor.labels('unknown').inc();
+export function advisorHostUnknown (host_id: string) {
+    log.debug({ host_id }, 'advisor host_id not known');
+    counters.advisor.labels('unknown_host').inc();
 };
 
-export function advisorUpdateError (host_id: string, issue_id: string, err: Error) {
-    log.error({ host_id, issue_id, err }, 'error updating advisor issue');
+export function advisorIssueUnknown (host_id: string, issue_id: string) {
+    log.debug({ host_id, issue_id }, 'advisor issue_id not known');
+    counters.advisor.labels('unknown_issue').inc();
+};
+
+export function advisorUpdateError (host_id: string, issues: Array<string>, err: Error) {
+    log.error({ host_id, issues, err }, 'error updating advisor issue');
     counters.advisor.labels('error').inc();
 };
 
@@ -123,13 +128,18 @@ export function complianceUpdateSuccess (host_id: string, issue_id: string, refe
     counters.compliance.labels('success').inc();
 };
 
-export function complianceUpdateUnknown (host_id: string, issue_id: string) {
-    log.debug({ host_id, issue_id }, 'host_id or issue_id not known');
-    counters.compliance.labels('unknown').inc();
+export function complianceHostUnknown (host_id: string) {
+    log.debug({ host_id }, 'compliance host_id not known');
+    counters.compliance.labels('unknown_host').inc();
 };
 
-export function complianceUpdateError (host_id: string, issue_id: string, err: Error) {
-    log.error({ host_id, issue_id, err }, 'error updating compliance issue');
+export function complianceIssueUnknown (host_id: string, issue_id: string) {
+    log.debug({ host_id, issue_id }, 'compliance issue_id not known');
+    counters.compliance.labels('unknown_issue').inc();
+};
+
+export function complianceUpdateError (host_id: string, issues: Array<string>, err: Error) {
+    log.error({ host_id, issues, err }, 'error updating compliance issue');
     counters.compliance.labels('error').inc();
 };
 
@@ -143,13 +153,18 @@ export function patchUpdateSuccess (host_id: string, issue_id: string, reference
     counters.patch.labels('success').inc();
 };
 
-export function patchUpdateUnknown (host_id: string, issue_id: string) {
-    log.debug({ host_id, issue_id }, 'host_id or issue_id not known');
-    counters.patch.labels('unknown').inc();
+export function patchHostUnknown (host_id: string) {
+    log.debug({ host_id }, 'patch host_id not known');
+    counters.patch.labels('unknown_host').inc();
 };
 
-export function patchUpdateError (host_id: string, issue_id: string, err: Error) {
-    log.error({ host_id, issue_id, err }, 'error updating patch issue');
+export function patchIssueUnknown (host_id: string, issue_id: string) {
+    log.debug({ host_id, issue_id }, 'patch issue_id not known');
+    counters.patch.labels('unknown_issue').inc();
+};
+
+export function patchUpdateError (host_id: string, issues: Array<string>, err: Error) {
+    log.error({ host_id, issues, err }, 'error updating patch issue');
     counters.patch.labels('error').inc();
 };
 
@@ -163,13 +178,18 @@ export function vulnerabilityUpdateSuccess (host_id: string, issue_id: string, r
     counters.vulnerability.labels('success').inc();
 };
 
-export function vulnerabilityUpdateUnknown (host_id: string, issue_id: string) {
-    log.debug({ host_id, issue_id }, 'host_id or issue_id not known');
-    counters.vulnerability.labels('unknown').inc();
+export function vulnerabilityHostUnknown (host_id: string) {
+    log.debug({ host_id }, 'vulnerability host_id not known');
+    counters.vulnerability.labels('unknown_host').inc();
 };
 
-export function vulnerabilityUpdateError (host_id: string, issue_id: string, err: Error) {
-    log.error({ host_id, issue_id, err }, 'error updating vulnerability issue');
+export function vulnerabilityIssueUnknown (host_id: string, issue_id: string) {
+    log.debug({ host_id, issue_id }, 'vulnerability issue_id not known');
+    counters.vulnerability.labels('unknown_issue').inc();
+};
+
+export function vulnerabilityUpdateError (host_id: string, issues: Array<string>, err: Error) {
+    log.error({ host_id, issues, err }, 'error updating vulnerability issue');
     counters.vulnerability.labels('error').inc();
 };
 
