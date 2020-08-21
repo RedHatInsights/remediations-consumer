@@ -29,21 +29,20 @@ import * as kafka from 'kafka-node';
 import { TopicConfig } from '../format';
 import * as probes from '../probes';
 
-const consumer = P.promisifyAll(new kafka.ConsumerGroupStream({
-    kafkaHost: config.kafka.host,
-    autoConnect: false,
-    groupId: config.kafka.consumerGroup,
-    fromOffset: 'earliest',
-    autoCommit: config.kafka.autoCommit,
-    autoCommitIntervalMs: 5000,
-    protocol: ['roundrobin'],
-    highWaterMark: 5
-}, [
-    config.kafka.topics.inventory.topic,
-    config.kafka.topics.receptor.topic
-]));
+function configureConsumer (topicConfig: TopicConfig[]) {
+    return P.promisifyAll(new kafka.ConsumerGroupStream({
+        kafkaHost: config.kafka.host,
+        autoConnect: false,
+        groupId: config.kafka.consumerGroup,
+        fromOffset: 'earliest',
+        autoCommit: config.kafka.autoCommit,
+        autoCommitIntervalMs: 5000,
+        protocol: ['roundrobin'],
+        highWaterMark: 5
+    }, topicConfig.map(topic => { return topic.topic; })));
+}
 
-async function resetOffsets (topic: string) {
+async function resetOffsets (topic: string, consumer: kafka.ConsumerGroupStream) {
     log.info({ topic }, 'reseting offsets for topic');
     const offset = P.promisifyAll(consumer.consumerGroup.getOffset());
     const offsets = await offset.fetchEarliestOffsetsAsync([topic]);
@@ -53,6 +52,7 @@ async function resetOffsets (topic: string) {
 }
 
 function connect (topicConfig: TopicConfig[]) {
+    const consumer = configureConsumer(topicConfig);
     const client = consumer.consumerGroup.client;
     consumer.pause();
 
@@ -63,18 +63,18 @@ function connect (topicConfig: TopicConfig[]) {
     consumer.consumerGroup.on('rebalanced', async () => {
         await P.mapSeries(topicConfig, topicConfig => {
             if (topicConfig.resetOffsets) {
-                return resetOffsets(topicConfig.topic);
+                return resetOffsets(topicConfig.topic, consumer);
             }
         });
 
         const offset = P.promisifyAll(consumer.consumerGroup.getOffset());
-        const offsets = await offset.fetchLatestOffsetsAsync([
-            config.kafka.topics.inventory.topic,
-            config.kafka.topics.receptor.topic
-        ]);
+        const offsets = await offset.fetchLatestOffsetsAsync(topicConfig.map(topic => { return topic.topic; }));
 
         log.debug(offsets, 'current offsets');
     });
+
+    const topics = topicConfig.map(topic => { return topic.topic; });
+    log.info('TOPICS ENABLED', topics);
 
     return {
         consumer,
