@@ -5,6 +5,7 @@ import metrics from './metrics';
 import version from './util/version';
 import log from './util/log';
 import * as format from './format';
+import * as _ from 'lodash';
 
 process.on('unhandledRejection', (reason: any) => {
     log.fatal(reason);
@@ -22,7 +23,19 @@ export default async function start () {
 
     const topicDetails = format.formatTopicDetails();
 
-    const { consumer, stop: stopKafka } = await kafka.start(topicDetails);
+    const filteredTopicDetails = _.compact(topicDetails.map(topic => {
+        if (topic.enabled === false) {
+            return;
+        }
+
+        return topic;
+    }));
+
+    if (_.isEmpty(filteredTopicDetails)) {
+        throw 'No topics were provided to the consumer, Spinning down';
+    }
+
+    const { consumer, stop: stopKafka } = await kafka.start(filteredTopicDetails);
 
     async function stop (e: Error | NodeJS.Signals | undefined) {
         consumer.off('error', stop);

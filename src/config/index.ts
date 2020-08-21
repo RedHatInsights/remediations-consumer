@@ -170,6 +170,11 @@ const config = convict({
                     format: Boolean,
                     default: false,
                     env: 'ADVISOR_RESET_OFFSETS'
+                },
+                enabled: {
+                    format: Boolean,
+                    default: false,
+                    env: 'ADVISOR_TOPIC_ENABLED'
                 }
             },
             compliance: {
@@ -182,6 +187,11 @@ const config = convict({
                     format: Boolean,
                     default: false,
                     env: 'COMPLIANCE_RESET_OFFSETS'
+                },
+                enabled: {
+                    format: Boolean,
+                    default: false,
+                    env: 'COMPLIANCE_TOPIC_ENABLED'
                 }
             },
             inventory: {
@@ -194,6 +204,11 @@ const config = convict({
                     format: Boolean,
                     default: false,
                     env: 'INVENTORY_RESET_OFFSETS'
+                },
+                enabled: {
+                    format: Boolean,
+                    default: false,
+                    env: 'INVENTORY_TOPIC_ENABLED'
                 }
             },
             patch: {
@@ -206,6 +221,11 @@ const config = convict({
                     format: Boolean,
                     default: false,
                     env: 'PATCH_RESET_OFFSETS'
+                },
+                enabled: {
+                    format: Boolean,
+                    default: false,
+                    env: 'PATCH_TOPIC_ENABLED'
                 }
             },
             receptor: {
@@ -218,6 +238,11 @@ const config = convict({
                     format: Boolean,
                     default: false,
                     env: 'RECEPTOR_RESET_OFFSETS'
+                },
+                enabled: {
+                    format: Boolean,
+                    default: false,
+                    env: 'RECEPTOR_TOPIC_ENABLED'
                 }
             },
             vulnerability: {
@@ -230,6 +255,11 @@ const config = convict({
                     format: Boolean,
                     default: false,
                     env: 'VULNERABILITY_RESET_OFFSETS'
+                },
+                enabled: {
+                    format: Boolean,
+                    default: false,
+                    env: 'VULNERABILITY_TOPIC_ENABLED'
                 }
             }
         }
