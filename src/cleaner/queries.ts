@@ -22,7 +22,7 @@ export function cancelExecutors (knex: Knex, timeoutMinutes = 15) {
     const query = whereUnfinishedExecutorsWithFinishedSystems(knex)
     .whereRaw(`updated_at < now() - ? * interval '1 minute'`, [timeoutMinutes]);
 
-    return updateStatusExecutors(knex, query);
+    return updateStatusExecutors(knex, query, 1, null);
 }
 
 export function cancelRuns (knex: Knex, timeoutMinutes = 15) {

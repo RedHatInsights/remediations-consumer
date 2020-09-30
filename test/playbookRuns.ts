@@ -90,6 +90,14 @@ export async function assertExecutor (id: string, status = Status.PENDING) {
     executor.status.should.equal(status);
 }
 
+export async function assertExecutorCodes (id: string, status = Status.PENDING, connection_code: any, execution_code: any) {
+    const executor = await getExecutor(id);
+    if (status === Status.FAILURE && connection_code && execution_code) {
+        executor.connection_code.should.equal(connection_code)
+        executor.execution_code.should.equal(execution_code)
+    }
+}
+
 export async function assertSystem (id: string, status = Status.PENDING, sequence = DEFAULT_SEQUENCE, console = DEFAULT_CONSOLE) {
     const system = await getSystem(id);
     system.status.should.equal(status);

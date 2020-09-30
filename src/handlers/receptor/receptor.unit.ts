@@ -21,7 +21,10 @@ const validFinished = JSON.stringify({
     type: 'playbook_run_finished',
     playbook_run_id: '4b407690-e2f8-4563-96a6-6191f1df8901',
     host: '01.example.com',
-    status: 'success'
+    status: 'success',
+    version: 2,
+    connection_code: 0,
+    execution_code: 200
 });
 
 const validCancel = JSON.stringify({
