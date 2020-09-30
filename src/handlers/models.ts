@@ -37,7 +37,9 @@ export enum PlaybookRunExecutor {
     receptor_node_id = 'receptor_node_id',
     status = 'status',
     updated_at = 'updated_at',
-    text_update_full = 'text_update_full'
+    text_update_full = 'text_update_full',
+    connection_code = 'connection_code',
+    execution_code = 'execution_code'
 }
 
 export enum PlaybookRunSystem {

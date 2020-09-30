@@ -18,20 +18,26 @@ export interface PlaybookRunFinished extends SatReceptorResponse {
     playbook_run_id: string;
     host: string;
     status: 'success' | 'failure' | 'canceled';
+    version?: number
+    connection_code?: 0 | 1 | null
+    execution_code?: number | null
 }
 
 export const schema = Joi.object().keys({
     type: Joi.string().valid('playbook_run_finished').required(),
     playbook_run_id: Joi.string().guid().required(),
     host: Joi.string().required(),
-    status: Joi.string().valid('success', 'failure', 'canceled').required()
+    status: Joi.string().valid('success', 'failure', 'canceled').required(),
+    version: Joi.number().integer(),
+    connection_code: Joi.number().integer().valid(0, 1, null),
+    execution_code: Joi.number().integer().allow(null)
 });
 
-function tryUpdateExecutor (knex: Knex, id: string) {
+function tryUpdateExecutor (knex: Knex, id: string, connection_code: any = null, execution_code: any = null) {
     const query = whereUnfinishedExecutorsWithFinishedSystems(knex)
     .where(PlaybookRunExecutor.id, id);
 
-    return updateStatusExecutors(knex, query);
+    return updateStatusExecutors(knex, query, connection_code, execution_code);
 }
 
 function tryUpdateRun (knex: Knex, id: string) {
@@ -63,7 +69,7 @@ export async function handle (message: ReceptorMessage<PlaybookRunFinished>) {
         [PlaybookRunSystem.updated_at]: knex.fn.now()
     });
 
-    const executorUpdated = await tryUpdateExecutor(knex, executor.id);
+    const executorUpdated = await tryUpdateExecutor(knex, executor.id, message.payload.connection_code, message.payload.execution_code);
     if (!executorUpdated.length) {
         log.debug('executor not finished yet');
         return;
@@ -72,12 +78,14 @@ export async function handle (message: ReceptorMessage<PlaybookRunFinished>) {
     assert.equal(executorUpdated.length, 1); // it should never happen that this updates more than one row but just in case
     log.info({id: executorUpdated[0].id, status: executorUpdated[0].status }, 'executor finished');
 
-    const runUpdated = await tryUpdateRun(knex, executor.playbook_run_id);
-    if (!runUpdated.length) {
-        log.debug('run not finished yet');
-        return;
+    if (!message.payload.version) { // if the message is NOT a v2 satellite message use v1 update logic for playbook run
+        const runUpdated = await tryUpdateRun(knex, executor.playbook_run_id);
+        if (!runUpdated.length) {
+            log.debug('run not finished yet');
+            return;
+        }
+    
+        assert.equal(runUpdated.length, 1); // it should never happen that this updates more than one row but just in case
+        log.info({id: runUpdated[0].id, status: runUpdated[0].status }, 'run finished');
     }
-
-    assert.equal(runUpdated.length, 1); // it should never happen that this updates more than one row but just in case
-    log.info({id: runUpdated[0].id, status: runUpdated[0].status }, 'run finished');
 }
