@@ -33,6 +33,17 @@ const validCancel = JSON.stringify({
     status: 'cancelling'
 });
 
+const validCompleted = JSON.stringify({
+    type: 'playbook_run_completed',
+    playbook_run_id: '4b407690-e2f8-4563-96a6-6191f1df8901',
+    status: 'success',
+    version: 2,
+    satellite_connection_code: 0,
+    satellite_connection_error: null,
+    satellite_infrastructure_code: 0,
+    satellite_infrastructure_error: null
+});
+
 function createInvalidPayload (type: string): string {
     return JSON.stringify({ type });
 }
@@ -97,6 +108,14 @@ describe('receptor handler unit tests', function () {
         receptorErrorParse.callCount.should.equal(0);
     });
 
+    test('parses completed message', async () => {
+        const message = kafkaMessage(envelope(validCompleted));
+
+        await handler(message);
+        receptorError.callCount.should.equal(0);
+        receptorErrorParse.callCount.should.equal(0);
+    });
+
     test('throws error on invalid ack payload', async () => {
         const message = kafkaMessage(envelope(createInvalidPayload('playbook_run_ack')));
 
@@ -120,6 +139,13 @@ describe('receptor handler unit tests', function () {
 
     test('throws error on invalid cancel payload', async () => {
         const message = kafkaMessage(envelope(createInvalidPayload('playbook_run_cancel_ack')));
+
+        await handler(message);
+        receptorErrorParse.callCount.should.equal(1);
+    });
+
+    test('throws error on invalid completed payload', async () => {
+        const message = kafkaMessage(envelope(createInvalidPayload('playbook_run_completed')));
 
         await handler(message);
         receptorErrorParse.callCount.should.equal(1);

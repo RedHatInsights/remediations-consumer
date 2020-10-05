@@ -36,11 +36,11 @@ const counters = {
 ['success', 'unknown_host', 'unknown_issue', 'error', 'error_parse'].forEach(value => counters.patch.labels(value).inc(0));
 ['success', 'unknown_host', 'unknown_issue', 'error', 'error_parse'].forEach(value => counters.vulnerability.labels(value).inc(0));
 ['error', 'error_parse', 'processed'].forEach(value => {
-    ['playbook_run_ack', 'playbook_run_update', 'playbook_run_finished', 'playbook_run_cancel_ack', 'unknown'].forEach(type => {
+    ['playbook_run_ack', 'playbook_run_update', 'playbook_run_finished', 'playbook_run_cancel_ack', 'playbook_run_completed', 'unknown'].forEach(type => {
         counters.receptor.labels(value, type).inc(0);
     });
 });
-['playbook_run_ack', 'playbook_run_update', 'playbook_run_finished'].forEach(value => counters.executorNotFound.labels(value).inc(0));
+['playbook_run_ack', 'playbook_run_update', 'playbook_run_finished', 'playbook_run_completed'].forEach(value => counters.executorNotFound.labels(value).inc(0));
 
 ['cancelling', 'finished', 'failure'].forEach(value => counters.receptorCancelAck.labels(value).inc(0));
 

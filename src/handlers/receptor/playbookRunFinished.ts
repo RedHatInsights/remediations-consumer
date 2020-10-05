@@ -40,7 +40,7 @@ function tryUpdateExecutor (knex: Knex, id: string, connection_code: any = null,
     return updateStatusExecutors(knex, query, connection_code, execution_code);
 }
 
-function tryUpdateRun (knex: Knex, id: string) {
+export function tryUpdateRun (knex: Knex, id: string) {
     const query = whereUnfinishedRunsWithFinishedExecutors(knex)
     .where(PlaybookRun.id, id);
 
@@ -59,33 +59,35 @@ export async function handle (message: ReceptorMessage<PlaybookRunFinished>) {
         return;
     }
 
-    // update the systems table
+    // update the systems status
     await knex(PlaybookRunSystem.TABLE)
     .where(PlaybookRunSystem.playbook_run_executor_id, executor.id)
     .whereIn(PlaybookRunSystem.status, [Status.PENDING, Status.RUNNING])
     .where(PlaybookRunSystem.system_name, message.payload.host)
     .update({
         [PlaybookRunSystem.status]: message.payload.status,
-        [PlaybookRunSystem.updated_at]: knex.fn.now()
+        [PlaybookRunSystem.updated_at]: knex.fn.now(),
+        [PlaybookRunSystem.connection_code]: message.payload.connection_code,
+        [PlaybookRunSystem.execution_code]: message.payload.execution_code
     });
 
-    const executorUpdated = await tryUpdateExecutor(knex, executor.id, message.payload.connection_code, message.payload.execution_code);
-    if (!executorUpdated.length) {
-        log.debug('executor not finished yet');
-        return;
-    }
-
-    assert.equal(executorUpdated.length, 1); // it should never happen that this updates more than one row but just in case
-    log.info({id: executorUpdated[0].id, status: executorUpdated[0].status }, 'executor finished');
-
     if (!message.payload.version) { // if the message is NOT a v2 satellite message use v1 update logic for playbook run
-        const runUpdated = await tryUpdateRun(knex, executor.playbook_run_id);
-        if (!runUpdated.length) {
-            log.debug('run not finished yet');
+        const executorUpdated = await tryUpdateExecutor(knex, executor.id, message.payload.connection_code, message.payload.execution_code);
+        if (!executorUpdated.length) {
+            log.debug('executor not finished yet');
             return;
         }
     
-        assert.equal(runUpdated.length, 1); // it should never happen that this updates more than one row but just in case
-        log.info({id: runUpdated[0].id, status: runUpdated[0].status }, 'run finished');
+        assert.equal(executorUpdated.length, 1); // it should never happen that this updates more than one row but just in case
+        log.info({id: executorUpdated[0].id, status: executorUpdated[0].status }, 'executor finished');
     }
+
+    const runUpdated = await tryUpdateRun(knex, executor.playbook_run_id);
+    if (!runUpdated.length) {
+        log.debug('run not finished yet');
+        return;
+    }
+
+    assert.equal(runUpdated.length, 1); // it should never happen that this updates more than one row but just in case
+    log.info({id: runUpdated[0].id, status: runUpdated[0].status }, 'run finished');
 }
