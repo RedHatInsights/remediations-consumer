@@ -4,7 +4,7 @@ import onMessage, { SatReceptorResponse, ReceptorMessage } from '.';
 import {getSandbox} from '../../../test';
 import * as probes from '../../probes';
 import { Status } from '../models';
-import { insertPlaybookRun, assertRun, assertExecutor, assertSystem, assertExecutorCodes } from '../../../test/playbookRuns';
+import { insertPlaybookRun, assertRun, assertExecutor, assertSystem, assertSystemStatusCodes } from '../../../test/playbookRuns';
 
 describe('receptor handler integration tests', function () {
 
@@ -491,8 +491,8 @@ describe('receptor handler integration tests', function () {
                 assertNoErrors();
                 await assertRun(data.id, status);
                 await assertExecutor(e.id, status);
-                await assertExecutorCodes(e.id, status, null, null);
                 await assertSystem(s.id, status);
+                await assertSystemStatusCodes(s.id, status, null, null);
             })
         );
 
@@ -508,9 +508,9 @@ describe('receptor handler integration tests', function () {
 
                 assertNoErrors();
                 await assertRun(data.id, Status.PENDING);
-                await assertExecutor(e.id, status);
-                await assertExecutorCodes(e.id, status, 0, 200);
+                await assertExecutor(e.id, Status.PENDING);
                 await assertSystem(s.id, status);
+                await assertSystemStatusCodes(s.id, status, 0, 200);
             })
         );
 
@@ -537,27 +537,27 @@ describe('receptor handler integration tests', function () {
         );
 
         [[Status.FAILURE, Status.SUCCESS], [Status.CANCELED, Status.FAILURE], [Status.FAILURE, Status.CANCELED]].forEach(([initial, status]) =>
-        test(`sat v2 does not update records in final state (${initial})`, async () => {
-            const data = await insertPlaybookRun(run => {
-                run.status = initial;
-                run.executors[0].status = initial;
-                run.executors[0].systems[0].status = initial;
-            });
+            test(`sat v2 does not update records in final state (${initial})`, async () => {
+                const data = await insertPlaybookRun(run => {
+                    run.status = initial;
+                    run.executors[0].status = initial;
+                    run.executors[0].systems[0].status = initial;
+                });
 
-            const e = data.executors[0];
-            const s = e.systems[0];
+                const e = data.executors[0];
+                const s = e.systems[0];
 
-            const payload = createFinishedPayload(data.id, s.system_name, status, 2, 0, 200);
-            const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
-            await onMessage(msg);
+                const payload = createFinishedPayload(data.id, s.system_name, status, 2, 0, 200);
+                const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
+                await onMessage(msg);
 
-            assertNoErrors();
-            await assertRun(data.id, initial);
-            await assertExecutor(e.id, initial);
-            await assertExecutorCodes(e.id, status, 0, 200);
-            await assertSystem(s.id, initial);
-        })
-    );
+                assertNoErrors();
+                await assertRun(data.id, initial);
+                await assertExecutor(e.id, initial);
+                await assertSystem(s.id, initial);
+                await assertSystemStatusCodes(s.id, initial, 0, 200)
+            })
+        );
 
         [Status.SUCCESS, Status.FAILURE, Status.CANCELED].forEach((status) =>
             test(`executor state not updated until all systems finish (${status})`, async () => {
@@ -678,6 +678,105 @@ describe('receptor handler integration tests', function () {
             assertNoErrors();
             await assertRun(data.id, Status.FAILURE);
             await assertSystem(data.executors[2].systems[0].id, Status.SUCCESS);
+        });
+    });
+
+    describe('playbook_run_completed', function () {
+        function createCompletedPayload (runId: string, host: string, status: Status) {
+            return {
+                type: 'playbook_run_completed',
+                playbook_run_id: runId,
+                host,
+                status,
+                version: 2,
+                satellite_connection_code: 0,
+                satellite_connection_error: null,
+                satellite_infrastructure_code: 0,
+                satellite_infrastructure_error: null
+            };
+        }
+
+        [Status.SUCCESS, Status.FAILURE, Status.CANCELED].forEach(status =>
+            test(`updates records to ${status} (default state)`, async () => {
+                const data = await insertPlaybookRun(run => {
+                    run.executors[0].systems[0].status = status
+                });
+                const e = data.executors[0];
+                const s = e.systems[0];
+
+                const payload = createCompletedPayload(data.id, s.system_name, status);
+                const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
+                await onMessage(msg);
+
+                assertNoErrors();
+                await assertRun(data.id, status);
+                await assertExecutor(e.id, status);
+                await assertSystem(s.id, status);
+            })
+        );
+
+        [[Status.FAILURE, Status.SUCCESS], [Status.CANCELED, Status.FAILURE], [Status.SUCCESS, Status.CANCELED]].forEach(([initial, status]) =>
+            test(`does not update records in final state (${initial})`, async () => {
+                const data = await insertPlaybookRun(run => {
+                    run.status = initial;
+                    run.executors[0].status = initial;
+                    run.executors[0].systems[0].status = initial;
+                });
+
+                const e = data.executors[0];
+                const s = e.systems[0];
+
+                const payload = createCompletedPayload(data.id, s.system_name, status);
+                const msg = createKafkaMessage(responseEnvelope(payload, e.receptor_job_id, e.receptor_node_id));
+                await onMessage(msg);
+
+                assertNoErrors();
+                await assertRun(data.id, initial);
+                await assertExecutor(e.id, initial);
+                await assertSystem(s.id, initial);
+            })
+        );
+
+        [Status.SUCCESS, Status.FAILURE, Status.CANCELED].forEach((status) =>
+            test(`run state not updated until all executors finish (${status})`, async () => {
+                const data = await insertPlaybookRun(undefined, 2, 1);
+
+                const payload1 = createCompletedPayload(data.id, data.executors[0].systems[0].system_name, status);
+                const payload2 = createCompletedPayload(data.id, data.executors[1].systems[0].system_name, status);
+
+                await onMessage(createKafkaMessage(responseEnvelope(payload1, data.executors[0].receptor_job_id, data.executors[0].receptor_node_id)));
+                assertNoErrors();
+                await assertRun(data.id, Status.PENDING);
+                await assertExecutor(data.executors[0].id, status);
+
+                await onMessage(createKafkaMessage(responseEnvelope(payload2, data.executors[1].receptor_job_id, data.executors[1].receptor_node_id)));
+                assertNoErrors();
+                await assertRun(data.id, status);
+                await assertExecutor(data.executors[1].id, status);
+            })
+        );
+
+        test('if a executor fails then the entire run fails', async () => {
+            const data = await insertPlaybookRun(undefined, 3, 1);
+
+            const payload1 = createCompletedPayload(data.id, data.executors[0].systems[0].system_name, Status.CANCELED);
+            const payload2 = createCompletedPayload(data.id, data.executors[1].systems[0].system_name, Status.FAILURE);
+            const payload3 = createCompletedPayload(data.id, data.executors[2].systems[0].system_name, Status.SUCCESS);
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload1, data.executors[0].receptor_job_id, data.executors[0].receptor_node_id)));
+            assertNoErrors();
+            await assertRun(data.id, Status.PENDING);
+            await assertExecutor(data.executors[0].id, Status.CANCELED);
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload2, data.executors[1].receptor_job_id, data.executors[1].receptor_node_id)));
+            assertNoErrors();
+            await assertRun(data.id, Status.PENDING);
+            await assertExecutor(data.executors[1].id, Status.FAILURE);
+
+            await onMessage(createKafkaMessage(responseEnvelope(payload3, data.executors[2].receptor_job_id, data.executors[2].receptor_node_id)));
+            assertNoErrors();
+            await assertRun(data.id, Status.FAILURE);
+            await assertExecutor(data.executors[2].id, Status.SUCCESS);
         });
     });
 });

@@ -50,5 +50,7 @@ export enum PlaybookRunSystem {
     status = 'status',
     system_name = 'system_name',
     console = 'console',
-    updated_at = 'updated_at'
+    updated_at = 'updated_at',
+    connection_code = 'connection_code',
+    execution_code = 'execution_code'
 }

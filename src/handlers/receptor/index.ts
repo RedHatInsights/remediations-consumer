@@ -8,6 +8,7 @@ import * as playbookRunAck from './playbookRunAck';
 import * as playbookRunUpdate from './playbookRunUpdate';
 import * as playbookRunFinished from './playbookRunFinished';
 import * as playbookRunCancelAck from './playbookRunCancelAck';
+import * as playbookRunCompleted from './playbookRunCompleted';
 
 export interface ReceptorMessage<T> {
     account: string;
@@ -102,6 +103,11 @@ export default async function onMessage (message: Message) {
 
         case 'playbook_run_cancel_ack': {
             await handleSatResponse<playbookRunCancelAck.PlaybookRunCancelAck>(envelope, playbookRunCancelAck);
+            break;
+        }
+
+        case 'playbook_run_completed': {
+            await handleSatResponse<playbookRunCompleted.PlaybookRunCompleted>(envelope, playbookRunCompleted);
             break;
         }
 
