@@ -78,6 +78,7 @@ async function handleSatResponse<T extends SatReceptorResponse> (
 }
 
 export default async function onMessage (message: Message) {
+    log.trace(message, 'receptor message received');
     const envelope = parseMessage(message);
     if (!envelope) {
         log.debug(message, 'ignoring message');
