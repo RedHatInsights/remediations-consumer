@@ -64,12 +64,10 @@ export function whereUnfinishedRunsWithFinishedExecutors (knex: Knex) {
     );
 }
 
-export function updateStatusExecutors (knex: Knex, builder: Knex.QueryBuilder<any, any>, connection_code: any = null, execution_code: any = null) {
+export function updateStatusExecutors (knex: Knex, builder: Knex.QueryBuilder<any, any>) {
     return builder.update({
-        [PlaybookRunExecutor.status]: knex.raw(EXECUTOR_FINAL_STATUS_SUBQUERY),
-        [PlaybookRunExecutor.connection_code]: connection_code,
-        [PlaybookRunExecutor.execution_code]: execution_code
-    }, ['id', 'status', 'connection_code', 'execution_code']);
+        [PlaybookRunExecutor.status]: knex.raw(EXECUTOR_FINAL_STATUS_SUBQUERY)
+    }, ['id', 'status']);
     // Need to find a way to also update connection_code and execution_code here using this syntax
     // OR just by using the regular knex syntax
 }

@@ -4,7 +4,7 @@ import onMessage, { SatReceptorResponse, ReceptorMessage } from '.';
 import {getSandbox} from '../../../test';
 import * as probes from '../../probes';
 import { Status } from '../models';
-import { insertPlaybookRun, assertRun, assertExecutor, assertSystem, assertSystemStatusCodes } from '../../../test/playbookRuns';
+import { insertPlaybookRun, assertRun, assertExecutor, assertSystem, assertSystemStatusCodes, assertExecutorStatusCodes } from '../../../test/playbookRuns';
 
 describe('receptor handler integration tests', function () {
 
@@ -711,6 +711,7 @@ describe('receptor handler integration tests', function () {
                 assertNoErrors();
                 await assertRun(data.id, status);
                 await assertExecutor(e.id, status);
+                await assertExecutorStatusCodes(e.id, 0, null, 0, null);
                 await assertSystem(s.id, status);
             })
         );
@@ -733,6 +734,7 @@ describe('receptor handler integration tests', function () {
                 assertNoErrors();
                 await assertRun(data.id, initial);
                 await assertExecutor(e.id, initial);
+                await assertExecutorStatusCodes(e.id, null, null, null, null);
                 await assertSystem(s.id, initial);
             })
         );
@@ -748,11 +750,13 @@ describe('receptor handler integration tests', function () {
                 assertNoErrors();
                 await assertRun(data.id, Status.PENDING);
                 await assertExecutor(data.executors[0].id, status);
+                await assertExecutorStatusCodes(data.executors[0].id, 0, null, 0, null);
 
                 await onMessage(createKafkaMessage(responseEnvelope(payload2, data.executors[1].receptor_job_id, data.executors[1].receptor_node_id)));
                 assertNoErrors();
                 await assertRun(data.id, status);
                 await assertExecutor(data.executors[1].id, status);
+                await assertExecutorStatusCodes(data.executors[1].id, 0, null, 0, null);
             })
         );
 
@@ -767,16 +771,19 @@ describe('receptor handler integration tests', function () {
             assertNoErrors();
             await assertRun(data.id, Status.PENDING);
             await assertExecutor(data.executors[0].id, Status.CANCELED);
+            await assertExecutorStatusCodes(data.executors[0].id, 0, null, 0, null);
 
             await onMessage(createKafkaMessage(responseEnvelope(payload2, data.executors[1].receptor_job_id, data.executors[1].receptor_node_id)));
             assertNoErrors();
             await assertRun(data.id, Status.PENDING);
             await assertExecutor(data.executors[1].id, Status.FAILURE);
+            await assertExecutorStatusCodes(data.executors[1].id, 0, null, 0, null);
 
             await onMessage(createKafkaMessage(responseEnvelope(payload3, data.executors[2].receptor_job_id, data.executors[2].receptor_node_id)));
             assertNoErrors();
             await assertRun(data.id, Status.FAILURE);
             await assertExecutor(data.executors[2].id, Status.SUCCESS);
+            await assertExecutorStatusCodes(data.executors[2].id, 0, null, 0, null);
         });
     });
 });

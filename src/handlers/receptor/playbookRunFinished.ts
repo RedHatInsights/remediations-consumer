@@ -33,11 +33,11 @@ export const schema = Joi.object().keys({
     execution_code: Joi.number().integer().allow(null)
 });
 
-function tryUpdateExecutor (knex: Knex, id: string, connection_code: any = null, execution_code: any = null) {
+function tryUpdateExecutor (knex: Knex, id: string) {
     const query = whereUnfinishedExecutorsWithFinishedSystems(knex)
     .where(PlaybookRunExecutor.id, id);
 
-    return updateStatusExecutors(knex, query, connection_code, execution_code);
+    return updateStatusExecutors(knex, query);
 }
 
 export function tryUpdateRun (knex: Knex, id: string) {
@@ -72,7 +72,7 @@ export async function handle (message: ReceptorMessage<PlaybookRunFinished>) {
     });
 
     if (!message.payload.version) { // if the message is NOT a v2 satellite message use v1 update logic for playbook run
-        const executorUpdated = await tryUpdateExecutor(knex, executor.id, message.payload.connection_code, message.payload.execution_code);
+        const executorUpdated = await tryUpdateExecutor(knex, executor.id);
         if (!executorUpdated.length) {
             log.debug('executor not finished yet');
             return;
