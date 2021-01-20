@@ -18,14 +18,28 @@ export function updateExecutorByReceptorIds (
     });
 }
 
-export function updateExecutorById (knex: Knex, id: string, expectedStatuses: Status[], targetStatus: Status) {
-    return knex(PlaybookRunExecutor.TABLE)
-    .where(PlaybookRunExecutor.id, id)
-    .whereIn(PlaybookRunExecutor.status, expectedStatuses)
-    .update({
-        [PlaybookRunExecutor.status]: targetStatus,
-        [PlaybookRunExecutor.updated_at]: knex.fn.now()
-    });
+export function updateExecutorById (
+    knex: Knex,
+    id: string,
+    expectedStatuses: Status[],
+    targetStatus: Status,
+    sat_connection_code: 1 | 0 | null = null,
+    sat_connection_error: string | null = null,
+    sat_infrastructure_code: 1 | 0 | null = null,
+    sat_infrastructure_error: string | null = null
+    ) {
+        return knex(PlaybookRunExecutor.TABLE)
+        .where(PlaybookRunExecutor.id, id)
+        .whereIn(PlaybookRunExecutor.status, expectedStatuses)
+        .update({
+            [PlaybookRunExecutor.status]: targetStatus,
+            [PlaybookRunExecutor.updated_at]: knex.fn.now(),
+            [PlaybookRunExecutor.satellite_connection_code]: sat_connection_code,
+            [PlaybookRunExecutor.satellite_connection_error]: sat_connection_error,
+            [PlaybookRunExecutor.satellite_infrastructure_code]: sat_infrastructure_code,
+            [PlaybookRunExecutor.satellite_infrastructure_error]: sat_infrastructure_error
+        }
+    );
 }
 
 export function updatePlaybookRun (knex: Knex, id: string, expectedStatuses: Status[], targetStatus: Status) {

@@ -37,9 +37,12 @@ export enum PlaybookRunExecutor {
     receptor_node_id = 'receptor_node_id',
     status = 'status',
     updated_at = 'updated_at',
+    version = 'version',
     text_update_full = 'text_update_full',
-    connection_code = 'connection_code',
-    execution_code = 'execution_code'
+    satellite_connection_code = 'satellite_connection_code',
+    satellite_connection_error = 'satellite_connection_error',
+    satellite_infrastructure_code = 'satellite_infrastructure_code',
+    satellite_infrastructure_error = 'satellite_infrastructure_error',
 }
 
 export enum PlaybookRunSystem {
@@ -51,6 +54,7 @@ export enum PlaybookRunSystem {
     system_name = 'system_name',
     console = 'console',
     updated_at = 'updated_at',
+    version = 'version',
     connection_code = 'connection_code',
     execution_code = 'execution_code'
 }

@@ -93,9 +93,34 @@ export async function assertExecutor (id: string, status = Status.PENDING) {
 export async function assertSystemStatusCodes (id: string, status = Status.PENDING, connection_code: any, execution_code: any) {
     const system = await getSystem(id);
     if (status === Status.FAILURE && connection_code && execution_code) {
-        system.connection_code.should.equal(connection_code)
-        system.execution_code.should.equal(execution_code)
+        system.connection_code.should.equal(connection_code);
+        system.execution_code.should.equal(execution_code);
     }
+}
+
+export async function assertExecutorStatusCodes (
+    id: string,
+    sat_connect_code: 0 | 1 | null,
+    sat_connect_error: string | null,
+    sat_infra_code: 0 | 1 | null,
+    sat_infra_error: string | null)
+    {
+        const executor = await getExecutor(id);
+        if (_.isNull(sat_connect_code)) {
+            expect(executor.satellite_connection_code).toBeNull();
+        } else { executor.satellite_connection_code.should.equal(sat_connect_code); }
+
+        if (_.isNull(sat_connect_error)) {
+            expect(executor.satellite_connection_error).toBeNull();
+        } else { executor.satellite_connection_error.should.equal(sat_connect_error); }
+
+        if (_.isNull(sat_infra_code)) {
+            expect(executor.satellite_infrastructure_code).toBeNull();
+        } else { executor.satellite_infrastructure_code.should.equal(sat_infra_code); }
+
+        if (_.isNull(sat_infra_error)) {
+            expect(executor.satellite_infrastructure_error).toBeNull();
+        } else { executor.satellite_infrastructure_error.should.equal(sat_infra_error); }
 }
 
 export async function assertSystem (id: string, status = Status.PENDING, sequence = DEFAULT_SEQUENCE, console = DEFAULT_CONSOLE) {

@@ -32,18 +32,49 @@ export const schema = Joi.object().keys({
     satellite_infrastructure_error: Joi.string().allow(null).required()
 });
 
-function tryUpdateExecutor (knex: Knex, executor_id: string, status: string) {
+function tryUpdateExecutor (
+        knex: Knex,
+        executor_id: string,
+        status: string,
+        sat_connection_code: 0 | 1 | null = null,
+        sat_connection_error: string | null = null,
+        sat_infrastructure_code: 0 | 1 | null = null,
+        sat_infrastructure_error: string | null = null
+    ){
     switch (status) {
         case Status.SUCCESS: {
-            return updateExecutorById(knex, executor_id, initialStatuses, Status.SUCCESS);
+            return updateExecutorById(
+                knex,
+                executor_id,
+                initialStatuses,
+                Status.SUCCESS,
+                sat_connection_code,
+                sat_connection_error,
+                sat_infrastructure_code,
+                sat_infrastructure_error);
         }
 
         case Status.FAILURE: {
-            return updateExecutorById(knex, executor_id, initialStatuses, Status.FAILURE);
+            return updateExecutorById(
+                knex,
+                executor_id,
+                initialStatuses,
+                Status.FAILURE,
+                sat_connection_code,
+                sat_connection_error,
+                sat_infrastructure_code,
+                sat_infrastructure_error);
         }
 
         case Status.CANCELED: {
-            return updateExecutorById(knex, executor_id, initialStatuses, Status.CANCELED);
+            return updateExecutorById(knex,
+                executor_id,
+                initialStatuses,
+                Status.CANCELED,
+                sat_connection_code,
+                sat_connection_error,
+                sat_infrastructure_code,
+                sat_infrastructure_error);
         }
 
         default: {
@@ -65,7 +96,15 @@ export async function handle (message: ReceptorMessage<PlaybookRunCompleted>) {
         return;
     }
 
-    const executorUpdated = await tryUpdateExecutor(knex, executor.id, message.payload.status);
+    const executorUpdated = await tryUpdateExecutor(
+        knex,
+        executor.id,
+        message.payload.status,
+        message.payload.satellite_connection_code,
+        message.payload.satellite_connection_error,
+        message.payload.satellite_infrastructure_code,
+        message.payload.satellite_infrastructure_error
+    );
     if (!executorUpdated) {
         log.debug('executor failed to update');
         return;
