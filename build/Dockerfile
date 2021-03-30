@@ -1,4 +1,4 @@
-FROM registry.redhat.io/ubi8/nodejs-14
+FROM registry.redhat.io/ubi8/nodejs-10 
 
 USER root
 
