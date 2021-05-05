@@ -46,6 +46,7 @@ export default async function onMessage (message: Message) {
             return;
         }
 
+        // TODO: make this more streamlined
         for (const issue of pastIssues) {
             if (_.find(issues, update => update === issue.issue_id)) {
                 const result = await db.updateToUnresolved(knex, host_id, issue.issue_id);
