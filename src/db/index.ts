@@ -1,7 +1,6 @@
 import log from '../util/log';
 import * as Knex from 'knex';
 import * as _ from 'lodash';
-import * as probes from '../probes';
 import { RemediationIssues, RemediationIssueSystems } from '../handlers/models';
 
 const EQ = '=';
@@ -88,6 +87,18 @@ function createUpdateQuery (host_id: string, issue_id: string, update: string) {
     return updateQuery;
 }
 
+export async function updateToUnresolved (knex: Knex, host_id: string, issue_id: string) {
+    const QUERY = createUpdateQuery(host_id, issue_id, UNRESOLVED);
+
+    return knex.raw(QUERY);
+}
+
+export async function updateToResolved (knex: Knex, host_id: string, issue_id: string) {
+    const QUERY = createUpdateQuery(host_id, issue_id, RESOLVED);
+
+    return knex.raw(QUERY);
+}
+
 export async function updateIssues (knex: Knex, host_id: string, issues: string[], pastIssues: any[]) {
     return knex.transaction(trx => {
         const queries = [];
@@ -106,18 +117,6 @@ export async function updateIssues (knex: Knex, host_id: string, issues: string[
         .then(trx.commit)
         .catch(trx.rollback);
     });
-}
-
-export async function updateToUnresolved (knex: Knex, host_id: string, issue_id: string) {
-    const QUERY = createUpdateQuery(host_id, issue_id, UNRESOLVED);
-
-    return knex.raw(QUERY);
-}
-
-export async function updateToResolved (knex: Knex, host_id: string, issue_id: string) {
-    const QUERY = createUpdateQuery(host_id, issue_id, RESOLVED);
-
-    return knex.raw(QUERY);
 }
 
 export function stop () {
