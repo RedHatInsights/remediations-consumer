@@ -98,8 +98,8 @@ export function lostUpdateMessage (message: ReceptorMessage<PlaybookRunUpdate>) 
     counters.lostMessage.inc()
 }
 
-export function advisorUpdateSuccess (host_id: string, issue_id: string, references: number) {
-    log.info({ host_id, issue_id, references }, 'advisor issue updated');
+export function advisorUpdateSuccess (host_id: string, issues: string[], references: number) {
+    log.info({ host_id, issues, references }, 'advisor issue updated');
     counters.advisor.labels('success').inc();
 };
 
@@ -108,8 +108,8 @@ export function advisorHostUnknown (host_id: string) {
     counters.advisor.labels('unknown_host').inc();
 };
 
-export function advisorIssueUnknown (host_id: string, issue_id: string) {
-    log.debug({ host_id, issue_id }, 'advisor issue_id not known');
+export function advisorIssueUnknown (host_id: string, issues: string[]) {
+    log.debug({ host_id, issues }, 'advisor issue_id not known');
     counters.advisor.labels('unknown_issue').inc();
 };
 

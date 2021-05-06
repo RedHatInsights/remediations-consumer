@@ -46,24 +46,13 @@ export default async function onMessage (message: Message) {
             return;
         }
 
-        // TODO: make this more streamlined
-        for (const issue of pastIssues) {
-            if (_.find(issues, update => update === issue.issue_id)) {
-                const result = await db.updateToUnresolved(knex, host_id, issue.issue_id);
+        // Add the thing here
+        const result = await db.updateIssues(knex, host_id, issues, pastIssues);
 
-                if (!_.isEmpty(result)) {
-                    probes.advisorIssueUnknown(host_id, issue.issue_id);
-                }
-                probes.advisorUpdateSuccess(host_id, issue.issue_id, result.length);
-            } else {
-                const result = await db.updateToResolved(knex, host_id, issue.issue_id);
-                
-                if (!_.isEmpty(result)) {
-                    probes.advisorIssueUnknown(host_id, issue.issue_id);
-                }
-                probes.advisorUpdateSuccess(host_id, issue.issue_id, result.length);
-            }
+        if (!_.isEmpty(result)) {
+            probes.advisorIssueUnknown(host_id, issues); // TODO: Fix Probes
         }
+        probes.advisorUpdateSuccess(host_id, issues, 2); // TODO: Fix Probes
     } catch (e) {
         probes.advisorUpdateError(host_id, issues, e);
     }
