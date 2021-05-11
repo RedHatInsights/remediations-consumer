@@ -46,8 +46,7 @@ export default async function onMessage (message: Message) {
             return;
         }
 
-        // Add the thing here
-        const result = await db.updateIssues(knex, host_id, issues, pastIssues);
+        const result = await db.updateIssues(knex, host_id, issues);
 
         if (!_.isEmpty(result)) {
             probes.advisorIssueUnknown(host_id, issues); // TODO: Fix Probes

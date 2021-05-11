@@ -46,23 +46,12 @@ export default async function onMessage (message: Message) {
             return;
         }
 
-        for (const issue of pastIssues) {
-            if (_.find(issues, update => update === issue.issue_id)) {
-                const result = await db.updateToUnresolved(knex, host_id, issue.issue_id);
+        const result = await db.updateIssues(knex, host_id, issues);
 
-                if (!_.isEmpty(result)) {
-                    probes.patchIssueUnknown(host_id, issue.issue_id);
-                }
-                probes.patchUpdateSuccess(host_id, issue.issue_id, result.length);
-            } else {
-                const result = await db.updateToResolved(knex, host_id, issue.issue_id);
-                
-                if (!_.isEmpty(result)) {
-                    probes.patchIssueUnknown(host_id, issue.issue_id);
-                }
-                probes.patchUpdateSuccess(host_id, issue.issue_id, result.length);
-            }
+        if (!_.isEmpty(result)) {
+            probes.patchIssueUnknown(host_id, issues); // TODO: Fix Probes
         }
+        probes.patchUpdateSuccess(host_id, issues, 2); // TODO: Fix Probes
     } catch (e) {
         probes.patchUpdateError(host_id, issues, e);
     }
