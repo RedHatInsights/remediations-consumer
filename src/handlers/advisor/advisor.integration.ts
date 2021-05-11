@@ -120,7 +120,7 @@ describe('advisor handler integration tests', function () {
         getSandbox().stub(db, 'updateIssues').throws();
 
         await handler(message);
-        spy.callCount.should.equal(1); // TODO: fix when probes are fixed
+        spy.callCount.should.equal(1);
     });
 
     test('handles database errors (updateResolved)', async () => {
@@ -137,6 +137,6 @@ describe('advisor handler integration tests', function () {
         getSandbox().stub(db, 'updateIssues').throws();
 
         await handler(message);
-        spy.callCount.should.equal(1);  // TODO: fix when probes are resolved
+        spy.callCount.should.equal(1);
     });
 });

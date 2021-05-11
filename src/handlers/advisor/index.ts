@@ -49,7 +49,7 @@ export default async function onMessage (message: Message) {
         const result = await db.updateIssues(knex, host_id, issues);
 
         if (!_.isEmpty(result)) {
-            probes.advisorIssueUnknown(host_id, issues); // TODO: Fix Probes
+            probes.advisorIssueUnknown(host_id, issues);
         }
         probes.advisorUpdateSuccess(host_id, issues, 2); // TODO: Fix Probes
     } catch (e) {
