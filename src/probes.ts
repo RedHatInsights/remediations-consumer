@@ -113,7 +113,7 @@ export function advisorIssueUnknown (host_id: string, issues: string[]) {
     counters.advisor.labels('unknown_issue').inc();
 };
 
-export function advisorUpdateError (host_id: string, issues: Array<string>, err: Error) {
+export function advisorUpdateError (host_id: string, issues: string[], err: Error) {
     log.error({ host_id, issues, err }, 'error updating advisor issue');
     counters.advisor.labels('error').inc();
 };
@@ -123,8 +123,8 @@ export function advisorUpdateErrorParse (message: Message, err: Error) {
     counters.compliance.labels('error_parse').inc();
 };
 
-export function complianceUpdateSuccess (host_id: string, issue_id: string, references: number) {
-    log.info({ host_id, issue_id, references }, 'compliance issue updated');
+export function complianceUpdateSuccess (host_id: string, issues: string[], references: number) {
+    log.info({ host_id, issues, references }, 'compliance issue updated');
     counters.compliance.labels('success').inc();
 };
 
@@ -133,8 +133,8 @@ export function complianceHostUnknown (host_id: string) {
     counters.compliance.labels('unknown_host').inc();
 };
 
-export function complianceIssueUnknown (host_id: string, issue_id: string) {
-    log.debug({ host_id, issue_id }, 'compliance issue_id not known');
+export function complianceIssueUnknown (host_id: string, issues: string[]) {
+    log.debug({ host_id, issues }, 'compliance issue_id not known');
     counters.compliance.labels('unknown_issue').inc();
 };
 
@@ -148,8 +148,8 @@ export function complianceUpdateErrorParse (message: Message, err: Error) {
     counters.compliance.labels('error_parse').inc();
 };
 
-export function patchUpdateSuccess (host_id: string, issue_id: string, references: number) {
-    log.info({ host_id, issue_id, references }, 'patch issue updated');
+export function patchUpdateSuccess (host_id: string, issues: string[], references: number) {
+    log.info({ host_id, issues, references }, 'patch issue updated');
     counters.patch.labels('success').inc();
 };
 
@@ -158,8 +158,8 @@ export function patchHostUnknown (host_id: string) {
     counters.patch.labels('unknown_host').inc();
 };
 
-export function patchIssueUnknown (host_id: string, issue_id: string) {
-    log.debug({ host_id, issue_id }, 'patch issue_id not known');
+export function patchIssueUnknown (host_id: string, issues: string[]) {
+    log.debug({ host_id, issues }, 'patch issue_id not known');
     counters.patch.labels('unknown_issue').inc();
 };
 
@@ -173,8 +173,8 @@ export function patchUpdateErrorParse (message: Message, err: Error) {
     counters.patch.labels('error_parse').inc();
 };
 
-export function vulnerabilityUpdateSuccess (host_id: string, issue_id: string, references: number) {
-    log.info({ host_id, issue_id, references }, 'vulnerability issue updated');
+export function vulnerabilityUpdateSuccess (host_id: string, issues: string[], references: number) {
+    log.info({ host_id, issues, references }, 'vulnerability issue updated');
     counters.vulnerability.labels('success').inc();
 };
 
@@ -183,8 +183,8 @@ export function vulnerabilityHostUnknown (host_id: string) {
     counters.vulnerability.labels('unknown_host').inc();
 };
 
-export function vulnerabilityIssueUnknown (host_id: string, issue_id: string) {
-    log.debug({ host_id, issue_id }, 'vulnerability issue_id not known');
+export function vulnerabilityIssueUnknown (host_id: string, issues: string[]) {
+    log.debug({ host_id, issues }, 'vulnerability issue_id not known');
     counters.vulnerability.labels('unknown_issue').inc();
 };
 

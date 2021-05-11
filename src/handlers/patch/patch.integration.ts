@@ -25,7 +25,7 @@ describe('patch handler integration tests', function () {
         .where({ [RemediationIssues.issue_id]: 'patch:RHBA-2019:4105'});
 
         result[0].resolved.should.equal(true);
-        spy.callCount.should.equal(2);
+        spy.callCount.should.equal(1);
     });
 
     test('update multiple issues', async () => {
@@ -54,7 +54,7 @@ describe('patch handler integration tests', function () {
 
         result1[0].resolved.should.equal(false);
         result2[0].resolved.should.equal(true);
-        spy.callCount.should.equal(2);
+        spy.callCount.should.equal(1);
     });
 
     test('does nothing on unknown host', async () => {
@@ -86,7 +86,7 @@ describe('patch handler integration tests', function () {
         const spy = getSandbox().spy(probes, 'patchIssueUnknown');
 
         await handler(message);
-        spy.callCount.should.equal(2);
+        spy.callCount.should.equal(1);
     });
 
     test('handles database errors (search)', async () => {
@@ -117,7 +117,7 @@ describe('patch handler integration tests', function () {
         };
 
         const spy = getSandbox().spy(probes, 'patchUpdateError');
-        getSandbox().stub(db, 'updateToUnresolved').throws();
+        getSandbox().stub(db, 'updateIssues').throws();
 
         await handler(message);
         spy.callCount.should.equal(1);
@@ -134,7 +134,7 @@ describe('patch handler integration tests', function () {
         };
 
         const spy = getSandbox().spy(probes, 'patchUpdateError');
-        getSandbox().stub(db, 'updateToResolved').throws();
+        getSandbox().stub(db, 'updateIssues').throws();
 
         await handler(message);
         spy.callCount.should.equal(1);

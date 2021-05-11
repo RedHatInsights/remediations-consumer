@@ -25,7 +25,7 @@ describe('compliance handler integration tests', function () {
         .where({ [RemediationIssues.issue_id]: 'ssg:rhel7|standard|xccdf_org.ssgproject.content_rule_service_rsylog_enabled'});
 
         result[0].resolved.should.equal(true);
-        spy.callCount.should.equal(2);
+        spy.callCount.should.equal(1);
     });
 
     test('update multiple issues', async () => {
@@ -57,7 +57,7 @@ describe('compliance handler integration tests', function () {
         result1[0].resolved.should.equal(false);
         result2[0].resolved.should.equal(true);
 
-        spy.callCount.should.equal(2);
+        spy.callCount.should.equal(1);
     });
 
     test('does nothing on unknown host', async () => {
@@ -89,7 +89,7 @@ describe('compliance handler integration tests', function () {
         const spy = getSandbox().spy(probes, 'complianceIssueUnknown');
 
         await handler(message);
-        spy.callCount.should.equal(2);
+        spy.callCount.should.equal(1);
     });
 
     test('handles database errors (search)', async () => {
@@ -120,7 +120,7 @@ describe('compliance handler integration tests', function () {
         };
 
         const spy = getSandbox().spy(probes, 'complianceUpdateError');
-        getSandbox().stub(db, 'updateToUnresolved').throws();
+        getSandbox().stub(db, 'updateIssues').throws();
 
         await handler(message);
         spy.callCount.should.equal(1);
@@ -137,7 +137,7 @@ describe('compliance handler integration tests', function () {
         };
 
         const spy = getSandbox().spy(probes, 'complianceUpdateError');
-        getSandbox().stub(db, 'updateToResolved').throws();
+        getSandbox().stub(db, 'updateIssues').throws();
 
         await handler(message);
         spy.callCount.should.equal(1);

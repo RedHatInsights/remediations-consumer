@@ -117,10 +117,10 @@ describe('advisor handler integration tests', function () {
         };
 
         const spy = getSandbox().spy(probes, 'advisorUpdateError');
-        getSandbox().stub(db, 'updateToUnresolved').throws();
+        getSandbox().stub(db, 'updateIssues').throws();
 
         await handler(message);
-        spy.callCount.should.equal(0); // TODO: fix when probes are fixed
+        spy.callCount.should.equal(1); // TODO: fix when probes are fixed
     });
 
     test('handles database errors (updateResolved)', async () => {
@@ -134,9 +134,9 @@ describe('advisor handler integration tests', function () {
         };
 
         const spy = getSandbox().spy(probes, 'advisorUpdateError');
-        getSandbox().stub(db, 'updateToResolved').throws();
+        getSandbox().stub(db, 'updateIssues').throws();
 
         await handler(message);
-        spy.callCount.should.equal(0);  // TODO: fix when probes are resolved
+        spy.callCount.should.equal(1);  // TODO: fix when probes are resolved
     });
 });
