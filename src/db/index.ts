@@ -86,20 +86,6 @@ function createUpdateQuery (host_id: string, issues: string[]) {
     return updateQuery;
 }
 
-// // REMOVE LATER
-// export async function updateToUnresolved (knex: Knex, host_id: string, issue_id: string) {
-//     const QUERY = createUpdateQuery(host_id, [issue_id]);
-
-//     return knex.raw(QUERY);
-// }
-
-// // REMOVE LATER
-// export async function updateToResolved (knex: Knex, host_id: string, issue_id: string) {
-//     const QUERY = createUpdateQuery(host_id, [issue_id]);
-
-//     return knex.raw(QUERY);
-// }
-
 export async function updateIssues (knex: Knex, host_id: string, issues: string[]) {
     const query = createUpdateQuery(host_id, issues);
 
