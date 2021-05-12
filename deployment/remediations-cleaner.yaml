@@ -1,0 +1,130 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: remediations-cleaner
+objects:
+- apiVersion: batch/v1beta1
+  kind: CronJob
+  metadata:
+    annotations: {}
+    name: remediations-cleaner
+  spec:
+    concurrencyPolicy: ${CONCURRENCY_POLICY}
+    failedJobsHistoryLimit: 10
+    jobTemplate:
+      spec:
+        template:
+          metadata:
+            labels:
+              parent: remediations-cleaner
+          spec:
+            containers:
+            - command:
+              - node
+              - dist/src/cleaner/run.js
+              env:
+              - name: DB_HOST
+                valueFrom:
+                  secretKeyRef:
+                    key: db.host
+                    name: remediations-db
+              - name: DB_DATABASE
+                value: remediations
+              - name: DB_USERNAME
+                valueFrom:
+                  secretKeyRef:
+                    key: db.user
+                    name: remediations-db
+              - name: DB_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    key: db.password
+                    name: remediations-db
+              - name: DB_CA
+                value: /opt/certs/rds-cacert
+              - name: DB_SSL_ENABLED
+                value: ${DB_SSL_ENABLED}
+              - name: LOG_CW_ENABLED
+                value: ${LOG_CW_ENABLED}
+              - name: LOG_CW_KEY
+                valueFrom:
+                  secretKeyRef:
+                    key: aws_access_key_id
+                    name: cloudwatch
+              - name: LOG_CW_SECRET
+                valueFrom:
+                  secretKeyRef:
+                    key: aws_secret_access_key
+                    name: cloudwatch
+              - name: LOG_CW_GROUP
+                valueFrom:
+                  secretKeyRef:
+                    key: log_group_name
+                    name: cloudwatch
+              - name: LOG_CW_REGION
+                valueFrom:
+                  secretKeyRef:
+                    key: aws_region
+                    name: cloudwatch
+              - name: LOG_CW_LEVEL
+                value: ${LOG_LEVEL}
+              - name: LOG_LEVEL
+                value: ${LOG_LEVEL}
+              - name: NAMESPACE
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.namespace
+              - name: METRICS_PREFIX
+                value: remediations_cleaner_
+              - name: METRICS_PUSH_GATEWAY
+                value: ${PROMETHEUS_PUSHGATEWAY}
+              image: quay.io/cloudservices/remediations-consumer:${IMAGE_TAG}
+              imagePullPolicy: Always
+              name: remediations-cleaner
+              resources:
+                limits:
+                  cpu: ${CPU_LIMIT}
+                  memory: ${MEMORY_LIMIT}
+                requests:
+                  cpu: 200m
+                  memory: 256Mi
+              volumeMounts:
+              - mountPath: /opt/certs/
+                name: rds-cacert
+                readOnly: true
+            imagePullSecrets:
+            - name: quay-cloudservices-pull
+            - name: rh-registry-pull
+            restartPolicy: Never
+            volumes:
+            - name: rds-cacert
+              secret:
+                secretName: rds-client-ca
+    schedule: ${CLEANER_SCHEDULE}
+    startingDeadlineSeconds: 300
+    successfulJobsHistoryLimit: 3
+    suspend: ${{CLEANER_SUSPEND}}
+parameters:
+- name: LOG_LEVEL
+  value: trace
+- name: DB_SSL_ENABLED
+  value: 'true'
+- description: Cpu limit of service
+  name: CPU_LIMIT
+  value: 200m
+- description: memory limit of service
+  name: MEMORY_LIMIT
+  value: 256Mi
+- name: CLEANER_SUSPEND
+  value: 'true'
+- name: CLEANER_SCHEDULE
+  value: '@hourly'
+- name: CONCURRENCY_POLICY
+  value: Replace
+- name: PROMETHEUS_PUSHGATEWAY
+  value: http://prometheus-push.mnm-ci.svc.cluster.local:9091
+- name: LOG_CW_ENABLED
+  value: 'true'
+- description: Image tag
+  name: IMAGE_TAG
+  required: true
