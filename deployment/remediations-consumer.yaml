@@ -1,0 +1,227 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: remediations-consumer
+objects:
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    labels:
+      app: remediations-consumer
+    name: remediations-consumer
+  spec:
+    minReadySeconds: 15
+    progressDeadlineSeconds: 600
+    replicas: ${{NUM_REPLICAS}}
+    revisionHistoryLimit: 9
+    selector:
+      matchLabels:
+        app: remediations-consumer
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        annotations:
+          prometheus.io/path: /metrics
+          prometheus.io/port: '9006'
+          prometheus.io/scrape: 'true'
+        labels:
+          app: remediations-consumer
+      spec:
+        affinity:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - remediations-consumer
+                topologyKey: failure-domain.beta.kubernetes.io/zone
+              weight: 100
+            - podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - remediations-consumer
+                topologyKey: kubernetes.io/hostname
+              weight: 99
+        containers:
+        - env:
+          - name: DB_HOST
+            valueFrom:
+              secretKeyRef:
+                key: db.host
+                name: remediations-db
+          - name: DB_DATABASE
+            value: remediations
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                key: db.user
+                name: remediations-db
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: db.password
+                name: remediations-db
+          - name: DB_DRY_RUN
+            value: ${DRY_RUN}
+          - name: DB_CA
+            value: /opt/certs/rds-cacert
+          - name: DB_SSL_ENABLED
+            value: ${DB_SSL_ENABLED}
+          - name: INVENTORY_RESET_OFFSETS
+            value: ${INVENTORY_RESET_OFFSETS}
+          - name: KAFKA_CONCURRENCY
+            value: ${KAFKA_CONCURRENCY}
+          - name: KAFKA_CONSUMER_GROUP
+            value: ${KAFKA_CONSUMER_GROUP}
+          - name: KAFKA_HOST
+            value: ${KAFKA_BOOTSTRAP_HOST}:${KAFKA_BOOTSTRAP_PORT}
+          - name: KAFKA_LOGGING
+            value: ${KAFKA_LOGGING}
+          - name: KAFKA_AUTOCOMMIT
+            value: ${KAFKA_AUTOCOMMIT}
+          - name: LOG_LEVEL
+            value: ${LOG_LEVEL}
+          - name: LOG_CW_ENABLED
+            value: ${LOG_CW_ENABLED}
+          - name: LOG_CW_KEY
+            valueFrom:
+              secretKeyRef:
+                key: aws_access_key_id
+                name: cloudwatch
+          - name: LOG_CW_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: aws_secret_access_key
+                name: cloudwatch
+          - name: LOG_CW_GROUP
+            valueFrom:
+              secretKeyRef:
+                key: log_group_name
+                name: cloudwatch
+          - name: LOG_CW_REGION
+            valueFrom:
+              secretKeyRef:
+                key: aws_region
+                name: cloudwatch
+          - name: LOG_CW_LEVEL
+            value: ${LOG_LEVEL}
+          - name: ADVISOR_TOPIC_ENABLED
+            value: ${ADVISOR_TOPIC_ENABLED}
+          - name: COMPLIANCE_TOPIC_ENABLED
+            value: ${COMPLIANCE_TOPIC_ENABLED}
+          - name: INVENTORY_TOPIC_ENABLED
+            value: ${INVENTORY_TOPIC_ENABLED}
+          - name: PATCH_TOPIC_ENABLED
+            value: ${PATCH_TOPIC_ENABLED}
+          - name: RECEPTOR_TOPIC_ENABLED
+            value: ${RECEPTOR_TOPIC_ENABLED}
+          - name: VULNERABILITY_TOPIC_ENABLED
+            value: ${VULNERABILITY_TOPIC_ENABLED}
+          image: quay.io/cloudservices/remediations-consumer:${IMAGE_TAG}
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /metrics
+              port: 9006
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+          name: remediations-consumer
+          ports:
+          - containerPort: 9006
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /metrics
+              port: 9006
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          volumeMounts:
+          - mountPath: /opt/certs/
+            name: rds-cacert
+            readOnly: true
+        dnsPolicy: ClusterFirst
+        imagePullSecrets:
+        - name: quay-cloudservices-pull
+        - name: rh-registry-pull
+        restartPolicy: Always
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: rds-cacert
+          secret:
+            secretName: rds-client-ca
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: remediations-consumer
+    name: remediations-consumer
+  spec:
+    ports:
+    - name: 9006-tcp
+      port: 9006
+      protocol: TCP
+      targetPort: 9006
+    selector:
+      app: remediations-consumer
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+parameters:
+- name: DRY_RUN
+  value: 'false'
+- name: LOG_LEVEL
+  value: trace
+- name: KAFKA_CONCURRENCY
+  value: '1'
+- name: KAFKA_CONSUMER_GROUP
+  value: remediations-consumer
+- name: INVENTORY_RESET_OFFSETS
+  value: 'false'
+- name: KAFKA_BOOTSTRAP_HOST
+  value: mq-kafka
+- name: KAFKA_BOOTSTRAP_PORT
+  value: '29092'
+- name: KAFKA_LOGGING
+  value: 'false'
+- name: KAFKA_AUTOCOMMIT
+  value: 'true'
+- name: NUM_REPLICAS
+  value: '1'
+- name: DB_SSL_ENABLED
+  value: 'true'
+- name: LOG_CW_ENABLED
+  value: 'true'
+- name: ADVISOR_TOPIC_ENABLED
+  value: 'false'
+- name: COMPLIANCE_TOPIC_ENABLED
+  value: 'false'
+- name: INVENTORY_TOPIC_ENABLED
+  value: 'true'
+- name: PATCH_TOPIC_ENABLED
+  value: 'false'
+- name: RECEPTOR_TOPIC_ENABLED
+  value: 'true'
+- name: VULNERABILITY_TOPIC_ENABLED
+  value: 'false'
+- description: Image tag
+  name: IMAGE_TAG
+  required: true
