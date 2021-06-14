@@ -6,6 +6,7 @@ import * as _ from 'lodash';
 import { Message } from 'kafka-node';
 import { validate, parse } from '../common';
 
+const PATCH_PREFIX = 'patch%';
 interface PatchUpdate {
     host_id: string;
     issues: Array<string>;
@@ -46,7 +47,7 @@ export default async function onMessage (message: Message) {
             return;
         }
 
-        const result = await db.updateIssues(knex, host_id, issues);
+        const result = await db.updateIssues(knex, host_id, issues, PATCH_PREFIX);
 
         if (!_.isEmpty(result)) {
             probes.patchIssueUnknown(host_id, issues);
