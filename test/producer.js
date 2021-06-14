@@ -40,7 +40,7 @@ const messages = [
     {
         topic: 'platform.remediation-updates.compliance',
         messages: JSON.stringify({
-            host_id: 'a910d22d-ff4b-4178-9eec-2f04424983ff',
+            host_id: 'dde971ae-0a39-4c2b-9041-a92e2d5a96bb',
             issues: ['ssg:rhel7|standard|xccdf_org.ssgproject.content_rule_service_autofs_disabled']
         })
     },

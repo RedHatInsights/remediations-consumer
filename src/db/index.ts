@@ -1,6 +1,5 @@
 import log from '../util/log';
 import * as Knex from 'knex';
-import * as _ from 'lodash';
 import { RemediationIssues, RemediationIssueSystems } from '../handlers/models';
 
 const EQ = '=';
@@ -75,21 +74,15 @@ export async function findHostIssues (knex: Knex, host_id: string) {
     .where(RemediationIssueSystems.system_id, EQ, host_id);
 }
 
-function createUpdateQuery (host_id: string, issues: string[]) {
-    const formatedIssues = `'` + _.join(issues, `', '`) + `'`;
-    const updateQuery = `UPDATE remediation_issue_systems SET resolved = remediation_issues.issue_id ` +
-    `NOT IN (${formatedIssues}) ` +
-    `FROM remediation_issues ` +
-    `WHERE remediation_issues.id = remediation_issue_systems.remediation_issue_id ` +
-    `AND remediation_issue_systems.system_id = '${host_id}'`;
-
-    return updateQuery;
-}
-
 export async function updateIssues (knex: Knex, host_id: string, issues: string[]) {
-    const query = createUpdateQuery(host_id, issues);
-
-    return knex.raw(query);
+    return knex.raw(
+        `UPDATE remediation_issue_systems SET resolved = remediation_issues.issue_id ` +
+        'NOT IN (' + issues.map(() => '?').join(',') + ')' +
+        `FROM remediation_issues ` +
+        `WHERE remediation_issues.id = remediation_issue_systems.remediation_issue_id ` +
+        `AND remediation_issue_systems.system_id = ?`,
+        [...issues, host_id]
+    );
 }
 
 export function stop () {
