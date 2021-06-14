@@ -74,14 +74,15 @@ export async function findHostIssues (knex: Knex, host_id: string) {
     .where(RemediationIssueSystems.system_id, EQ, host_id);
 }
 
-export async function updateIssues (knex: Knex, host_id: string, issues: string[]) {
+export async function updateIssues (knex: Knex, host_id: string, issues: string[], prefix: string) {
     return knex.raw(
         `UPDATE remediation_issue_systems SET resolved = remediation_issues.issue_id ` +
-        'NOT IN (' + issues.map(() => '?').join(',') + ')' +
+        'NOT IN (' + issues.map(() => '?').join(',') + ') ' +
         `FROM remediation_issues ` +
         `WHERE remediation_issues.id = remediation_issue_systems.remediation_issue_id ` +
+        'AND remediation_issues.issue_id LIKE ?' +
         `AND remediation_issue_systems.system_id = ?`,
-        [...issues, host_id]
+        [...issues, prefix, host_id]
     );
 }
 
