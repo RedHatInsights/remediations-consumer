@@ -1,4 +1,9 @@
 import * as convict from 'convict';
+import * as _ from 'lodash';
+import * as process from 'process';
+import * as os from 'os';
+import * as fs from 'fs';
+import * as tmp from 'tmp';
 import formats from './formats';
 
 convict.addFormats(formats);
@@ -278,6 +283,63 @@ const config = convict({
         }
     }
 });
+
+// load Clowder Config
+// eslint-disable-next-line no-process-env
+const acgConfig = process.env.ACG_CONFIG;
+if (acgConfig) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+    const clowdAppConfig = require(acgConfig); // eslint-disable-line security/detect-non-literal-require
+
+    const data: any = {
+        metrics: {
+            port: clowdAppConfig.metricsPort,
+            path: clowdAppConfig.metricsPath
+        }
+    };
+
+    // Cloudwatch settings
+    if (_.get(clowdAppConfig, 'logging.cloudwatch.accessKeyId') !== undefined) {
+        data.logging = {
+            cloudwatch: {
+                enabled: true,
+                group: clowdAppConfig.logging.cloudwatch.logGroup,
+                stream: os.hostname(),
+                key: clowdAppConfig.logging.cloudwatch.accessKeyId,
+                secret: clowdAppConfig.logging.cloudwatch.secretAccessKey,
+                region: clowdAppConfig.logging.cloudwatch.region
+            }
+        };
+    }
+
+    // DB settings
+    data.db.connection = {
+        user: clowdAppConfig.database.adminUsername,
+        password: clowdAppConfig.database.adminPassword,
+        database: clowdAppConfig.database.name,
+        host: clowdAppConfig.database.hostname,
+        port: clowdAppConfig.database.port
+    };
+
+    if (clowdAppConfig.database.sslMode !== 'disable') {
+        data.db.ssl = true;
+
+        const tmpobj = tmp.fileSync({ mode: 0o644, prefix: 'prefix-', postfix: '.txt' });
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
+        fs.writeFileSync(tmpobj.name, clowdAppConfig.database.rdsCa, 'utf8');
+
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
+        data.db.connection.ssl = { ca: fs.readFileSync(tmpobj.name) };
+    }
+
+    // Kafka settings
+    data.kafka = {
+        host: clowdAppConfig.kafka.brokers[0].hostname,
+        port: clowdAppConfig.kafka.brokers[0].port
+    };
+
+    config.load(data);
+}
 
 config.validate({ strict: true });
 
