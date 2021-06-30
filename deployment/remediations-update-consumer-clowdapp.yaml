@@ -1,95 +1,95 @@
 ---
-  apiVersion: v1
-  kind: Template
+apiVersion: v1
+kind: Template
+metadata:
+  name: remediations-update-consumer
+objects:
+- apiVersion: cloud.redhat.com/v1alpha1
+  kind: ClowdApp
   metadata:
     name: remediations-update-consumer
-  objects:
-  - apiVersion: cloud.redhat.com/v1alpha1
-    kind: ClowdApp
-    metadata:
-      name: remediations-update-consumer
-    spec:
-      envName: ${ENV_NAME}
-      database:
-        sharedDbAppName: remediations
-      kafkaTopics: 
-      - replicas: 3
-        partitions: 3
-        topicName: platform.remediation-updates.advisor
-      - replicas: 3
-        partitions: 3
-        topicName: platform.remediation-updates.compliance
-      - replicas: 3
-        partitions: 3
-        topicName: platform.remediation-updates.patch
-      - repliacas: 3
-        partitions: 3
-        topicName: platform.remediation-updates.vulnerability
-      deployments:
-      - name: remediations-update-consumer
-        minReplicas: ${NUM_REPLICAS}
-        podSpec:
-          image: quay.io/cloudservices/remediations-consumer:${IMAGE_TAG}
-          livenessProbe:
-            failureThreshold: 3
-            httpGet:
-              path: /metrics
-              port: 9006
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            successThreshold: 1
-          readinessProbe:
-            failureThreshold: 3
-            httpGet:
-              path: /metrics
-              port: 9006
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            successThreshold: 1
-          resources:
-            limits:
-              cpu: 200m
-              memory: 512Mi
-            requests:
-              cpu: 100m
-              memory: 256Mi
-          env:
-            - name: DB_DRY_RUN
-              value: ${DRY_RUN}
-            - name: DB_CA
-              value: /opt/certs/rds-cacert
-            - name: DB_SSL_ENABLED
-              value: ${DB_SSL_ENABLED}
-            - name: INVENTORY_RESET_OFFSETS
-              value: ${INVENTORY_RESET_OFFSETS}
-            - name: KAFKA_CONCURRENCY
-              value: ${KAFKA_CONCURRENCY}
-            - name: KAFKA_CONSUMER_GROUP
-              value: ${KAFKA_CONSUMER_GROUP}
-            - name: KAFKA_HOST
-              value: ${KAFKA_BOOTSTRAP_HOST}:${KAFKA_BOOTSTRAP_PORT}
-            - name: KAFKA_LOGGING
-              value: ${KAFKA_LOGGING}
-            - name: KAFKA_AUTOCOMMIT
-              value: ${KAFKA_AUTOCOMMIT}
-            - name: LOG_LEVEL
-              value: ${LOG_LEVEL}
-            - name: LOG_CW_ENABLED
-              value: ${LOG_CW_ENABLED}
-            - name: LOG_CW_LEVEL
-              value: ${LOG_LEVEL}
-            - name: ADVISOR_TOPIC_ENABLED
-              value: ${ADVISOR_TOPIC_ENABLED}
-            - name: COMPLIANCE_TOPIC_ENABLED
-              value: ${COMPLIANCE_TOPIC_ENABLED}
-            - name: INVENTORY_TOPIC_ENABLED
-              value: ${INVENTORY_TOPIC_ENABLED}
-            - name: PATCH_TOPIC_ENABLED
-              value: ${PATCH_TOPIC_ENABLED}
-            - name: RECEPTOR_TOPIC_ENABLED
-              value: ${RECEPTOR_TOPIC_ENABLED}
-            - name: VULNERABILITY_TOPIC_ENABLED
-              value: ${VULNERABILITY_TOPIC_ENABLED}
+  spec:
+    envName: ${ENV_NAME}
+    database:
+      sharedDbAppName: remediations
+    kafkaTopics: 
+    - replicas: 3
+      partitions: 3
+      topicName: platform.remediation-updates.advisor
+    - replicas: 3
+      partitions: 3
+      topicName: platform.remediation-updates.compliance
+    - replicas: 3
+      partitions: 3
+      topicName: platform.remediation-updates.patch
+    - repliacas: 3
+      partitions: 3
+      topicName: platform.remediation-updates.vulnerability
+    deployments:
+    - name: remediations-update-consumer
+      minReplicas: ${NUM_REPLICAS}
+      podSpec:
+        image: quay.io/cloudservices/remediations-consumer:${IMAGE_TAG}
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /metrics
+            port: 9006
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /metrics
+            port: 9006
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+        resources:
+          limits:
+            cpu: 200m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        env:
+          - name: DB_DRY_RUN
+            value: ${DRY_RUN}
+          - name: DB_CA
+            value: /opt/certs/rds-cacert
+          - name: DB_SSL_ENABLED
+            value: ${DB_SSL_ENABLED}
+          - name: INVENTORY_RESET_OFFSETS
+            value: ${INVENTORY_RESET_OFFSETS}
+          - name: KAFKA_CONCURRENCY
+            value: ${KAFKA_CONCURRENCY}
+          - name: KAFKA_CONSUMER_GROUP
+            value: ${KAFKA_CONSUMER_GROUP}
+          - name: KAFKA_HOST
+            value: ${KAFKA_BOOTSTRAP_HOST}:${KAFKA_BOOTSTRAP_PORT}
+          - name: KAFKA_LOGGING
+            value: ${KAFKA_LOGGING}
+          - name: KAFKA_AUTOCOMMIT
+            value: ${KAFKA_AUTOCOMMIT}
+          - name: LOG_LEVEL
+            value: ${LOG_LEVEL}
+          - name: LOG_CW_ENABLED
+            value: ${LOG_CW_ENABLED}
+          - name: LOG_CW_LEVEL
+            value: ${LOG_LEVEL}
+          - name: ADVISOR_TOPIC_ENABLED
+            value: ${ADVISOR_TOPIC_ENABLED}
+          - name: COMPLIANCE_TOPIC_ENABLED
+            value: ${COMPLIANCE_TOPIC_ENABLED}
+          - name: INVENTORY_TOPIC_ENABLED
+            value: ${INVENTORY_TOPIC_ENABLED}
+          - name: PATCH_TOPIC_ENABLED
+            value: ${PATCH_TOPIC_ENABLED}
+          - name: RECEPTOR_TOPIC_ENABLED
+            value: ${RECEPTOR_TOPIC_ENABLED}
+          - name: VULNERABILITY_TOPIC_ENABLED
+            value: ${VULNERABILITY_TOPIC_ENABLED}
 
 parameters:
 - name: DRY_RUN
