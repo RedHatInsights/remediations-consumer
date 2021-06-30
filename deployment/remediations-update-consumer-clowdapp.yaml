@@ -12,8 +12,19 @@
       envName: ${ENV_NAME}
       database:
         name: remediations
-      kafka: 
-        # ADD SOMETHING HERE
+      kafkaTopics: 
+      - replicas: 3
+        partitions: 3
+        topicName: platform.remediation-updates.advisor
+      - replicas: 3
+        partitions: 3
+        topicName: platform.remediation-updates.compliance
+      - replicas: 3
+        partitions: 3
+        topicName: platform.remediation-updates.patch
+      - repliacas: 3
+        partitions: 3
+        topicName: platform.remediation-updates.vulnerability
       deployments:
       - name: remediations-update-consumer
         minReplicas: ${NUM_REPLICAS}
