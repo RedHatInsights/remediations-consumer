@@ -11,7 +11,7 @@
     spec:
       envName: ${ENV_NAME}
       database:
-        name: remediations
+        sharedDbAppName: remediations
       kafkaTopics: 
       - replicas: 3
         partitions: 3
