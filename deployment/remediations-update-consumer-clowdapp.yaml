@@ -112,7 +112,7 @@ parameters:
 - name: KAFKA_AUTOCOMMIT
   value: 'true'
 - name: NUM_REPLICAS
-  value: '1'
+  value: 3
 - name: DB_SSL_ENABLED
   value: 'true'
 - name: LOG_CW_ENABLED
