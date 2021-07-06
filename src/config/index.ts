@@ -313,12 +313,14 @@ if (acgConfig) {
     }
 
     // DB settings
-    data.db.connection = {
-        user: clowdAppConfig.database.adminUsername,
-        password: clowdAppConfig.database.adminPassword,
-        database: clowdAppConfig.database.name,
-        host: clowdAppConfig.database.hostname,
-        port: clowdAppConfig.database.port
+    data.db = {
+        connection: {
+            user: clowdAppConfig.database.adminUsername,
+            password: clowdAppConfig.database.adminPassword,
+            database: clowdAppConfig.database.name,
+            host: clowdAppConfig.database.hostname,
+            port: clowdAppConfig.database.port
+        }
     };
 
     if (clowdAppConfig.database.sslMode !== 'disable') {
