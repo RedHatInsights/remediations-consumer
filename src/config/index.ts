@@ -296,8 +296,6 @@ if (acgConfig) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
     const clowdAppConfig = require(acgConfig); // eslint-disable-line security/detect-non-literal-require
 
-    console.log('CLOWDAPPCONFIG: ', clowdAppConfig);
-
     const data: any = {
         metrics: {
             port: clowdAppConfig.metricsPort
@@ -305,6 +303,7 @@ if (acgConfig) {
     };
 
     // Cloudwatch settings
+    console.log("logGroup: ", clowdAppConfig.logging.cloudwatch.logGroup);
     if (_.get(clowdAppConfig, 'logging.cloudwatch.accessKeyId') !== undefined) {
         data.logging = {
             cloudwatch: {
