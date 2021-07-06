@@ -339,7 +339,7 @@ if (acgConfig) {
     // Kafka settings
     data.kafka = {
         host: clowdAppConfig.kafka.brokers[0].hostname,
-        port: clowdAppConfig.kafka.brokers[0].port
+        port: clowdAppConfig.kafka.brokers[0].port.toString()
     };
 
     config.load(data);
