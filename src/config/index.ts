@@ -141,8 +141,13 @@ const config = convict({
     kafka: {
         host: {
             format: String,
-            default: 'localhost:29092',
+            default: 'localhost',
             env: 'KAFKA_HOST'
+        },
+        port: {
+            format: String,
+            default: '29092',
+            env: 'KAFKA_PORT'
         },
         autoCommit: {
             format: Boolean,
@@ -293,8 +298,7 @@ if (acgConfig) {
 
     const data: any = {
         metrics: {
-            port: clowdAppConfig.metricsPort,
-            path: clowdAppConfig.metricsPath
+            port: clowdAppConfig.metricsPort
         }
     };
 
@@ -304,7 +308,6 @@ if (acgConfig) {
             cloudwatch: {
                 enabled: true,
                 group: clowdAppConfig.logging.cloudwatch.logGroup,
-                stream: os.hostname(),
                 key: clowdAppConfig.logging.cloudwatch.accessKeyId,
                 secret: clowdAppConfig.logging.cloudwatch.secretAccessKey,
                 region: clowdAppConfig.logging.cloudwatch.region

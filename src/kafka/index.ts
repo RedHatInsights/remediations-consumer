@@ -31,7 +31,7 @@ import * as probes from '../probes';
 
 function configureConsumer (topicConfig: TopicConfig[]) {
     return P.promisifyAll(new kafka.ConsumerGroupStream({
-        kafkaHost: config.kafka.host,
+        kafkaHost: `${config.kafka.host}:${config.kafka.port}`,
         autoConnect: false,
         groupId: config.kafka.consumerGroup,
         fromOffset: 'earliest',
