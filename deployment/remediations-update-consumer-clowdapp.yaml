@@ -58,8 +58,6 @@ objects:
         env:
           - name: DB_DRY_RUN
             value: ${DRY_RUN}
-          - name: DB_CA
-            value: /opt/certs/rds-cacert
           - name: DB_SSL_ENABLED
             value: ${DB_SSL_ENABLED}
           - name: INVENTORY_RESET_OFFSETS
