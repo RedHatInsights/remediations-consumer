@@ -308,9 +308,9 @@ if (acgConfig) {
         data.logging = {
             cloudwatch: {
                 enabled: true,
-                group: clowdAppConfig.logging.cloudwatch.logGroup,
                 key: clowdAppConfig.logging.cloudwatch.accessKeyId,
                 secret: clowdAppConfig.logging.cloudwatch.secretAccessKey,
+                group: clowdAppConfig.logging.cloudwatch.logGroup,
                 region: clowdAppConfig.logging.cloudwatch.region
             }
         };
