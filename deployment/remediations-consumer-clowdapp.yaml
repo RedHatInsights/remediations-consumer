@@ -60,8 +60,6 @@ objects:
             value: ${KAFKA_CONCURRENCY}
           - name: KAFKA_CONSUMER_GROUP
             value: ${KAFKA_CONSUMER_GROUP}
-          - name: KAFKA_HOST
-            value: ${KAFKA_BOOTSTRAP_HOST}:${KAFKA_BOOTSTRAP_PORT}
           - name: KAFKA_LOGGING
             value: ${KAFKA_LOGGING}
           - name: KAFKA_AUTOCOMMIT
@@ -95,10 +93,6 @@ parameters:
   value: remediations-consumer
 - name: INVENTORY_RESET_OFFSETS
   value: 'false'
-- name: KAFKA_BOOTSTRAP_HOST
-  value: mq-kafka
-- name: KAFKA_BOOTSTRAP_PORT
-  value: '29092'
 - name: KAFKA_LOGGING
   value: 'false'
 - name: KAFKA_AUTOCOMMIT
