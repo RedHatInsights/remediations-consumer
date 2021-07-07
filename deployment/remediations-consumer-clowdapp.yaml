@@ -30,7 +30,7 @@ objects:
           failureThreshold: 3
           httpGet:
             path: /metrics
-            port: 9006
+            port: metrics
           initialDelaySeconds: 10
           periodSeconds: 10
           successThreshold: 1
@@ -38,7 +38,7 @@ objects:
           failureThreshold: 3
           httpGet:
             path: /metrics
-            port: 9006
+            port: metrics
           initialDelaySeconds: 10
           periodSeconds: 10
           successThreshold: 1
