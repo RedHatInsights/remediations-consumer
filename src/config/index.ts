@@ -3,7 +3,6 @@ import * as _ from 'lodash';
 import * as process from 'process';
 import * as fs from 'fs';
 import * as tmp from 'tmp';
-import * as console from 'console';
 import formats from './formats';
 
 convict.addFormats(formats);
@@ -302,9 +301,8 @@ if (acgConfig) {
         }
     };
 
-    console.log('logGroup: ', clowdAppConfig.logging.cloudwatch.logGroup);
     // Cloudwatch settings
-    if (_.get(clowdAppConfig, 'logging.cloudwatch.accessKeyId') !== undefined) {
+    if (_.get(clowdAppConfig, 'logging.cloudwatch.accessKeyId') !== '') {
         data.logging = {
             cloudwatch: {
                 enabled: true,
