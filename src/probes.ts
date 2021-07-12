@@ -99,7 +99,8 @@ export function lostUpdateMessage (message: ReceptorMessage<PlaybookRunUpdate>) 
 }
 
 export function advisorUpdateSuccess (host_id: string, issues: string[], references: number) {
-    log.info({ host_id, issues, references }, 'advisor issue updated');
+    log.info({ host_id, references }, 'advisor issues successfully updated');
+    log.debug({ issues }, 'updated advisor issues');
     counters.advisor.labels('success').inc();
 };
 
@@ -124,7 +125,8 @@ export function advisorUpdateErrorParse (message: Message, err: Error) {
 };
 
 export function complianceUpdateSuccess (host_id: string, issues: string[], references: number) {
-    log.info({ host_id, issues, references }, 'compliance issue updated');
+    log.info({ host_id, references }, 'compliance issues successfully updated');
+    log.debug({ issues }, 'updated compliance issues');
     counters.compliance.labels('success').inc();
 };
 
@@ -149,7 +151,8 @@ export function complianceUpdateErrorParse (message: Message, err: Error) {
 };
 
 export function patchUpdateSuccess (host_id: string, issues: string[], references: number) {
-    log.info({ host_id, issues, references }, 'patch issue updated');
+    log.info({ host_id, references }, 'patch issues successfully updated');
+    log.debug({ issues }, 'updated patch issues')
     counters.patch.labels('success').inc();
 };
 
@@ -174,7 +177,8 @@ export function patchUpdateErrorParse (message: Message, err: Error) {
 };
 
 export function vulnerabilityUpdateSuccess (host_id: string, issues: string[], references: number) {
-    log.info({ host_id, issues, references }, 'vulnerability issue updated');
+    log.info({ host_id, references }, 'vulnerability issues successfully updated');
+    log.debug({ issues }, 'updated vulnerabilitiy issues');
     counters.vulnerability.labels('success').inc();
 };
 
