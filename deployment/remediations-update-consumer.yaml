@@ -81,7 +81,9 @@ objects:
           - name: KAFKA_CONSUMER_GROUP
             value: ${KAFKA_CONSUMER_GROUP}
           - name: KAFKA_HOST
-            value: ${KAFKA_BOOTSTRAP_HOST}:${KAFKA_BOOTSTRAP_PORT}
+            value: ${KAFKA_BOOTSTRAP_HOST}
+          - name: KAFKA_PORT
+            value: ${KAFKA_BOOTSTRAP_PORT}
           - name: KAFKA_LOGGING
             value: ${KAFKA_LOGGING}
           - name: KAFKA_AUTOCOMMIT
