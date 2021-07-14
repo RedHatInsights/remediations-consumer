@@ -305,7 +305,7 @@ if (acgConfig) {
     if (_.get(clowdAppConfig, 'logging.cloudwatch.accessKeyId') !== '') {
         data.logging = {
             cloudwatch: {
-                enabled: true,
+                enabled: 'true',
                 key: clowdAppConfig.logging.cloudwatch.accessKeyId,
                 secret: clowdAppConfig.logging.cloudwatch.secretAccessKey,
                 group: clowdAppConfig.logging.cloudwatch.logGroup,
