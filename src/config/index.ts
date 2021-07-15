@@ -303,14 +303,13 @@ if (acgConfig) {
 
     // Cloudwatch settings
     if (_.get(clowdAppConfig, 'logging.cloudwatch.accessKeyId') !== '') {
-        data.logging = {
-            cloudwatch: {
-                enabled: true,
-                key: clowdAppConfig.logging.cloudwatch.accessKeyId,
-                secret: clowdAppConfig.logging.cloudwatch.secretAccessKey,
-                group: clowdAppConfig.logging.cloudwatch.logGroup,
-                region: clowdAppConfig.logging.cloudwatch.region
-            }
+        data.logging = { cloudwatch: {} };
+        data.logging.cloudwatch = {
+            enabled: true,
+            key: clowdAppConfig.logging.cloudwatch.accessKeyId,
+            secret: clowdAppConfig.logging.cloudwatch.secretAccessKey,
+            group: clowdAppConfig.logging.cloudwatch.logGroup,
+            region: clowdAppConfig.logging.cloudwatch.region
         };
     }
 
