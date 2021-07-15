@@ -303,7 +303,7 @@ if (acgConfig) {
 
     // Cloudwatch settings
     if (_.get(clowdAppConfig, 'logging.cloudwatch.accessKeyId') !== '') {
-        data.logging = { cloudwatch: {} };
+        data.logging = {};
         data.logging.cloudwatch = {
             enabled: true,
             key: clowdAppConfig.logging.cloudwatch.accessKeyId,
