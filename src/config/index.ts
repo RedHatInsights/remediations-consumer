@@ -305,6 +305,7 @@ if (acgConfig) {
     if (_.get(clowdAppConfig, 'logging.cloudwatch.accessKeyId') !== '') {
         data.logging = {};
         data.logging.cloudwatch = {
+            enabled: true,
             key: clowdAppConfig.logging.cloudwatch.accessKeyId,
             secret: clowdAppConfig.logging.cloudwatch.secretAccessKey,
             group: clowdAppConfig.logging.cloudwatch.logGroup,
@@ -324,7 +325,7 @@ if (acgConfig) {
     };
 
     if (clowdAppConfig.database.sslMode !== 'disable') {
-        data.db.ssl = true;
+        data.db.ssl = { enabled: true };
 
         const tmpobj = tmp.fileSync({ mode: 0o644, prefix: 'prefix-', postfix: '.txt' });
         // eslint-disable-next-line security/detect-non-literal-fs-filename
