@@ -105,7 +105,7 @@ const config = convict({
             ssl: {
                 ca: {
                     format: 'file',
-                    default: undefined,
+                    default: null,
                     env: 'DB_CA',
                     sensitive: true
                 }
