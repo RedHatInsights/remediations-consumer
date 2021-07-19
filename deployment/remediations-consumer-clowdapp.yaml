@@ -50,8 +50,6 @@ objects:
             cpu: 100m
             memory: 256Mi
         env:
-          - name: DB_CA
-            value: /opt/certs/rds-cacert
           - name: DB_DRY_RUN
             value: ${DRY_RUN}
           - name: DB_SSL_ENABLED
