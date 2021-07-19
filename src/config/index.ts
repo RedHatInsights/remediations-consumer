@@ -332,7 +332,7 @@ if (acgConfig) {
         fs.writeFileSync(tmpobj.name, clowdAppConfig.database.rdsCa, 'utf8');
 
         // Due to the config package not initializing "db.connection.ssl.ca"
-        // based on this issue https://github.com/mozilla/node-convict/issues/278 
+        // based on this issue https://github.com/mozilla/node-convict/issues/278
         // use .set() to initialize the value and set the new file.
         // eslint-disable-next-line security/detect-non-literal-fs-filename
         config.set('db.connection.ssl.ca', fs.readFileSync(tmpobj.name));
