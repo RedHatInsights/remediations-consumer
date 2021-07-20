@@ -326,16 +326,9 @@ if (acgConfig) {
 
     if (clowdAppConfig.database.sslMode !== 'disable') {
         data.db.ssl = { enabled: true };
-
-        const tmpobj = tmp.fileSync({ mode: 0o644, prefix: 'prefix-', postfix: '.txt' });
-        // eslint-disable-next-line security/detect-non-literal-fs-filename
-        fs.writeFileSync(tmpobj.name, clowdAppConfig.database.rdsCa, 'utf8');
-
-        // Due to the config package not initializing "db.connection.ssl.ca"
-        // based on this issue https://github.com/mozilla/node-convict/issues/278
-        // use .set() to initialize the value and set the new file.
-        // eslint-disable-next-line security/detect-non-literal-fs-filename
-        config.set('db.connection.ssl.ca', fs.readFileSync(tmpobj.name));
+        data.db.connection.ssl = {
+            ca: clowdAppConfig.database.rdsCa
+        };
     }
 
     // Kafka settings
