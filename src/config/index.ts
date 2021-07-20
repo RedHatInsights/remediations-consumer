@@ -1,8 +1,6 @@
 import * as convict from 'convict';
 import * as _ from 'lodash';
 import * as process from 'process';
-import * as fs from 'fs';
-import * as tmp from 'tmp';
 import formats from './formats';
 
 convict.addFormats(formats);
