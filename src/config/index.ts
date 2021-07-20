@@ -1,5 +1,7 @@
 import * as convict from 'convict';
 import * as _ from 'lodash';
+import * as fs from 'fs';
+import * as tmp from 'tmp';
 import * as process from 'process';
 import formats from './formats';
 
@@ -324,8 +326,13 @@ if (acgConfig) {
 
     if (clowdAppConfig.database.sslMode !== 'disable') {
         data.db.ssl = { enabled: true };
+
+        const tmpobj = tmp.fileSync({ mode: 0o644, prefix: 'prefix-', postfix: '.txt' });
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
+        fs.writeFileSync(tmpobj.name, clowdAppConfig.database.rdsCa, 'utf8');
+
         data.db.connection.ssl = {
-            ca: clowdAppConfig.database.rdsCa
+            ca: tmpobj.name
         };
     }
 
