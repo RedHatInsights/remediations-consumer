@@ -1,8 +1,14 @@
-FROM registry.redhat.io/ubi8/nodejs-12
+FROM registry.redhat.io/ubi8/ubi-minimal:latest
 
 USER root
 
 WORKDIR /opt/app-root/src
+
+RUN microdnf module enable nodejs:12 && \
+    microdnf install -y nodejs --nodocs && \
+    microdnf install -y yum --nodocs && \
+    yum install -y kernel-headers binutils && \
+    microdnf clean all
 
 COPY package.json package-lock.json /opt/app-root/src/
 
