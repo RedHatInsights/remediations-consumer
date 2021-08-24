@@ -57,6 +57,10 @@ export function whereUnfinishedExecutorsWithFinishedSystems (knex: Knex) {
 export function whereUnfinishedRunsWithFinishedExecutors (knex: Knex) {
     return knex(PlaybookRun.TABLE)
     .whereNotIn(PlaybookRun.status, FINAL_STATES)
+    .whereExists(
+        knex(PlaybookRunExecutor.TABLE)
+        .where(PlaybookRunExecutor.playbook_run_id, knex.raw('"playbook_runs"."id"'))
+    )
     .whereNotExists(
         knex(PlaybookRunExecutor.TABLE)
         .whereIn(PlaybookRunExecutor.status, NON_FINAL_STATES_EXECUTORS)

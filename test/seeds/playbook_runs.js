@@ -17,6 +17,13 @@ export async function seed (knex) {
         created_by: 'fifi',
         created_at: '2019-12-23T08:19:36.641Z',
         updated_at: '2019-12-23T08:19:36.641Z'
+    }, {
+        id: '99d0ba73-0015-4e7d-a6d6-4b530cbfb6cb',
+        status: 'running',
+        remediation_id: '147b453d-36be-4c72-8dff-f1d24587ff73',
+        created_by: 'fifi',
+        created_at: '2019-12-23T08:19:36.641Z',
+        updated_at: '2019-12-23T08:19:36.641Z'
     }]);
 
     await knex('playbook_run_executors').insert([{
