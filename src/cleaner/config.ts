@@ -1,4 +1,7 @@
 import '../config';
+import * as _ from 'lodash'
+import * as fs from 'fs';
+import * as tmp from 'tmp';
 import * as convict from 'convict';
 
 const config = convict({
@@ -162,6 +165,53 @@ const config = convict({
         }
     }
 });
+
+// load Clowder Config
+// eslint-disable-next-line no-process-env
+const acgConfig = process.env.ACG_CONFIG;
+if (acgConfig) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+    const clowdAppConfig = require(acgConfig); // eslint-disable-line security/detect-non-literal-require
+
+    const data: any = {};
+
+    // Cloudwatch settings
+    if (_.get(clowdAppConfig, 'logging.cloudwatch.accessKeyId') !== '') {
+        data.logging = {};
+        data.logging.cloudwatch = {
+            enabled: true,
+            key: clowdAppConfig.logging.cloudwatch.accessKeyId,
+            secret: clowdAppConfig.logging.cloudwatch.secretAccessKey,
+            group: clowdAppConfig.logging.cloudwatch.logGroup,
+            region: clowdAppConfig.logging.cloudwatch.region
+        };
+    }
+
+    // DB settings
+    data.db = {
+        connection: {
+            user: clowdAppConfig.database.adminUsername,
+            password: clowdAppConfig.database.adminPassword,
+            database: clowdAppConfig.database.name,
+            host: clowdAppConfig.database.hostname,
+            port: clowdAppConfig.database.port
+        }
+    };
+
+    if (clowdAppConfig.database.sslMode !== 'disable') {
+        data.db.ssl = { enabled: true };
+
+        const tmpobj = tmp.fileSync({ mode: 0o644, prefix: 'prefix-', postfix: '.txt' });
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
+        fs.writeFileSync(tmpobj.name, clowdAppConfig.database.rdsCa, 'utf8');
+
+        data.db.connection.ssl = {
+            ca: tmpobj.name
+        };
+    }
+
+    config.load(data);
+}
 
 config.validate({ strict: true });
 
