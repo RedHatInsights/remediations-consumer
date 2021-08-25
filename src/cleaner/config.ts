@@ -1,5 +1,5 @@
 import '../config';
-import * as _ from 'lodash'
+import * as _ from 'lodash';
 import * as fs from 'fs';
 import * as tmp from 'tmp';
 import * as convict from 'convict';
