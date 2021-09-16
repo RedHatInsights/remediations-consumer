@@ -2,6 +2,7 @@ import * as pino from 'pino';
 import config from '../config';
 import * as pinoms from 'pino-multi-stream';
 import * as pinoCW from 'pino-cloudwatch';
+import { logLevel } from 'kafkajs';
 
 function buildDestination () {
     if (!config.logging.cloudwatch.enabled) {
@@ -33,5 +34,21 @@ const logger: pino.Logger = pino({
         errorProps: '*'
     } : false
 }, buildDestination());
+
+export function toPinoLogLevel(level: logLevel) {
+    switch (level) {
+        case logLevel.ERROR:
+            return 'error';
+        case logLevel.WARN:
+            return 'warn';
+        case logLevel.DEBUG:
+            return 'debug';
+        case logLevel.NOTHING:
+            return 'silent';
+        case logLevel.INFO:
+        default:
+            return 'info';
+    }
+}
 
 export default logger.child({ type: 'application' });

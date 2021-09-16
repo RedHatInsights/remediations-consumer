@@ -1,10 +1,11 @@
 /* eslint-disable max-len */
 
 import * as _ from 'lodash';
-import { Kafka, logLevel } from 'kafkajs';
+import { Kafka, logLevel, LogEntry } from 'kafkajs';
+import * as pino from 'pino';
 
 import config from '../config';
-import log from '../util/log';
+import log, { toPinoLogLevel } from '../util/log';
 import { TopicConfig } from '../format';
 import * as probes from '../probes';
 
@@ -27,9 +28,27 @@ function kafkaLogLevel () {
     return undefined;
 }
 
+const pinoLogCreator = (logLevel: logLevel) => {
+    const logger = pino({
+        name: 'remediations-consumer',
+        level: toPinoLogLevel(logLevel),
+        prettyPrint: config.logging.pretty && !config.logging.cloudwatch.enabled ? {
+            errorProps: '*'
+        } : false
+    });
+
+    return ({ log }: LogEntry) => {
+        const pinoLevel = toPinoLogLevel(logLevel);
+        const { message, ...extras} = log;
+        // eslint-disable-next-line security/detect-object-injection
+        logger[pinoLevel](extras, message);
+    };
+};
+
 function configureBroker () {
     return new Kafka({
         logLevel: kafkaLogLevel(),
+        logCreator: pinoLogCreator,
         brokers: [`${config.kafka.host}:${config.kafka.port}`]
     });
 }
