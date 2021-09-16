@@ -1,8 +1,12 @@
 import * as Joi from '@hapi/joi';
-import { Message } from 'kafka-node';
+import { Message } from 'kafkajs';
 
 export function parse<T> (message: Message): any {
-    return JSON.parse(message.value.toString());
+    if (typeof(message.value) === 'string') {
+        return JSON.parse(message.value);
+    }
+
+    return null;
 }
 
 export function validate<T> (value: any, schema: Joi.ObjectSchema): T {

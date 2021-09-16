@@ -38,7 +38,7 @@ export default async function start () {
     const { consumer, stop: stopKafka } = await kafka.start(filteredTopicDetails);
 
     async function stop (e: Error | NodeJS.Signals | undefined) {
-        consumer.off('error', stop);
+        consumer.stop();
         process.off('SIGINT', stop);
         process.off('SIGTERM', stop);
 
@@ -57,7 +57,7 @@ export default async function start () {
         }
     }
 
-    consumer.once('error', stop);
+    consumer.on('consumer.crash', stop);
     process.on('SIGINT', stop);
     process.on('SIGTERM', stop);
 }

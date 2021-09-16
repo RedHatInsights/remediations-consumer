@@ -1,7 +1,7 @@
 import log from '../../util/log';
 import * as Joi from '@hapi/joi';
 import * as probes from '../../probes';
-import { Message } from 'kafka-node';
+import { Message } from 'kafkajs';
 import { validate, parse } from '../common';
 import * as _ from 'lodash';
 import * as playbookRunAck from './playbookRunAck';

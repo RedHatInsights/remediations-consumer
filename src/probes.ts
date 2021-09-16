@@ -3,7 +3,7 @@
 import log from './util/log';
 import { client } from './metrics';
 import config from './config';
-import { Message } from 'kafka-node';
+import { Message } from 'kafkajs'
 import { ReceptorMessage } from './handlers/receptor';
 import { PlaybookRunCancelAck } from './handlers/receptor/playbookRunCancelAck';
 import { PlaybookRunUpdate } from './handlers/receptor/playbookRunUpdate';
@@ -44,9 +44,9 @@ const counters = {
 
 ['cancelling', 'finished', 'failure'].forEach(value => counters.receptorCancelAck.labels(value).inc(0));
 
-export function incomingMessage (message: Message) {
+export function incomingMessage (topic: string, message: Message) {
     log.trace({ message }, 'incoming message');
-    counters.incoming.labels(message.topic).inc();
+    counters.incoming.labels(topic).inc();
 };
 
 export function inventoryRemoveSuccess (id: string, references: number) {
