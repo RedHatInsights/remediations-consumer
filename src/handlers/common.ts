@@ -2,8 +2,9 @@ import * as Joi from '@hapi/joi';
 import { Message } from 'kafkajs';
 
 export function parse<T> (message: Message): any {
-    if (typeof(message.value) === 'string') {
-        return JSON.parse(message.value);
+    const stringValue = (message.value) ? message.value.toString() : null;
+    if (typeof(stringValue) === 'string') {
+        return JSON.parse(stringValue);
     }
 
     return null;
