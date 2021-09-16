@@ -1,122 +1,80 @@
 /* eslint-disable max-len */
 
 import * as _ from 'lodash';
-import { queue } from 'async';
+import { Kafka, logLevel } from 'kafkajs';
 
 import config from '../config';
 import log from '../util/log';
-
-const SHUTDOWN_DELAY = 5000;
-
-function kafkaLogger (type: string) {
-    const child = log.child({type});
-
-    return {
-        debug: child.trace.bind(child),
-        info: child.info.bind(child),
-        warn: child.warn.bind(child),
-        error: child.error.bind(child)
-    };
-}
-
-if (config.kafka.logging) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('kafka-node/logging').setLoggerProvider(kafkaLogger);
-}
-
-import * as P from 'bluebird';
-import * as kafka from 'kafka-node';
 import { TopicConfig } from '../format';
 import * as probes from '../probes';
 
-function configureConsumer (topicConfig: TopicConfig[]) {
-    return P.promisifyAll(new kafka.ConsumerGroupStream({
-        kafkaHost: `${config.kafka.host}:${config.kafka.port}`,
-        autoConnect: false,
-        groupId: config.kafka.consumerGroup,
-        fromOffset: 'earliest',
-        autoCommit: config.kafka.autoCommit,
-        autoCommitIntervalMs: 5000,
-        protocol: ['roundrobin'],
-        highWaterMark: 5
-    }, topicConfig.map(topic => { return topic.topic; })));
+function kafkaLogLevel () {
+    if (config.kafka.logging) {
+        switch (config.logging.level) {
+            case 'DEBUG':
+                return logLevel.DEBUG;
+            case 'TRACE':
+                return logLevel.DEBUG;
+            case 'INFO':
+                return logLevel.INFO;
+            case 'ERROR':
+                return logLevel.ERROR;
+            default:
+                return logLevel.INFO;
+        }
+    }
+
+    return undefined;
 }
 
-async function resetOffsets (topic: string, consumer: kafka.ConsumerGroupStream) {
-    log.info({ topic }, 'reseting offsets for topic');
-    const offset = P.promisifyAll(consumer.consumerGroup.getOffset());
-    const offsets = await offset.fetchEarliestOffsetsAsync([topic]);
-    Object.entries<number>(offsets[topic]).forEach(setting => { // eslint-disable-line security/detect-object-injection
-        consumer.consumerGroup.setOffset(topic, parseInt(setting[0]), setting[1]);
+function configureBroker () {
+    return new Kafka({
+        logLevel: kafkaLogLevel(),
+        brokers: [`${config.kafka.host}:${config.kafka.port}`]
     });
 }
 
-function connect (topicConfig: TopicConfig[]) {
-    const consumer = configureConsumer(topicConfig);
-    const client = consumer.consumerGroup.client;
-    consumer.pause();
-
-    client.connect();
-
-    consumer.resume();
-    consumer.consumerGroup.client.on('ready', () => log.info('connected to Kafka'));
-    consumer.consumerGroup.on('rebalanced', async () => {
-        await P.mapSeries(topicConfig, topicConfig => {
-            if (topicConfig.resetOffsets) {
-                return resetOffsets(topicConfig.topic, consumer);
-            }
-        });
-
-        const offset = P.promisifyAll(consumer.consumerGroup.getOffset());
-        const offsets = await offset.fetchLatestOffsetsAsync(topicConfig.map(topic => { return topic.topic; }));
-
-        log.debug(offsets, 'current offsets');
-    });
-
-    const topics = topicConfig.map(topic => { return topic.topic; });
-    log.info('TOPICS ENABLED', topics);
+function connect () {
+    const kafka = configureBroker();
+    const consumer = kafka.consumer({ groupId: config.kafka.consumerGroup });
 
     return {
         consumer,
         stop () {
-            return consumer.closeAsync();
+            return consumer.stop();
         }
     };
 }
 
 export async function start (topicConfig: TopicConfig[]) {
-    const {consumer, stop} = await connect(topicConfig);
+    const {consumer, stop} = await connect();
 
-    const handlers: Record<string, (message: kafka.Message) => void> =
-        _(topicConfig).keyBy('topic').mapValues(details => details.handler).value();
+    const topics = topicConfig.map(topic => { return topic.topic; });
+    log.info('TOPICS ENABLED', topics);
 
-    const router: any = async (message: kafka.Message) => {
-        probes.incomingMessage(message);
-        const handler = handlers[message.topic];
-        await handler(message);
-    };
+    await consumer.connect();
+    log.info('connected to Kafka');
 
-    const q = queue(router, config.kafka.concurrency);
-    q.saturated(() => consumer.pause());
-    q.unsaturated(() => consumer.resume());
+    // Subscribe to each enabled topic
+    for (const topic of topicConfig) {
+        await consumer.subscribe({ topic: topic.topic });
+    }
 
-    consumer.on('data', message => q.push(message));
+    await consumer.run({
+        autoCommit: config.kafka.autoCommit,
+        partitionsConsumedConcurrently: config.kafka.concurrency,
+        eachMessage: async ({ topic, message }) => {
+            probes.incomingMessage(topic, message);
+            const handlers = _(topicConfig).keyBy('topic').mapValues(details => details.handler).value();
+            // eslint-disable-next-line security/detect-object-injection
+            const handler = handlers[topic];
+            await handler(message);
+        }
+    });
 
     return {
         consumer,
         async stop () {
-            q.pause();
-            consumer.pause();
-            if (q.length() > 0) {
-                log.info({ pending: q.length() }, 'waiting for pending inventory tasks to finish');
-                await P.delay(SHUTDOWN_DELAY);
-                if (q.length() > 0) {
-                    log.error({ pending: q.length() }, 'shutting down despite pending inventory tasks');
-                } else {
-                    log.info({ pending: q.length() }, 'all inventory tasks finished');
-                }
-            }
-
             await stop();
         }
     };

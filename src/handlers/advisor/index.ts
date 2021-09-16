@@ -1,9 +1,8 @@
 import * as Joi from '@hapi/joi';
 import * as probes from '../../probes';
 import * as db from '../../db';
-import * as P from 'bluebird';
 import * as _ from 'lodash';
-import { Message } from 'kafka-node';
+import { Message } from 'kafkajs';
 import { validate, parse } from '../common';
 
 const ADVISOR_PREFIX = 'advisor%';

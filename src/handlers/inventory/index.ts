@@ -2,7 +2,7 @@ import * as db from '../../db';
 import log from '../../util/log';
 import * as Joi from '@hapi/joi';
 import * as probes from '../../probes';
-import { Message } from 'kafka-node';
+import { Message } from 'kafkajs';
 import config from '../../config';
 import { validate, parse } from '../common';
 
