@@ -294,7 +294,7 @@ const config = convict({
             username: {
                 format: String,
                 default: '',
-                env: 'KAFKA_SASL_USERNAME',
+                env: 'KAFKA_SASL_USERNAME'
             },
             password: {
                 format: String,
@@ -383,7 +383,7 @@ if (acgConfig) {
 
     data.kafka.ssl = {
         ca: tmpobj2.name
-    }
+    };
 
     config.load(data);
 }
