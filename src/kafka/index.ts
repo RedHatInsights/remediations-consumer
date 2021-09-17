@@ -46,6 +46,23 @@ const pinoLogCreator = (logLevel: logLevel) => {
 };
 
 function configureBroker () {
+    if (config.kafka.ssl.enabled) {
+        return new Kafka({
+            logLevel: kafkaLogLevel(),
+            logCreator: pinoLogCreator,
+            brokers: [`${config.kafka.host}:${config.kafka.port}`],
+            ssl: {
+                rejectUnauthorized: false,
+                ca: [config.kafka.ssl.ca]
+            },
+            sasl: {
+                mechanism: 'scram-sha-512',
+                username: config.kafka.sasl.username,
+                password: config.kafka.sasl.password
+            }
+        });
+    }
+
     return new Kafka({
         logLevel: kafkaLogLevel(),
         logCreator: pinoLogCreator,

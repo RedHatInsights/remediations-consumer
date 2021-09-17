@@ -271,6 +271,37 @@ const config = convict({
                     env: 'VULNERABILITY_TOPIC_ENABLED'
                 }
             }
+        },
+        ssl: {
+            enabled: {
+                format: Boolean,
+                default: false,
+                env: 'KAFKA_SSL_ENABLED'
+            },
+            ca: {
+                format: String,
+                default: '',
+                env: 'KAFKA_CA',
+                sensitive: true
+            }
+        },
+        sasl: {
+            mechanism: {
+                format: String,
+                default: 'plain',
+                env: 'KAFKA_SASL_MECHANISM'
+            },
+            username: {
+                format: String,
+                default: '',
+                env: 'KAFKA_SASL_USERNAME',
+            },
+            password: {
+                format: String,
+                default: '',
+                env: 'KAFKA_SASL_PASSWORD',
+                sensitive: true
+            }
         }
     },
 
@@ -339,8 +370,20 @@ if (acgConfig) {
     // Kafka settings
     data.kafka = {
         host: clowdAppConfig.kafka.brokers[0].hostname,
-        port: clowdAppConfig.kafka.brokers[0].port.toString()
+        port: clowdAppConfig.kafka.brokers[0].port.toString(),
+        sasl: {
+            username: clowdAppConfig.kafka.brokers[0].sasl.username,
+            password: clowdAppConfig.kafka.brokers[0].sasl.password
+        }
     };
+
+    const tmpobj2 = tmp.fileSync({mode: 0o644, prefix: 'prefix-', postfix: '.txt'});
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
+    fs.writeFileSync(tmpobj2.name, clowdAppConfig.database.rdsCa, 'utf8');
+
+    data.kafka.ssl = {
+        ca: tmpobj2.name
+    }
 
     config.load(data);
 }
