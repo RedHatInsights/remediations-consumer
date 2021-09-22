@@ -54,7 +54,7 @@ function configureBroker () {
             brokers: [`${config.kafka.host}:${config.kafka.port}`],
             ssl: {
                 rejectUnauthorized: false,
-                ca: [fs.readFileSync(config.kafka.ssl.ca, 'utf-8')]
+                ca: [config.kafka.ssl.ca]
             },
             sasl: {
                 mechanism: 'scram-sha-512',
