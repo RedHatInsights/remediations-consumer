@@ -374,15 +374,10 @@ if (acgConfig) {
         sasl: {
             username: clowdAppConfig.kafka.brokers[0].sasl.username,
             password: clowdAppConfig.kafka.brokers[0].sasl.password
+        },
+        ssl: {
+            ca: clowdAppConfig.kafka.brokers[0].cacert
         }
-    };
-
-    const tmpobj2 = tmp.fileSync({mode: 0o644, prefix: 'prefix-', postfix: '.txt'});
-    // eslint-disable-next-line security/detect-non-literal-fs-filename
-    fs.writeFileSync(tmpobj2.name, clowdAppConfig.database.rdsCa, 'utf8');
-
-    data.kafka.ssl = {
-        ca: tmpobj2.name
     };
 
     config.load(data);
