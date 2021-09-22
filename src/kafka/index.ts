@@ -1,7 +1,6 @@
 /* eslint-disable max-len */
 
 import * as _ from 'lodash';
-import * as fs from 'fs';
 import { Kafka, logLevel, LogEntry } from 'kafkajs';
 import * as pino from 'pino';
 
