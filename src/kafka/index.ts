@@ -52,7 +52,7 @@ function configureBroker () {
             logCreator: pinoLogCreator,
             brokers: [`${config.kafka.host}:${config.kafka.port}`],
             ssl: {
-                rejectUnauthorized: false,
+                rejectUnauthorized: true,
                 ca: [config.kafka.ssl.ca]
             },
             sasl: {
