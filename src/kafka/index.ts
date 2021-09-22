@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 
 import * as _ from 'lodash';
+import * as fs from 'fs';
 import { Kafka, logLevel, LogEntry } from 'kafkajs';
 import * as pino from 'pino';
 
@@ -53,7 +54,7 @@ function configureBroker () {
             brokers: [`${config.kafka.host}:${config.kafka.port}`],
             ssl: {
                 rejectUnauthorized: false,
-                ca: [config.kafka.ssl.ca]
+                ca: [fs.readFileSync(config.kafka.ssl.ca, 'utf-8')]
             },
             sasl: {
                 mechanism: 'scram-sha-512',
