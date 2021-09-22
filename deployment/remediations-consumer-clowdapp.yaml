@@ -151,4 +151,3 @@ parameters:
   name: MEMORY_LIMIT
   value: 256Mi
 - name: CLEANER_SUSPEND
-  value: true
