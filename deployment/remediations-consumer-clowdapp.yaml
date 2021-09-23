@@ -83,7 +83,7 @@ objects:
     jobs:
     - name: cleaner
       schedule: '@hourly'
-      suspend: ${{CLEANER_SUSPEND}}
+      suspend: ${CLEANER_SUSPEND}
       podSpec:
         image: quay.io/cloudservices/remediations-consumer:${IMAGE_TAG}
         restartPolicy: Never
