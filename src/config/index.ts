@@ -372,18 +372,18 @@ if (acgConfig) {
     // Kafka settings
     data.kafka = {
         host: clowdAppConfig.kafka.brokers[0].hostname,
-        port: clowdAppConfig.kafka.brokers[0].port.toString(),
+        port: clowdAppConfig.kafka.brokers[0].port.toString()
     };
 
     if (_.get(clowdAppConfig, 'kafka.brokers[0].sasl', '') !== '') {
         data.kafka.sasl = {
             username: clowdAppConfig.kafka.brokers[0].sasl.username,
             password: clowdAppConfig.kafka.brokers[0].sasl.password
-        }
+        };
 
         data.kafka.ssl = {
             ca: clowdAppConfig.kafka.brokers[0].cacert
-        }
+        };
     }
 
     config.load(data);
