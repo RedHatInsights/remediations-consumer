@@ -372,11 +372,11 @@ if (acgConfig) {
         host: clowdAppConfig.kafka.brokers[0].hostname,
         port: clowdAppConfig.kafka.brokers[0].port.toString(),
         sasl: {
-            username: clowdAppConfig.kafka.brokers[0].sasl.username,
-            password: clowdAppConfig.kafka.brokers[0].sasl.password
+            username: clowdAppConfig.kafka.brokers[0].sasl.username || '',
+            password: clowdAppConfig.kafka.brokers[0].sasl.password || ''
         },
         ssl: {
-            ca: clowdAppConfig.kafka.brokers[0].cacert
+            ca: clowdAppConfig.kafka.brokers[0].cacert || ''
         }
     };
 
