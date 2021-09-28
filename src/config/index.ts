@@ -5,6 +5,8 @@ import * as tmp from 'tmp';
 import * as process from 'process';
 import formats from './formats';
 
+/* eslint-disable max-len */
+
 convict.addFormats(formats);
 
 const config = convict({
@@ -372,11 +374,11 @@ if (acgConfig) {
         host: clowdAppConfig.kafka.brokers[0].hostname,
         port: clowdAppConfig.kafka.brokers[0].port.toString(),
         sasl: {
-            username: clowdAppConfig.kafka.brokers[0].sasl.username || '',
-            password: clowdAppConfig.kafka.brokers[0].sasl.password || ''
+            username: (!_.isUndefined(clowdAppConfig.kafka.brokers[0].sasl.username)) ? clowdAppConfig.kafka.brokers[0].sasl.username : '',
+            password: (!_.isUndefined(clowdAppConfig.kafka.brokers[0].sasl.password)) ? clowdAppConfig.kafka.brokers[0].sasl.password : ''
         },
         ssl: {
-            ca: clowdAppConfig.kafka.brokers[0].cacert || ''
+            ca: (!_.isUndefined(clowdAppConfig.kafka.brokers[0].cacert)) ? clowdAppConfig.kafka.brokers[0].cacert : ''
         }
     };
 
