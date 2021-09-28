@@ -373,14 +373,18 @@ if (acgConfig) {
     data.kafka = {
         host: clowdAppConfig.kafka.brokers[0].hostname,
         port: clowdAppConfig.kafka.brokers[0].port.toString(),
-        sasl: {
-            username: (!_.isUndefined(clowdAppConfig.kafka.brokers[0].sasl.username)) ? clowdAppConfig.kafka.brokers[0].sasl.username : '',
-            password: (!_.isUndefined(clowdAppConfig.kafka.brokers[0].sasl.password)) ? clowdAppConfig.kafka.brokers[0].sasl.password : ''
-        },
-        ssl: {
-            ca: (!_.isUndefined(clowdAppConfig.kafka.brokers[0].cacert)) ? clowdAppConfig.kafka.brokers[0].cacert : ''
-        }
     };
+
+    if (_.get(clowdAppConfig, 'kafka.brokers[0].sasl', '') !== '') {
+        data.kafka.sasl = {
+            username: clowdAppConfig.kafka.brokers[0].sasl.username,
+            password: clowdAppConfig.kafka.brokers[0].sasl.password
+        }
+
+        data.kafka.ssl = {
+            ca: clowdAppConfig.kafka.brokers[0].cacert
+        }
+    }
 
     config.load(data);
 }
