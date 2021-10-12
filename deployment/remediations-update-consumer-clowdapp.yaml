@@ -66,6 +66,8 @@ objects:
             value: ${KAFKA_CONCURRENCY}
           - name: KAFKA_CONSUMER_GROUP
             value: ${KAFKA_CONSUMER_GROUP}
+          - name: KAFKA_SSL_ENABLED
+            value: ${KAFKA_SSL_ENABLED}
           - name: KAFKA_LOGGING
             value: ${KAFKA_LOGGING}
           - name: KAFKA_AUTOCOMMIT
@@ -97,6 +99,7 @@ parameters:
   value: '1'
 - name: KAFKA_CONSUMER_GROUP
   value: remediations-consumer
+- name: KAFKA_SSL_ENABLED
 - name: INVENTORY_RESET_OFFSETS
   value: 'false'
 - name: KAFKA_LOGGING
