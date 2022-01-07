@@ -8,6 +8,12 @@ export DB_DATABASE=$DATABASE_NAME
 export DB_HOST=$DATABASE_HOST
 export DB_PORT=$DATABASE_PORT
 
+echo DB_PASSWORD: $DB_PASSWORD
+echo DB_USERNAME: $DB_USERNAME
+echo DB_DATABASE: $DB_DATABASE
+echo DB_HOST:     $DB_HOST
+echo DB_PORT:     $DB_PORT
+
 # run unit-tests
 npm ci
 npm run test
