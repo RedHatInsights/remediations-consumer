@@ -2,7 +2,6 @@
 source $CICD_ROOT/deploy_ephemeral_db.sh
 
 # Map env vars set by `deploy_ephemeral_db.sh` if vars the app uses are different
-export DB_DEPLOYMENT_NAME="remediations-db"
 export DB_PASSWORD=$DATABASE_ADMIN_PASSWORD
 export DB_USERNAME=$DATABASE_ADMIN_USERNAME
 export DB_DATABASE=$DATABASE_NAME
