@@ -7,7 +7,7 @@ APP_NAME="remediations"  # name of app-sre "application" folder this component l
 COMPONENT_NAME="remediations-consumer"  # name of app-sre "resourceTemplate" in deploy.yaml for this component
 IMAGE="quay.io/cloudservices/remediations-consumer"
 DOCKERFILE=build/Dockerfile
-DB_DEPLOYTMENT_NAME=remediations-db
+DB_DEPLOYMENT_NAME=remediations-db
 
 # ADD IQE TESTS IN LATER
 # IQE_PLUGINS="remediations"
