@@ -5,7 +5,7 @@
 # --------------------------------------------
 APP_NAME="remediations"  # name of app-sre "application" folder this component lives in
 COMPONENT_NAME="remediations-consumer"  # name of app-sre "resourceTemplate" in deploy.yaml for this component
-IMAGE="quay.io/cloudservices/remediations-consumer"
+IMAGE="quay.io/cloudservices/remediations-consumer" # name of quay image repo
 DOCKERFILE=build/Dockerfile
 DB_DEPLOYMENT_NAME=remediations-db
 
