@@ -389,6 +389,7 @@ if (acgConfig) {
     config.load(data);
 }
 
+// debug comment
 config.validate({ strict: true });
 
 export default config.get();
