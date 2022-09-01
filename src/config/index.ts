@@ -389,8 +389,6 @@ if (acgConfig) {
     config.load(data);
 }
 
-// eslint-disable-next-line no-console,no-process-env
-console.log(`ENV:\n${process.env.KAFKA_CA}`);
 config.validate({ strict: true });
 
 export default config.get();
