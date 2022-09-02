@@ -16,7 +16,7 @@ echo DB_PORT:     $DB_PORT
 
 # run unit-tests
 npm ci
-npm run test
+npm run test-jenkins
 result=$?
 
 # TODO: add unittest-xml-reporting to rbac so that junit results can be parsed by jenkins
