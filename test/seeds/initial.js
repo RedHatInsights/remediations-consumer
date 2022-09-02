@@ -17,7 +17,29 @@ export async function seed (knex) {
         updated_by: 'tuser@redhat.com',
         updated_at: '2018-10-04T08:19:36.641Z'
     }, {
+        id: '147b453d-36be-4c72-8dff-f1d24587ff71',
+        name: 'remediation 2',
+        auto_reboot: true,
+        archived: true,
+        account_number: '8675309',
+        tenant_org_id: '11897521',
+        created_by: 'someUsername',
+        created_at: '2018-10-04T08:19:36.641Z',
+        updated_by: 'someUsername',
+        updated_at: '2018-10-04T08:19:36.641Z'
+    }, {
         id: '147b453d-36be-4c72-8dff-f1d24587ff72',
+        name: 'remediation 2',
+        auto_reboot: true,
+        archived: true,
+        account_number: '8675309',
+        tenant_org_id: '11897521',
+        created_by: 'someUsername',
+        created_at: '2018-10-04T08:19:36.641Z',
+        updated_by: 'someUsername',
+        updated_at: '2018-10-04T08:19:36.641Z'
+    }, {
+        id: '147b453d-36be-4c72-8dff-f1d24587ff73',
         name: 'remediation 2',
         auto_reboot: true,
         archived: true,
