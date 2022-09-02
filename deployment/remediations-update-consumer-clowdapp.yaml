@@ -13,6 +13,7 @@ objects:
     database:
       sharedDbAppName: remediations
     dependencies:
+    - remediations
     kafkaTopics:
     - replicas: 3
       partitions: 3
