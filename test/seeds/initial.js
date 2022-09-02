@@ -3,53 +3,53 @@ const toSchema = ({issue, system}) => ({ remediation_issue_id: issue, system_id:
 export async function seed (knex) {
     await knex('remediation_issue_systems').del();
     await knex('remediation_issues').del();
-    await knex('remediations').del();
-
-    await knex('remediations').insert([{
-        id: '1f12bdfc-8267-492d-a930-92f498fe65b9',
-        name: 'remediation 1',
-        auto_reboot: true,
-        archived: true,
-        account_number: 'test',
-        tenant_org_id: '0000000',
-        created_by: 'tuser@redhat.com',
-        created_at: '2018-10-04T08:19:36.641Z',
-        updated_by: 'tuser@redhat.com',
-        updated_at: '2018-10-04T08:19:36.641Z'
-    }, {
-        id: '147b453d-36be-4c72-8dff-f1d24587ff71',
-        name: 'remediation 2',
-        auto_reboot: true,
-        archived: true,
-        account_number: '8675309',
-        tenant_org_id: '11897521',
-        created_by: 'someUsername',
-        created_at: '2018-10-04T08:19:36.641Z',
-        updated_by: 'someUsername',
-        updated_at: '2018-10-04T08:19:36.641Z'
-    }, {
-        id: '147b453d-36be-4c72-8dff-f1d24587ff72',
-        name: 'remediation 2',
-        auto_reboot: true,
-        archived: true,
-        account_number: '8675309',
-        tenant_org_id: '11897521',
-        created_by: 'someUsername',
-        created_at: '2018-10-04T08:19:36.641Z',
-        updated_by: 'someUsername',
-        updated_at: '2018-10-04T08:19:36.641Z'
-    }, {
-        id: '147b453d-36be-4c72-8dff-f1d24587ff73',
-        name: 'remediation 2',
-        auto_reboot: true,
-        archived: true,
-        account_number: '8675309',
-        tenant_org_id: '11897521',
-        created_by: 'someUsername',
-        created_at: '2018-10-04T08:19:36.641Z',
-        updated_by: 'someUsername',
-        updated_at: '2018-10-04T08:19:36.641Z'
-    }]);
+    // await knex('remediations').del();
+    //
+    // await knex('remediations').insert([{
+    //     id: '1f12bdfc-8267-492d-a930-92f498fe65b9',
+    //     name: 'remediation 1',
+    //     auto_reboot: true,
+    //     archived: true,
+    //     account_number: 'test',
+    //     tenant_org_id: '0000000',
+    //     created_by: 'tuser@redhat.com',
+    //     created_at: '2018-10-04T08:19:36.641Z',
+    //     updated_by: 'tuser@redhat.com',
+    //     updated_at: '2018-10-04T08:19:36.641Z'
+    // }, {
+    //     id: '147b453d-36be-4c72-8dff-f1d24587ff71',
+    //     name: 'remediation 2',
+    //     auto_reboot: true,
+    //     archived: true,
+    //     account_number: '8675309',
+    //     tenant_org_id: '11897521',
+    //     created_by: 'someUsername',
+    //     created_at: '2018-10-04T08:19:36.641Z',
+    //     updated_by: 'someUsername',
+    //     updated_at: '2018-10-04T08:19:36.641Z'
+    // }, {
+    //     id: '147b453d-36be-4c72-8dff-f1d24587ff72',
+    //     name: 'remediation 2',
+    //     auto_reboot: true,
+    //     archived: true,
+    //     account_number: '8675309',
+    //     tenant_org_id: '11897521',
+    //     created_by: 'someUsername',
+    //     created_at: '2018-10-04T08:19:36.641Z',
+    //     updated_by: 'someUsername',
+    //     updated_at: '2018-10-04T08:19:36.641Z'
+    // }, {
+    //     id: '147b453d-36be-4c72-8dff-f1d24587ff73',
+    //     name: 'remediation 2',
+    //     auto_reboot: true,
+    //     archived: true,
+    //     account_number: '8675309',
+    //     tenant_org_id: '11897521',
+    //     created_by: 'someUsername',
+    //     created_at: '2018-10-04T08:19:36.641Z',
+    //     updated_by: 'someUsername',
+    //     updated_at: '2018-10-04T08:19:36.641Z'
+    // }]);
 
     await knex('remediation_issues').insert([{
         remediation_id: '1f12bdfc-8267-492d-a930-92f498fe65b9',
