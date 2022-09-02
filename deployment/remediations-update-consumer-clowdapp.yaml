@@ -12,6 +12,7 @@ objects:
     envName: ${ENV_NAME}
     database:
       sharedDbAppName: remediations
+    dependencies:
     kafkaTopics:
     - replicas: 3
       partitions: 3
