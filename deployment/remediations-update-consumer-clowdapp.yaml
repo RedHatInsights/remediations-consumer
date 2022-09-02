@@ -12,9 +12,7 @@ objects:
     envName: ${ENV_NAME}
     database:
       sharedDbAppName: remediations
-    dependencies:
-    - remediations
-    kafkaTopics: 
+    kafkaTopics:
     - replicas: 3
       partitions: 3
       topicName: platform.remediation-updates.advisor
@@ -68,6 +66,8 @@ objects:
             value: ${KAFKA_CONSUMER_GROUP}
           - name: KAFKA_SSL_ENABLED
             value: ${KAFKA_SSL_ENABLED}
+          - name: KAFKA_CA
+            value: ${KAFKA_CA}
           - name: KAFKA_LOGGING
             value: ${KAFKA_LOGGING}
           - name: KAFKA_AUTOCOMMIT
@@ -100,6 +100,7 @@ parameters:
 - name: KAFKA_CONSUMER_GROUP
   value: remediations-consumer
 - name: KAFKA_SSL_ENABLED
+- name: KAFKA_CA
 - name: INVENTORY_RESET_OFFSETS
   value: 'false'
 - name: KAFKA_LOGGING
