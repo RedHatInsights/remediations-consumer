@@ -53,7 +53,7 @@ function configureBroker () {
             brokers: [`${config.kafka.host}:${config.kafka.port}`],
             ssl: true,
             sasl: {
-                mechanism: "plain",
+                mechanism: _.toLower(config.kafka.sasl.username),
                 username: config.kafka.sasl.username,
                 password: config.kafka.sasl.password
             }

@@ -303,13 +303,7 @@ const config = convict({
                 default: '',
                 env: 'KAFKA_SASL_PASSWORD',
                 sensitive: true
-            },
-            securityProtocol: {
-                format: String,
-                default: '',
-                env: "KAFKA_SASL_SECURITY_PROTOCOL"
             }
-        }
     },
 
     metrics: {
@@ -385,7 +379,6 @@ if (acgConfig) {
             username: clowdAppConfig.kafka.brokers[0].sasl.username,
             password: clowdAppConfig.kafka.brokers[0].sasl.password,
             mechanism: clowdAppConfig.kafka.brokers[0].sasl.saslMechanism,
-            securityProtocol: clowdAppConfig.kafka.brokers[0].sasl.securityProtocol
         };
 
         data.kafka.ssl = {
