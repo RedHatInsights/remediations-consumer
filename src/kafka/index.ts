@@ -47,6 +47,7 @@ const pinoLogCreator = (logLevel: logLevel) => {
 
 function configureBroker () {
     if (config.kafka.ssl.enabled) {
+        console.log("Mechanism: ", config.kafka.sasl.mechanism)
         return new Kafka({
             logLevel: kafkaLogLevel(),
             logCreator: pinoLogCreator,
