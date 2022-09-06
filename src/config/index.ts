@@ -303,6 +303,11 @@ const config = convict({
                 default: '',
                 env: 'KAFKA_SASL_PASSWORD',
                 sensitive: true
+            },
+            securityProtocol: {
+                format: String,
+                default: '',
+                env: "KAFKA_SASL_SECURITY_PROTOCOL"
             }
         }
     },
