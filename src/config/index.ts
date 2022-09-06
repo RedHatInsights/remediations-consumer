@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as tmp from 'tmp';
 import * as process from 'process';
 import formats from './formats';
+import { isPlainObject } from 'lodash';
 
 /* eslint-disable max-len */
 

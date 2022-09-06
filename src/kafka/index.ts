@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 
 import * as _ from 'lodash';
-import { Kafka, logLevel, LogEntry } from 'kafkajs';
+import { Kafka, logLevel, LogEntry, SASLOptions } from 'kafkajs';
 import * as pino from 'pino';
 
 import config from '../config';
@@ -47,17 +47,35 @@ const pinoLogCreator = (logLevel: logLevel) => {
 
 function configureBroker () {
     if (config.kafka.ssl.enabled) {
-        console.log("Mechanism: ", config.kafka.sasl.mechanism)
+        // eslint-disable-next-line no-console
+        console.log('Mechanism: ', config.kafka.sasl.mechanism);
+
+        if (config.kafka.sasl.mechanism === 'plain') {
+            var sasl: SASLOptions = {
+                mechanism: 'plain',
+                username: config.kafka.sasl.username,
+                password: config.kafka.sasl.password
+            }
+        } else if (config.kafka.sasl.mechanism === 'scram-sha-512') {
+            var sasl: SASLOptions = {
+                mechanism: 'scram-sha-512',
+                username: config.kafka.sasl.username,
+                password: config.kafka.sasl.password
+            }
+        } else {
+            var sasl: SASLOptions = {
+                mechanism: 'plain',
+                username: config.kafka.sasl.username,
+                password: config.kafka.sasl.password
+            }
+        }
+
         return new Kafka({
             logLevel: kafkaLogLevel(),
             logCreator: pinoLogCreator,
             brokers: [`${config.kafka.host}:${config.kafka.port}`],
             ssl: true,
-            sasl: {
-                mechanism: _.toLower(_.toString(config.kafka.sasl.mechanism)),
-                username: config.kafka.sasl.username,
-                password: config.kafka.sasl.password
-            }
+            sasl: sasl
         });
     }
 
