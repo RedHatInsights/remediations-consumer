@@ -56,7 +56,8 @@ function configureBroker () {
                 ca: [config.kafka.ssl.ca]
             },
             sasl: {
-                mechanism: 'scram-sha-512',
+                mechanism: config.kafka.sasl.saslMechanism,
+                securityProtocol: config.kafka.sasl.securityProtocol,
                 username: config.kafka.sasl.username,
                 password: config.kafka.sasl.password
             }
