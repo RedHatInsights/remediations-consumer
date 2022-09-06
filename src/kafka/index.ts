@@ -51,13 +51,9 @@ function configureBroker () {
             logLevel: kafkaLogLevel(),
             logCreator: pinoLogCreator,
             brokers: [`${config.kafka.host}:${config.kafka.port}`],
-            ssl: {
-                rejectUnauthorized: true,
-                ca: [config.kafka.ssl.ca]
-            },
+            ssl: true,
             sasl: {
-                mechanism: config.kafka.sasl.mechanism,
-                securityProtocol: config.kafka.sasl.securityProtocol,
+                mechanism: "plain",
                 username: config.kafka.sasl.username,
                 password: config.kafka.sasl.password
             }
