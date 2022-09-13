@@ -75,7 +75,7 @@ function configureBroker () {
             logCreator: pinoLogCreator,
             brokers: [`${config.kafka.host}:${config.kafka.port}`],
             ssl: true,
-            sasl: sasl
+            sasl
         });
     }
 
