@@ -381,7 +381,6 @@ if (acgConfig) {
             username: clowdAppConfig.kafka.brokers[0].sasl.username,
             password: clowdAppConfig.kafka.brokers[0].sasl.password,
             mechanism: clowdAppConfig.kafka.brokers[0].sasl.saslMechanism,
-            securityProtocol: clowdAppConfig.kafka.brokers[0].sasl.securityProtocol
         };
 
         data.kafka.ssl = {
