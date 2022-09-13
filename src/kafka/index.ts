@@ -46,40 +46,35 @@ const pinoLogCreator = (logLevel: logLevel) => {
 };
 
 function configureBroker () {
-    if (config.kafka.ssl.enabled) {
-        // eslint-disable-next-line no-console
-        console.log('Mechanism: ', config.kafka.sasl.mechanism);
+    let sasl: SASLOptions;
 
-        // if (config.kafka.sasl.mechanism === 'plain') {
-        //     var sasl: SASLOptions = {
-        //         mechanism: 'plain',
-        //         username: config.kafka.sasl.username,
-        //         password: config.kafka.sasl.password
-        //     }
-        // } else if (config.kafka.sasl.mechanism === 'scram-sha-512') {
-        //     var sasl: SASLOptions = {
-        //         mechanism: 'scram-sha-512',
-        //         username: config.kafka.sasl.username,
-        //         password: config.kafka.sasl.password
-        //     }
-        // } else {
-        //     var sasl: SASLOptions = {
-        //         mechanism: 'plain',
-        //         username: config.kafka.sasl.username,
-        //         password: config.kafka.sasl.password
-        //     }
-        // }
+    if (config.kafka.ssl.enabled) {
+        if (config.kafka.sasl.mechanism === 'plain') {
+            sasl = {
+                mechanism: 'plain',
+                username: config.kafka.sasl.username,
+                password: config.kafka.sasl.password
+            }
+        } else if (config.kafka.sasl.mechanism === 'scram-sha-512') {
+            sasl = {
+                mechanism: 'scram-sha-512',
+                username: config.kafka.sasl.username,
+                password: config.kafka.sasl.password
+            }
+        } else {
+            sasl = {
+                mechanism: 'plain',
+                username: config.kafka.sasl.username,
+                password: config.kafka.sasl.password
+            }
+        }
 
         return new Kafka({
             logLevel: kafkaLogLevel(),
             logCreator: pinoLogCreator,
             brokers: [`${config.kafka.host}:${config.kafka.port}`],
             ssl: true,
-            sasl: {
-                mechanism: 'scram-sha-512',
-                username: config.kafka.sasl.username,
-                password: config.kafka.sasl.password
-            }
+            sasl
         });
     }
 
