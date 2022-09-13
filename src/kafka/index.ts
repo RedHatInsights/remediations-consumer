@@ -50,32 +50,36 @@ function configureBroker () {
         // eslint-disable-next-line no-console
         console.log('Mechanism: ', config.kafka.sasl.mechanism);
 
-        if (config.kafka.sasl.mechanism === 'plain') {
-            var sasl: SASLOptions = {
-                mechanism: 'plain',
-                username: config.kafka.sasl.username,
-                password: config.kafka.sasl.password
-            }
-        } else if (config.kafka.sasl.mechanism === 'scram-sha-512') {
-            var sasl: SASLOptions = {
-                mechanism: 'scram-sha-512',
-                username: config.kafka.sasl.username,
-                password: config.kafka.sasl.password
-            }
-        } else {
-            var sasl: SASLOptions = {
-                mechanism: 'plain',
-                username: config.kafka.sasl.username,
-                password: config.kafka.sasl.password
-            }
-        }
+        // if (config.kafka.sasl.mechanism === 'plain') {
+        //     var sasl: SASLOptions = {
+        //         mechanism: 'plain',
+        //         username: config.kafka.sasl.username,
+        //         password: config.kafka.sasl.password
+        //     }
+        // } else if (config.kafka.sasl.mechanism === 'scram-sha-512') {
+        //     var sasl: SASLOptions = {
+        //         mechanism: 'scram-sha-512',
+        //         username: config.kafka.sasl.username,
+        //         password: config.kafka.sasl.password
+        //     }
+        // } else {
+        //     var sasl: SASLOptions = {
+        //         mechanism: 'plain',
+        //         username: config.kafka.sasl.username,
+        //         password: config.kafka.sasl.password
+        //     }
+        // }
 
         return new Kafka({
             logLevel: kafkaLogLevel(),
             logCreator: pinoLogCreator,
             brokers: [`${config.kafka.host}:${config.kafka.port}`],
             ssl: true,
-            sasl
+            sasl: {
+                mechanism: 'scram-sha-512',
+                username: config.kafka.sasl.username,
+                password: config.kafka.sasl.password
+            }
         });
     }
 
