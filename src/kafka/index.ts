@@ -48,7 +48,7 @@ const pinoLogCreator = (logLevel: logLevel) => {
 function configureBroker () {
     let sasl: SASLOptions;
 
-    if (config.kafka.ssl.enabled) {
+    if (config.kafka.sasl.securityProtocol === "SASL_SSL") {
         if (config.kafka.sasl.mechanism === 'plain') {
             sasl = {
                 mechanism: 'plain',
