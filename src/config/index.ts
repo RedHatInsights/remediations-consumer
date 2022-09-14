@@ -5,6 +5,7 @@ import * as tmp from 'tmp';
 import * as process from 'process';
 import formats from './formats';
 import { isPlainObject } from 'lodash';
+import { Kafka } from 'kafkajs';
 
 /* eslint-disable max-len */
 
@@ -304,6 +305,11 @@ const config = convict({
                 default: '',
                 env: 'KAFKA_SASL_PASSWORD',
                 sensitive: true
+            },
+            securityProtocol: {
+                format: String,
+                default: '',
+                env: 'KAFKA_SECURITY_PROTOCOL',
             }
         }
     },
@@ -376,11 +382,40 @@ if (acgConfig) {
         port: clowdAppConfig.kafka.brokers[0].port.toString()
     };
 
+    data.kafka.topics = {
+    // Kafka topic settings
+        advisor: {
+            topic: processTopicName(clowdAppConfig, "platform.remediation-updates.advisor"),
+            enabled: processTopicEnabled(clowdAppConfig, "platform.remediation-updates.advisor"),
+        },
+        compliance: {
+            topic: processTopicName(clowdAppConfig, "platform.remediation-updates.compliance"),
+            enabled: processTopicEnabled(clowdAppConfig, "platform.remediation-updates.compliance"),
+        },
+        inventory: {
+            topic: processTopicName(clowdAppConfig, "platform.inventory.events"),
+            enabled: processTopicEnabled(clowdAppConfig, "platform.inventory.events"),
+        },
+        patch: {
+            topic: processTopicName(clowdAppConfig, "platform.remediation-updates.patch"),
+            enabled: processTopicEnabled(clowdAppConfig, "platform.remediation-updates.patch"),
+        },
+        receptor: {
+            topic: processTopicName(clowdAppConfig, "platform.receptor-controller.responses"),
+            enabled: processTopicEnabled(clowdAppConfig, "platform.receptor-controller.responses"),
+        },
+        vulnerability: {
+            topic: processTopicName(clowdAppConfig, "platform.remediation-updates.vulnerability"),
+            enabled: processTopicEnabled(clowdAppConfig, "platform.remediation-updates.vulnerability"),
+        }
+    }
+
     if (_.get(clowdAppConfig, 'kafka.brokers[0].sasl', '') !== '') {
         data.kafka.sasl = {
             username: clowdAppConfig.kafka.brokers[0].sasl.username,
             password: clowdAppConfig.kafka.brokers[0].sasl.password,
             mechanism: clowdAppConfig.kafka.brokers[0].sasl.saslMechanism,
+            securityProtocol: clowdAppConfig.kafka.brokers[0].sasl.securityProtocol,
         };
 
         data.kafka.ssl = {
@@ -396,3 +431,12 @@ config.validate({ strict: true });
 
 export default config.get();
 export const sanitized = config.toString();
+
+function processTopicName (cappconfig:any, key: string): string{
+    const output = cappconfig.kafka.topics.find(({ requestedName }: { requestedName: string }) => requestedName === key);
+    return output ? output.name : "";
+}
+
+function processTopicEnabled (cappconfig:any ,key: string): boolean{
+    return Boolean(cappconfig.kafka.topics.find(({ requestedName }: { requestedName: string }) => requestedName === key));
+}
