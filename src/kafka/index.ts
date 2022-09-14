@@ -48,14 +48,14 @@ const pinoLogCreator = (logLevel: logLevel) => {
 function configureBroker () {
     let sasl: SASLOptions;
 
-    if (config.kafka.ssl.enabled) {
-        if (config.kafka.sasl.mechanism === 'plain') {
+    if (config.kafka.sasl.securityProtocol === "SASL_SSL") {
+        if (config.kafka.sasl.mechanism === 'PLAIN') {
             sasl = {
                 mechanism: 'plain',
                 username: config.kafka.sasl.username,
                 password: config.kafka.sasl.password
             }
-        } else if (config.kafka.sasl.mechanism === 'scram-sha-512') {
+        } else if (config.kafka.sasl.mechanism === 'SCRAM-SHA-512') {
             sasl = {
                 mechanism: 'scram-sha-512',
                 username: config.kafka.sasl.username,
