@@ -5,7 +5,7 @@ import {SatReceptorResponse, ReceptorMessage} from '.';
 import * as Joi from '@hapi/joi';
 import * as probes from '../../probes';
 import { PlaybookRunExecutor, PlaybookRunSystem, Status, PlaybookRun } from '../models';
-import * as Knex from 'knex';
+import { Knex } from 'knex';
 import { findExecutorByReceptorIds } from './queries';
 import {
     whereUnfinishedExecutorsWithFinishedSystems,
@@ -18,9 +18,9 @@ export interface PlaybookRunFinished extends SatReceptorResponse {
     playbook_run_id: string;
     host: string;
     status: 'success' | 'failure' | 'canceled';
-    version?: number
-    connection_code?: 0 | 1 | null
-    execution_code?: number | null
+    version?: number;
+    connection_code?: 0 | 1 | null;
+    execution_code?: number | null;
 }
 
 export const schema = Joi.object().keys({
@@ -77,7 +77,7 @@ export async function handle (message: ReceptorMessage<PlaybookRunFinished>) {
             log.debug('executor not finished yet');
             return;
         }
-    
+
         assert.equal(executorUpdated.length, 1); // it should never happen that this updates more than one row but just in case
         log.info({id: executorUpdated[0].id, status: executorUpdated[0].status }, 'executor finished');
     }

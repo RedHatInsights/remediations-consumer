@@ -48,7 +48,9 @@ function parseMessage (message: Message): ReceptorMessage<any> | undefined {
 
         return validate<ReceptorMessage<any>>(parsed, envelopeSchema);
     } catch (e) {
-        probes.receptorErrorParse(message, e);
+        if (e instanceof Error) {
+            probes.receptorErrorParse(message, e);
+        }
     }
 }
 
@@ -63,14 +65,20 @@ async function handleSatResponse<T extends SatReceptorResponse> (
     try {
         validate<T>(message.payload, handler.schema);
     } catch (e) {
-        probes.receptorErrorParse(message, e);
+        if (e instanceof Error) {
+            probes.receptorErrorParse(message, e);
+        }
+
         return;
     }
 
     try {
         await handler.handle(message);
     } catch (e) {
-        probes.receptorError(message, e);
+        if (e instanceof Error) {
+            probes.receptorError(message, e);
+        }
+
         return;
     }
 

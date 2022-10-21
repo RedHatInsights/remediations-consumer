@@ -10,7 +10,7 @@ const COMPLIANCE_PREFIX = 'ssg%';
 
 interface ComplianceUpdate {
     host_id: string;
-    issues: Array<string>;
+    issues: string[];
 }
 
 const schema = Joi.object().keys({
@@ -28,7 +28,9 @@ function parseMessage (message: Message): ComplianceUpdate | undefined {
 
         return validate(parsed, schema);
     } catch (e) {
-        probes.complianceUpdateErrorParse(message, e);
+        if (e instanceof Error) {
+            probes.complianceUpdateErrorParse(message, e);
+        }
     }
 }
 
@@ -53,8 +55,11 @@ export default async function onMessage (message: Message) {
         if (!_.isEmpty(result)) {
             probes.complianceIssueUnknown(host_id, issues);
         }
+
         probes.complianceUpdateSuccess(host_id, issues, 2); // TODO: Fix Probes
     } catch (e) {
-        probes.complianceUpdateError(host_id, issues, e);
+        if (e instanceof Error) {
+            probes.complianceUpdateError(host_id, issues, e);
+        }
     }
 }
