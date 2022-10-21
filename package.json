@@ -17,7 +17,7 @@
     "db:seed": "knex seed:run",
     "lint": "eslint src/**/*.ts test/**/*.js",
     "start": "tsc && LOG_PRETTY=true node dist/src/app.js",
-    "test": "tsc && npm run db:ims && NODE_ENV=test LOG_LEVEL=fatal jest -i",
+    "test": "tsc && npm run db:ims && node -v && NODE_ENV=test LOG_LEVEL=fatal jest -i",
     "test-jenkins": "tsc && npm run db:seed && NODE_ENV=test LOG_LEVEL=fatal jest -i",
     "verify": "npm-run-all lint coverage"
   },
