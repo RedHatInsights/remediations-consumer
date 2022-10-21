@@ -8,7 +8,7 @@ Kafka consumer that consumes messages produced by applications and updates state
 
 ### Prerequisities
 
-* node.js 10
+* node.js 16.18
 
 ### Running the application locally
 
@@ -17,11 +17,11 @@ Kafka consumer that consumes messages produced by applications and updates state
 ### Local development
 
 1. ```npm ci```
-1. ```docker-compose -f build/docker-compose.yml up zookeeper```
-1. ```docker-compose -f build/docker-compose.yml up kafka```
-1. ```docker-compose -f build/docker-compose.yml up db```
-1. ```npm run db:ims```
-1. ```npm start```
+2. ```docker-compose -f build/docker-compose.yml up zookeeper```
+3. ```docker-compose -f build/docker-compose.yml up kafka```
+4. ```docker-compose -f build/docker-compose.yml up db```
+5. ```npm run db:ims```
+6. ```npm start```
 
 Metrics can be found at http://localhost:9006/metrics
 

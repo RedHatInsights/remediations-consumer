@@ -4,7 +4,7 @@ USER root
 
 WORKDIR /opt/app-root/src
 
-RUN microdnf module enable nodejs:12 && \
+RUN microdnf module enable nodejs:16 && \
     microdnf install -y nodejs --nodocs && \
     microdnf install -y yum --nodocs && \
     yum install -y kernel-headers binutils && \

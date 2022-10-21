@@ -1,12 +1,7 @@
 module.exports = {
     coverageDirectory: 'coverage',
     testEnvironment: 'node',
-
-    testMatch: [
-        '**/?(*.)+(unit|integration).ts'
-    ],
-
-    transform: {
-        '^.+\\.tsx?$': 'ts-jest'
-    }
+    preset: 'ts-jest',
+    modulePathIgnorePatterns: ['<rootDir>/package.json'],
+    testMatch: ['**/?(*.)+(unit|integration).ts']
 };
