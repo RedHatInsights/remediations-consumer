@@ -16,7 +16,7 @@ RUN npm ci --only=production
 
 COPY . /opt/app-root/src
 
-RUN npm i typescript@3.6.3 && npm run compile
+RUN npm i typescript@4.8.4 && npm run compile
 
 RUN UPDATE_PKGS="kernel-headers binutils" && \
     yum update -y $UPDATE_PKGS && \
