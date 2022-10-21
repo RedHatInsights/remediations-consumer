@@ -21,7 +21,7 @@ describe('inventory handler integration tests', function () {
 
         await handler(message);
         const [{ count }] = await db.get()('remediation_issue_systems').where({ system_id: 'dde971ae-0a39-4c2b-9041-a92e2d5a96cc' }).count();
-        parseInt(count).should.equal(0);
+        parseInt(count as string).should.equal(0);
         spy.callCount.should.equal(1);
     });
 
@@ -73,7 +73,7 @@ describe('inventory handler integration tests', function () {
 
         await handler(message);
         const [{ count }] = await db.get()('remediation_issue_systems').where({ system_id: 'aa94b090-ea16-46ed-836d-5f42a918e9c7' }).count();
-        parseInt(count).should.equal(1);
+        parseInt(count as string).should.equal(1);
         spy.callCount.should.equal(0);
     });
 });

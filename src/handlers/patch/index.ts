@@ -9,7 +9,7 @@ import { validate, parse } from '../common';
 const PATCH_PREFIX = 'patch%';
 interface PatchUpdate {
     host_id: string;
-    issues: Array<string>;
+    issues: string[];
 }
 
 const schema = Joi.object().keys({
@@ -27,7 +27,9 @@ function parseMessage (message: Message): PatchUpdate | undefined {
 
         return validate(parsed, schema);
     } catch (e) {
-        probes.patchUpdateErrorParse(message, e);
+        if (e instanceof Error) {
+            probes.patchUpdateErrorParse(message, e);
+        }
     }
 }
 
@@ -52,8 +54,11 @@ export default async function onMessage (message: Message) {
         if (!_.isEmpty(result)) {
             probes.patchIssueUnknown(host_id, issues);
         }
+
         probes.patchUpdateSuccess(host_id, issues, 2); // TODO: Fix Probes
     } catch (e) {
-        probes.patchUpdateError(host_id, issues, e);
+        if (e instanceof Error) {
+            probes.patchUpdateError(host_id, issues, e);
+        }
     }
 }

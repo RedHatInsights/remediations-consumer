@@ -29,7 +29,9 @@ function parseMessage (message: Message): RemoveMessage | undefined {
 
         return validate(parsed, schema);
     } catch (e) {
-        probes.inventoryRemoveErrorParse(message, e);
+        if (e instanceof Error) {
+            probes.inventoryRemoveErrorParse(message, e);
+        }
     }
 }
 
@@ -53,6 +55,8 @@ export default async function onMessage (message: Message) {
             probes.inventoryRemoveUnknown(id);
         }
     } catch (e) {
-        probes.inventoryRemoveError(id, e);
+        if (e instanceof Error) {
+            probes.inventoryRemoveError(id, e);
+        }
     }
 }

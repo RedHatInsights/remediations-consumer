@@ -1,4 +1,4 @@
-import * as Knex from 'knex';
+import { Knex }from 'knex';
 import { PlaybookRunExecutor, PlaybookRunSystem, Status, PlaybookRun } from '../models';
 import { ReceptorMessage } from '.';
 import { PlaybookRunUpdate } from './playbookRunUpdate';

@@ -1,5 +1,5 @@
 import { trim } from '../../util/strings';
-import * as Knex from 'knex';
+import { Knex } from 'knex';
 import { PlaybookRunExecutor, PlaybookRunSystem, PlaybookRun, Status } from '../models';
 
 const NON_FINAL_STATES_SYSTEMS = [Status.PENDING, Status.RUNNING];

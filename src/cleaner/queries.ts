@@ -1,4 +1,4 @@
-import * as Knex from 'knex';
+import {  Knex } from 'knex';
 import { PlaybookRunSystem, Status } from '../handlers/models';
 import {
     whereUnfinishedExecutorsWithFinishedSystems,

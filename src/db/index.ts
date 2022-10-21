@@ -1,5 +1,5 @@
 import log from '../util/log';
-import * as Knex from 'knex';
+import { knex, Knex } from 'knex';
 import { RemediationIssues, RemediationIssueSystems } from '../handlers/models';
 
 const EQ = '=';
@@ -8,7 +8,7 @@ interface DbConfig {
     connection:
         Record<'user' | 'password' | 'database'| 'host', string> &
         Record<'port', number> &
-        Record<'ssl', Record<'ca', string | undefined>>;
+        Partial<Record<'ssl', Record<'ca', string | undefined>>>;
     ssl: Record<'enabled', boolean>;
     pool: Record<'min' | 'max', number>;
 }
@@ -22,28 +22,28 @@ export function buildConfiguration (config: DbConfig) {
         acquireConnectionTimeout: 10000
     };
 
-    if (!config.ssl.enabled || !opts.connection.ssl.ca) {
+    if (!config.ssl.enabled || !opts.connection.ssl?.ca) {
         delete opts.connection.ssl;
     }
 
     return Object.freeze(opts);
 }
 
-let knex: any = null;
+let knexInstance: any = null;
 
 export function get (): Knex {
-    if (knex === null) {
+    if (knexInstance === null) {
         throw new Error('not connected');
     }
 
-    return knex;
+    return knexInstance;
 }
 
 export async function start (config: DbConfig): Promise<Knex> {
-    knex = Knex(buildConfiguration(config));
-    await knex.raw('SELECT 1 AS result');
-    knex.on('query', (data: any) => log.trace({sql: data.sql, bindings: data.bindings}, 'executing SQL query'));
-    return knex;
+    knexInstance = knex(buildConfiguration(config));
+    await knexInstance.raw('SELECT 1 AS result');
+    knexInstance.on('query', (data: any) => log.trace({sql: data.sql, bindings: data.bindings}, 'executing SQL query'));
+    return knexInstance;
 }
 
 export async function deleteSystem (system_id: string, dryRun = false): Promise<number> {
@@ -88,6 +88,6 @@ export async function updateIssues (knex: Knex, host_id: string, issues: string[
 
 export function stop () {
     if (knex !== null) {
-        return knex.destroy();
+        return knexInstance.destroy();
     }
 }

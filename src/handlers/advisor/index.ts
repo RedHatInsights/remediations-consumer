@@ -9,7 +9,7 @@ const ADVISOR_PREFIX = 'advisor%';
 
 interface AdvisorUpdate {
     host_id: string;
-    issues: Array<string>;
+    issues: string[];
 }
 
 const schema = Joi.object().keys({
@@ -26,8 +26,10 @@ function parseMessage (message: Message): AdvisorUpdate | undefined {
         }
 
         return validate(parsed, schema);
-    } catch (e) {
-        probes.advisorUpdateErrorParse(message, e);
+    } catch (e: unknown) {
+        if (e instanceof Error) {
+            probes.advisorUpdateErrorParse(message, e);
+        }
     }
 }
 
@@ -52,8 +54,11 @@ export default async function onMessage (message: Message) {
         if (!_.isEmpty(result)) {
             probes.advisorIssueUnknown(host_id, issues);
         }
+
         probes.advisorUpdateSuccess(host_id, issues, 2); // TODO: Fix Probes
     } catch (e) {
-        probes.advisorUpdateError(host_id, issues, e);
+        if (e instanceof Error) {
+            probes.advisorUpdateError(host_id, issues, e);
+        }
     }
 }

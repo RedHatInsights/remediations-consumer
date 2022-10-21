@@ -4,12 +4,12 @@ import * as assert from 'assert';
 import * as Joi from '@hapi/joi';
 import * as db from '../../db';
 import * as probes from '../../probes';
-import * as Knex from 'knex';
+import { Knex } from 'knex';
 import { Status } from '../models';
 import { findExecutorByReceptorIds, updateExecutorById } from './queries';
 import { tryUpdateRun } from './playbookRunFinished';
 
-const initialStatuses = [ Status.ACKED, Status.PENDING, Status.RUNNING ];
+const initialStatuses = [Status.ACKED, Status.PENDING, Status.RUNNING];
 
 export interface PlaybookRunCompleted extends SatReceptorResponse {
     playbook_run_id: string;
@@ -33,14 +33,14 @@ export const schema = Joi.object().keys({
 });
 
 function tryUpdateExecutor (
-        knex: Knex,
-        executor_id: string,
-        status: string,
-        sat_connection_code: 0 | 1 | null = null,
-        sat_connection_error: string | null = null,
-        sat_infrastructure_code: 0 | 1 | null = null,
-        sat_infrastructure_error: string | null = null
-    ){
+    knex: Knex,
+    executor_id: string,
+    status: string,
+    sat_connection_code: 0 | 1 | null = null,
+    sat_connection_error: string | null = null,
+    sat_infrastructure_code: 0 | 1 | null = null,
+    sat_infrastructure_error: string | null = null
+) {
     switch (status) {
         case Status.SUCCESS: {
             return updateExecutorById(
