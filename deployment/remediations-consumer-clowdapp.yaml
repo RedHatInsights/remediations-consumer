@@ -68,6 +68,8 @@ objects:
             value: ${KAFKA_LOGGING}
           - name: KAFKA_AUTOCOMMIT
             value: ${KAFKA_AUTOCOMMIT}
+          - name: KAFKA_CONNECTION_TIMEOUT
+            value: ${KAFKA_CONNECTION_TIMEOUT}
           - name: LOG_LEVEL
             value: ${LOG_LEVEL}
           - name: LOG_CW_LEVEL
@@ -130,6 +132,7 @@ parameters:
   value: 'false'
 - name: KAFKA_AUTOCOMMIT
   value: 'true'
+- name: KAFKA_CONNECTION_TIMEOUT
 - name: NUM_REPLICAS
   value: '3'
 - name: DB_SSL_ENABLED

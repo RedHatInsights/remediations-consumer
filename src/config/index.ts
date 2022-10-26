@@ -162,6 +162,11 @@ const config = convict({
             default: 1,
             env: 'KAFKA_CONCURRENCY'
         },
+        connectionTimeout: {
+            format: Number,
+            default: 1000,
+            env: 'KAFKA_CONNECTION_TIMEOUT'
+        },
         consumerGroup: {
             format: String,
             default: 'remediations-consumer',
