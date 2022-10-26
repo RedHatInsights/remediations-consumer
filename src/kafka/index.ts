@@ -48,32 +48,26 @@ const pinoLogCreator = (logLevel: logLevel) => {
 function configureBroker () {
     let sasl: SASLOptions;
 
-    if (config.kafka.sasl.securityProtocol === "SASL_SSL") {
-        if (config.kafka.sasl.mechanism === 'PLAIN') {
-            sasl = {
-                mechanism: 'plain',
-                username: config.kafka.sasl.username,
-                password: config.kafka.sasl.password
-            }
-        } else if (config.kafka.sasl.mechanism === 'SCRAM-SHA-512') {
+    if (config.kafka.sasl.securityProtocol === 'SASL_SSL') {
+        if (config.kafka.sasl.mechanism === 'SCRAM-SHA-512') {
             sasl = {
                 mechanism: 'scram-sha-512',
                 username: config.kafka.sasl.username,
                 password: config.kafka.sasl.password
-            }
+            };
         } else {
             sasl = {
                 mechanism: 'plain',
                 username: config.kafka.sasl.username,
                 password: config.kafka.sasl.password
-            }
+            };
         }
 
         return new Kafka({
             logLevel: kafkaLogLevel(),
             logCreator: pinoLogCreator,
             brokers: [`${config.kafka.host}:${config.kafka.port}`],
-            connectionTimeout: 10000,
+            connectionTimeout: config.kafka.connectionTimeout,
             ssl: true,
             sasl
         });
