@@ -18,6 +18,12 @@ DB_DEPLOYMENT_NAME=remediations-db
 CICD_URL=https://raw.githubusercontent.com/RedHatInsights/bonfire/master/cicd
 curl -s $CICD_URL/bootstrap.sh > .cicd_bootstrap.sh && source .cicd_bootstrap.sh
 
+# DELETE ME - env tests
+echo "================== test stuff ===================="
+docker -v
+docker-compose -v
+echo "============= END OF test stuff ===================="
+
 # Build Remediations image based on the latest commit
 source $CICD_ROOT/build.sh
 source $APP_ROOT/unit_test.sh
