@@ -39,7 +39,7 @@ RUN UPDATE_PKGS="kernel-headers binutils" && \
 
 FROM base AS packages
 
-COPY package.json package-lock.json .
+COPY package.json package-lock.json ./
 
 RUN npm ci --only=production
 
