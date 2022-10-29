@@ -1,9 +1,10 @@
-version: '2'
+version: '3.4'
 services:
   remediations-consumer:
     build:
       context: ../
       dockerfile: build/Dockerfile
+      target: test
     command: sh -c "echo 'Waiting 10s for dependencies to start' && sleep 10 && npm run db:ims && npm start"
     links:
       - db
