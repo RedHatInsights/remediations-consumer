@@ -1,24 +1,11 @@
-# Deploy ephemeral db
-source $CICD_ROOT/deploy_ephemeral_db.sh
+# Docker version 20.10.14, build a224086
+# docker-compose version 1.29.1, build c34c88b2
+# podman version 1.6.4
 
-# Map env vars set by `deploy_ephemeral_db.sh` if vars the app uses are different
-export DB_PASSWORD=$DATABASE_ADMIN_PASSWORD
-export DB_USERNAME=$DATABASE_ADMIN_USERNAME
-export DB_DATABASE="remediations_consumer_test"
-export DB_HOST=$DATABASE_HOST
-export DB_PORT=$DATABASE_PORT
-
-echo DB_PASSWORD: $DB_PASSWORD
-echo DB_USERNAME: $DB_USERNAME
-echo DB_DATABASE: $DB_DATABASE
-echo DB_HOST:     $DB_HOST
-echo DB_PORT:     $DB_PORT
-
-# build test image and run tests in that...
-# run unit-tests
-npm ci
-npm run test
+# run tests...
+docker-compose -f build/docker-compose-unit_test.yaml up --exit-code-from remediations-consumer
 result=$?
+docker-compose -f build/docker-compose-unit_test.yaml down
 
 # TODO: add unittest-xml-reporting to rbac so that junit results can be parsed by jenkins
 mkdir -p $WORKSPACE/artifacts
