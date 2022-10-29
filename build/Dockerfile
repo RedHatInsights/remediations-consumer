@@ -1,4 +1,25 @@
-FROM registry.redhat.io/ubi8/ubi-minimal:latest
+#--- base ---
+# -> node
+
+#--- base -> packages ---
+# node
+# -> npm-prod
+
+#--- packages -> test ---
+# node
+# npm-prod
+# -> npm-dev
+# -> src
+# -> ./dist
+
+#--- packages -> dist ---
+# node
+# npm-prod
+# test:./dist
+
+#----------------------- base -----------------------
+
+FROM registry.redhat.io/ubi8/ubi-minimal:latest AS base
 
 USER root
 
@@ -10,20 +31,41 @@ RUN microdnf module enable nodejs:12 && \
     yum install -y kernel-headers binutils && \
     microdnf clean all
 
-COPY package.json package-lock.json /opt/app-root/src/
-
-RUN npm ci --only=production
-
-COPY . /opt/app-root/src
-
-RUN npm i typescript@4.8.4 && npm run compile
-
 RUN UPDATE_PKGS="kernel-headers binutils" && \
     yum update -y $UPDATE_PKGS && \
     yum clean all
 
-USER 1001
+#--------------------- packages ---------------------
 
+FROM base AS packages
+
+COPY package.json package-lock.json .
+
+RUN npm ci --only=production
+
+#----------------------- test -----------------------
+
+FROM packages AS test
+
+# required by jest
+RUN yum install -y findutils
+
+RUN npm ci
+
+COPY . .
+
+RUN npm run compile
+
+ENV NODE_ENV=test
+# Run the linter here?
+
+#----------------------- dist -----------------------
+
+FROM packages AS dist
+
+COPY --from=test /opt/app-root/src/dist/src ./dist/src
+
+USER 1001
 EXPOSE 9006
 ENV NODE_ENV=production
 CMD [ "node", "dist/src/app.js" ]
