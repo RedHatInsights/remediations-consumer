@@ -11,8 +11,12 @@
         "sourceMap": true
     },
     "include": [
-        "./src/**/*",
-        "./test/**/*"
+        "./src/**/*.ts",
+        "./test/**/*.js"   // for DB init, migration & seeding
+    ],
+    "exclude": [
+        "**/*.unit.ts",
+        "**/*.integration.ts"
     ],
     "types": [
         "node"
