@@ -14,6 +14,7 @@ echo DB_DATABASE: $DB_DATABASE
 echo DB_HOST:     $DB_HOST
 echo DB_PORT:     $DB_PORT
 
+# build test image and run tests in that...
 # run unit-tests
 npm ci
 npm run test

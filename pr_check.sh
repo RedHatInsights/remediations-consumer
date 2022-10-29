@@ -22,6 +22,9 @@ curl -s $CICD_URL/bootstrap.sh > .cicd_bootstrap.sh && source .cicd_bootstrap.sh
 echo "================== test stuff ===================="
 docker -v
 docker-compose -v
+podman -v
+# Docker version 20.10.14, build a224086
+# docker-compose version 1.29.1, build c34c88b2
 echo "============= END OF test stuff ===================="
 
 # Build Remediations image based on the latest commit

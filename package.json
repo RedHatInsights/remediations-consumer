@@ -2,7 +2,7 @@
   "name": "remediations-consumer",
   "version": "0.1.0",
   "description": "Consumer of platform messages for Remediations",
-  "main": "index.js",
+  "main": "app.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:RedHatInsights/remediations-consumer.git"
@@ -18,7 +18,6 @@
     "lint": "eslint src/**/*.ts test/**/*.js",
     "start": "tsc && LOG_PRETTY=true node dist/src/app.js",
     "test": "tsc && npm run db:ims && NODE_ENV=test LOG_LEVEL=fatal jest -i",
-    "test-jenkins": "tsc && npm run db:seed && NODE_ENV=test LOG_LEVEL=fatal jest -i",
     "verify": "npm-run-all lint coverage"
   },
   "author": "Jozef Hartinger",
