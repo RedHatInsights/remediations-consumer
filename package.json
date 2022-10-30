@@ -18,7 +18,7 @@
     "lint": "eslint src/**/*.ts test/**/*.js",
     "start": "tsc && LOG_PRETTY=true node dist/src/app.js",
     "test": "tsc && npm run db:ims && NODE_ENV=test LOG_LEVEL=fatal jest -i",
-    "ci-test": "npm run db:ims && NODE_ENV=test LOG_LEVEL=fatal jest -i --coverage",
+    "ci-test": "npm run db:ims && NODE_ENV=test LOG_LEVEL=fatal jest -i",
     "verify": "npm-run-all lint coverage"
   },
   "author": "Jozef Hartinger",
