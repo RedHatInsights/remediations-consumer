@@ -6,7 +6,7 @@ services:
       context: ../
       dockerfile: build/Dockerfile
       target: test
-    command: sh -c "npm run ci-test"
+    command: sh -c "npm run ci"
     volumes:
       - ../artifacts:/opt/app-root/src/artifacts
     links:
