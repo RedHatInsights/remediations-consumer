@@ -1,5 +1,5 @@
 import '../../test';
-import * as convict from 'convict';
+import convict from 'convict';
 import formats from './formats';
 
 convict.addFormats(formats);
