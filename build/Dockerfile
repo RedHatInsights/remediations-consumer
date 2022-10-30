@@ -29,11 +29,7 @@ RUN microdnf module enable nodejs:16 && \
     microdnf install -y nodejs --nodocs && \
     microdnf install -y yum --nodocs && \
     yum install -y kernel-headers binutils && \
-    microdnf clean all
-
-RUN UPDATE_PKGS="kernel-headers binutils" && \
-    yum update -y $UPDATE_PKGS && \
-    yum clean all
+    microdnf clean all && yum clean all
 
 #--------------------- packages ---------------------
 
