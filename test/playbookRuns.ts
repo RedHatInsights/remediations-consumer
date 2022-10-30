@@ -1,7 +1,7 @@
 import {v4} from 'uuid';
 import { Status, PlaybookRunExecutor, PlaybookRun, PlaybookRunSystem } from '../src/handlers/models';
 import * as db from '../src/db';
-import * as P from 'bluebird';
+import P from 'bluebird';
 import * as _ from 'lodash';
 
 /*
