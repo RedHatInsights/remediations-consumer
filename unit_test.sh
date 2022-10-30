@@ -1,5 +1,5 @@
 # run our tests...
-docker-compose -f build/docker-compose-unit_test.yml up --force-recreate --exit-code-from remediations-consumer
+docker-compose -f build/docker-compose-unit_test.yml up --exit-code-from remediations-consumer
 
 result=$?
 
