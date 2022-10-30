@@ -14,6 +14,8 @@ DB_DEPLOYMENT_NAME=remediations-db
 # IQE_MARKER_EXPRESSION="smoke"
 # IQE_FILTER_EXPRESSION=""
 
+docker system prune -af
+
 # Install bonfire repo/initialize
 CICD_URL=https://raw.githubusercontent.com/RedHatInsights/bonfire/master/cicd
 curl -s $CICD_URL/bootstrap.sh > .cicd_bootstrap.sh && source .cicd_bootstrap.sh
