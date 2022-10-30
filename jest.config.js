@@ -1,12 +1,8 @@
 module.exports = {
-    coverageDirectory: 'coverage',
+    coverageDirectory: 'artifacts/coverage',
     testEnvironment: 'node',
-
-    testMatch: [
-        '**/?(*.)+(unit|integration).ts'
-    ],
-
-    transform: {
-        '^.+\\.tsx?$': 'ts-jest'
-    }
+    preset: 'ts-jest',
+    // reporters: ['default', ['jest-junit', {JEST_JUNIT_OUTPUT_DIR: 'artifacts'}]],
+    reporters: ['default', ['jest-junit', {outputDirectory: 'artifacts'}]],
+    testMatch: ['**/?(*.)+(unit|integration).ts']
 };
