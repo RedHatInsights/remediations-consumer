@@ -1,8 +1,8 @@
 /* eslint-disable max-len */
 
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { Kafka, logLevel, LogEntry, SASLOptions } from 'kafkajs';
-import * as pino from 'pino';
+import pino from 'pino';
 
 import config from '../config';
 import log, { toPinoLogLevel } from '../util/log';

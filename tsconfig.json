@@ -1,14 +1,11 @@
 {
+    "extends": "@tsconfig/node16/tsconfig.json",
     "compilerOptions": {
-        "module": "commonjs",
         "outDir": "./dist",
         "allowJs": true,
-        "moduleResolution": "node",
-        "strict": true,
         "resolveJsonModule": true,
-        "target": "es2017",
         "baseUrl": ".",
-        "sourceMap": true
+        "sourceMap": false
     },
     "include": [
         "./src/**/*.ts",
