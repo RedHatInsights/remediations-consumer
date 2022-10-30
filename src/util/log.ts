@@ -1,4 +1,4 @@
-import * as pino from 'pino';
+import pino from 'pino';
 import config from '../config';
 import * as pinoms from 'pino-multi-stream';
 import * as pinoCW from 'pino-cloudwatch';

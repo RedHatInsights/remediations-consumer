@@ -2,7 +2,7 @@ import '../config';
 import * as _ from 'lodash';
 import * as fs from 'fs';
 import * as tmp from 'tmp';
-import * as convict from 'convict';
+import convict from 'convict';
 import * as convict_format_with_validator from 'convict-format-with-validator';
 
 convict.addFormats(convict_format_with_validator);

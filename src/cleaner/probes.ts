@@ -1,7 +1,7 @@
 import * as client from 'prom-client';
 import config from './config';
 import log from '../util/log';
-import * as P from 'bluebird';
+import P from 'bluebird';
 import * as os from 'os';
 
 const logger = log.child({type: 'cleaner'});

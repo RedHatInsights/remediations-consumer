@@ -1,4 +1,4 @@
-import * as convict from 'convict';
+import convict from 'convict';
 import * as _ from 'lodash';
 import * as fs from 'fs';
 import * as tmp from 'tmp';
