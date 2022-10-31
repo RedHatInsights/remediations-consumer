@@ -6,14 +6,13 @@ services:
       context: ../
       dockerfile: build/Dockerfile
       target: test
-    command: sh -c "npm run ci-test"
-#    volumes:
-#      - ../artifacts:/opt/app-root/src/artifacts
+    command: sh -c "npm run ci-test && chmod -fR 777 artifacts"
+    volumes:
+      - ../artifacts:/opt/app-root/src/artifacts
     links:
       - db
     ports:
       - "9006:9006"
-#    user: "${DOCKER_UID}:${DOCKER_GID}"
     environment:
       - NODE_ENV=test
       - LOG_LEVEL=trace
