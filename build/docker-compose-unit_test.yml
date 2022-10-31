@@ -6,13 +6,14 @@ services:
       context: ../
       dockerfile: build/Dockerfile
       target: test
-    command: sh -c "npm run ci-test"
+    command: sh -c "echo 'UID ' $UID && echo 'GID ' $GID && npm run ci-test"
 #    volumes:
 #      - ../artifacts:/opt/app-root/src/artifacts
     links:
       - db
     ports:
-      - 9006:9006
+      - "9006:9006"
+    user: "${UID}:${GID}"
     environment:
       - NODE_ENV=test
       - LOG_LEVEL=trace
@@ -22,7 +23,7 @@ services:
   db:
     image: registry.access.redhat.com/rhscl/postgresql-10-rhel7
     ports:
-      - 5432:5432
+      - "5432:5432"
     environment:
       - POSTGRESQL_ADMIN_PASSWORD=remediations
 
