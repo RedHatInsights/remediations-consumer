@@ -6,7 +6,7 @@ services:
       context: ../
       dockerfile: build/Dockerfile
       target: test
-    command: sh -c "echo 'UID ' DOCKER_UID && echo 'GID ' DOCKER_GID && npm run ci-test"
+    command: sh -c "echo 'UID ' $DOCKER_UID && echo 'GID ' $DOCKER_GID && npm run ci-test"
 #    volumes:
 #      - ../artifacts:/opt/app-root/src/artifacts
     links:
