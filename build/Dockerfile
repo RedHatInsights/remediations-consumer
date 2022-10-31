@@ -21,8 +21,6 @@
 
 FROM registry.redhat.io/ubi8/ubi-minimal:latest AS base
 
-USER root
-
 WORKDIR /opt/app-root/src
 
 RUN microdnf module enable nodejs:16 && \
