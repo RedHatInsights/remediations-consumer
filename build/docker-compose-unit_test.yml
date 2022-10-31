@@ -13,7 +13,7 @@ services:
       - db
     ports:
       - "9006:9006"
-    user: "${UID}:${GID}"
+    user: "${DOCKER_UID}:${DOCKER_GID}"
     environment:
       - NODE_ENV=test
       - LOG_LEVEL=trace
