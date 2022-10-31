@@ -1,5 +1,5 @@
-UID=$(id -u)
-GID=$(id -g)
+DOCKER_UID=$(id -u)
+DOCKER_GID=$(id -g)
 
 # run our tests...
 docker-compose -f build/docker-compose-unit_test.yml up --build --exit-code-from remediations-consumer
