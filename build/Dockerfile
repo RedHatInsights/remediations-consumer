@@ -26,6 +26,7 @@ WORKDIR /opt/app-root/src
 RUN microdnf module enable nodejs:16 && \
     microdnf install -y nodejs --nodocs && \
     microdnf install -y yum --nodocs && \
+    yum update -y && \
     yum install -y kernel-headers binutils findutils && \
     microdnf clean all && yum clean all
 
@@ -51,7 +52,7 @@ ENV NODE_ENV=test
 
 FROM packages AS dist
 
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
 COPY --from=test /opt/app-root/src/dist/package.json ./dist/
 COPY --from=test /opt/app-root/src/dist/src ./dist/src
