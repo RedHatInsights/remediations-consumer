@@ -9,14 +9,15 @@ services:
     links:
       - db
     ports:
-      - 9006:9006
+      - "9006:9006"
     environment:
       - NODE_ENV=development
       - LOG_LEVEL=trace
       - DB_HOST=db
       - KAFKA_HOST=kafka:9092
       - KAFKA_AUTOCOMMIT=true
-    restart: unless-stopped
+      - INVENTORY_TOPIC_ENABLED="true"
+    restart: "no"
 
   zookeeper:
     image: confluentinc/cp-zookeeper
@@ -29,13 +30,13 @@ services:
     ports:
       - "29092:29092"
     environment:
-      - KAFKA_LISTENERS=INTERNAL://kafka:9092,EXTERNAL://kafka:29092
-      - KAFKA_ADVERTISED_LISTENERS=INTERNAL://kafka:9092,EXTERNAL://localhost:29092
-      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
-      - KAFKA_INTER_BROKER_LISTENER_NAME=INTERNAL
-      - KAFKA_CREATE_TOPICS="platform.inventory.events:3:1"
-      - KAFKA_ADVERTISED_HOST_NAME=172.17.0.1
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      KAFKA_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://kafka:29092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+#      KAFKA_CREATE_TOPICS: "platform.inventory.events:3:1"
+      KAFKA_ADVERTISED_HOST_NAME: 172.17.0.1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
 
   db:
     image: registry.access.redhat.com/rhscl/postgresql-10-rhel7
