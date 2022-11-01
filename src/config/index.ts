@@ -7,7 +7,7 @@ import formats from './formats';
 
 /* eslint-disable max-len */
 
-convict.addFormats(formats);
+convict.addFormat(formats);
 
 const config = convict({
     env: {

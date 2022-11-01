@@ -3,9 +3,11 @@ import * as _ from 'lodash';
 import * as fs from 'fs';
 import * as tmp from 'tmp';
 import convict from 'convict';
-import * as convict_format_with_validator from 'convict-format-with-validator';
+import format from '../config/formats';
+import convict_format_with_validator from 'convict-format-with-validator';
 
 convict.addFormats(convict_format_with_validator);
+convict.addFormat(format);
 
 const config = convict({
     env: {
