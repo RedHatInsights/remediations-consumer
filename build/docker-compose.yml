@@ -1,11 +1,10 @@
 version: '3.4'
 services:
   remediations-consumer:
-    image: quay.io/cloudservices/remediations-consumer:dedc041
-#    build:
-#      context: ../
-#      dockerfile: build/Dockerfile
-#      target: test
+    build:
+      context: ../
+      dockerfile: build/Dockerfile
+      target: test
     command: sh -c "echo 'Waiting 10s for dependencies to start' && sleep 10 && npm run db:ims && npm start"
     links:
       - db
