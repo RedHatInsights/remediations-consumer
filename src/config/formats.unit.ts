@@ -2,7 +2,7 @@ import '../../test';
 import convict from 'convict';
 import formats from './formats';
 
-convict.addFormats(formats);
+convict.addFormat(formats);
 
 let config: any = null;
 
