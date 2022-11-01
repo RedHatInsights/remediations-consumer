@@ -1,7 +1,7 @@
 import pino from 'pino';
 import config from '../config';
 import * as pinoms from 'pino-multi-stream';
-import * as pinoCW from 'pino-cloudwatch';
+import pinoCW from 'pino-cloudwatch';
 import { logLevel } from 'kafkajs';
 
 function buildDestination () {
