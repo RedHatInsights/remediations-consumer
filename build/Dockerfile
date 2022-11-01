@@ -53,7 +53,7 @@ FROM packages AS dist
 
 RUN npm ci --only=production
 
-COPY --from=test /opt/app-root/src/dist/src /opt/app-root/src/dist/package.json ./dist
+COPY --from=test /opt/app-root/src/dist/src /opt/app-root/src/dist/package.json ./dist/
 
 USER 1001
 EXPOSE 9006
