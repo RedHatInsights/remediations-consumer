@@ -6,7 +6,7 @@ services:
       context: ../
       dockerfile: build/Dockerfile
       target: test
-    command: sh -c "npm run ci-test && chmod -fR 777 artifacts"
+    command: sh -c "npm run test:ci && chmod -fR 777 artifacts"
     volumes:
       - ../artifacts:/opt/app-root/src/artifacts
     links:
