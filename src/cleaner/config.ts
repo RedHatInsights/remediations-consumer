@@ -6,8 +6,7 @@ import convict from 'convict';
 import format from '../config/formats';
 import convict_format_with_validator from 'convict-format-with-validator';
 
-convict.addFormats(convict_format_with_validator);
-convict.addFormat(format);
+convict.addFormats({ ...convict_format_with_validator, format});
 
 const config = convict({
     env: {

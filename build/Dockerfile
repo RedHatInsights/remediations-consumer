@@ -19,7 +19,7 @@
 
 #----------------------- base -----------------------
 
-FROM registry.redhat.io/ubi8/ubi-minimal:latest AS base
+FROM registry.redhat.io/ubi8/ubi-minimal:8.7-923 AS base
 
 WORKDIR /opt/app-root/src
 
