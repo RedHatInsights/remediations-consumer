@@ -1,25 +1,7 @@
-#--- base ---
-# -> node
-
-#--- base -> packages ---
-# node
-# -> npm-prod
-
-#--- packages -> test ---
-# node
-# npm-prod
-# -> npm-dev
-# -> src
-# -> ./dist
-
-#--- packages -> dist ---
-# node
-# npm-prod
-# test:./dist
 
 #----------------------- base -----------------------
 
-FROM registry.redhat.io/ubi8/ubi-minimal:8.7-923 AS base
+FROM registry.redhat.io/ubi8/ubi-minimal:8.7-923.1669829893 AS base
 
 WORKDIR /opt/app-root/src
 
@@ -27,7 +9,6 @@ RUN microdnf module enable nodejs:16 && \
     microdnf install -y nodejs --nodocs && \
     microdnf install -y yum --nodocs && \
     yum update -y && \
-    yum install -y kernel-headers binutils findutils && \
     microdnf clean all && yum clean all
 
 #--------------------- packages ---------------------
