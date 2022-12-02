@@ -7,7 +7,7 @@ WORKDIR /opt/app-root/src
 
 RUN microdnf module enable nodejs:16 && \
     microdnf install -y nodejs --nodocs && \
-    microdnf clean all && yum clean all
+    microdnf clean all
 
 #--------------------- packages ---------------------
 
