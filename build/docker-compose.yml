@@ -1,7 +1,6 @@
 version: '3.4'
 services:
   remediations-consumer:
-#    image: quay.io/cloudservices/remediations-consumer:pr-157-2dfb8b2
     build:
       context: ../
       dockerfile: build/Dockerfile
