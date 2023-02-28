@@ -290,12 +290,6 @@ const config = convict({
                 default: '',
                 env: 'KAFKA_CA',
                 sensitive: true
-            },
-            cert: {
-                format: String,
-                default: '',
-                env: 'KAFKA_SSL_CERT',
-                sensitive: true
             }
         },
         sasl: {
