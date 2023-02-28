@@ -64,8 +64,6 @@ objects:
             value: ${KAFKA_SSL_ENABLED}
           - name: KAFKA_CA
             value: ${KAFKA_CA}
-          - name: KAFKA_SSL_CERT
-            value: ${KAFKA_SSL_CERT}
           - name: KAFKA_LOGGING
             value: ${KAFKA_LOGGING}
           - name: KAFKA_AUTOCOMMIT
@@ -128,7 +126,6 @@ parameters:
   value: remediations-consumer
 - name: KAFKA_SSL_ENABLED
 - name: KAFKA_CA
-- name: KAFKA_SSL_CERT
 - name: INVENTORY_RESET_OFFSETS
   value: 'false'
 - name: KAFKA_LOGGING

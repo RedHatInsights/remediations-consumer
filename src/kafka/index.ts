@@ -1,8 +1,7 @@
 /* eslint-disable max-len */
 
-import * as fs from 'fs';
 import _ from 'lodash';
-import { Kafka, logLevel, LogEntry } from 'kafkajs';
+import { Kafka, logLevel, LogEntry, SASLOptions } from 'kafkajs';
 import pino from 'pino';
 
 import config from '../config';
@@ -47,17 +46,37 @@ const pinoLogCreator = (logLevel: logLevel) => {
 };
 
 function configureBroker () {
+    let sasl: SASLOptions;
+
+    if (config.kafka.sasl.securityProtocol === 'SASL_SSL') {
+        if (config.kafka.sasl.mechanism === 'SCRAM-SHA-512') {
+            sasl = {
+                mechanism: 'scram-sha-512',
+                username: config.kafka.sasl.username,
+                password: config.kafka.sasl.password
+            };
+        } else {
+            sasl = {
+                mechanism: 'plain',
+                username: config.kafka.sasl.username,
+                password: config.kafka.sasl.password
+            };
+        }
+
+        return new Kafka({
+            logLevel: kafkaLogLevel(),
+            logCreator: pinoLogCreator,
+            brokers: [`${config.kafka.host}:${config.kafka.port}`],
+            connectionTimeout: config.kafka.connectionTimeout,
+            ssl: true,
+            sasl
+        });
+    }
+
     return new Kafka({
-        brokers: [`${config.kafka.host}:${config.kafka.port}`],
         logLevel: kafkaLogLevel(),
         logCreator: pinoLogCreator,
-        // @ts-ignore
-        sasl: config.kafka.sasl.username ? {
-            username: config.kafka.sasl.username,
-            password: config.kafka.sasl.password,
-            mechanism: config.kafka.sasl.mechanism
-        } : undefined,
-        ssl: config.kafka.ssl.cert ? {ca: [fs.readFileSync(config.kafka.ssl.cert, 'utf-8')]} : false
+        brokers: [`${config.kafka.host}:${config.kafka.port}`]
     });
 }
 
