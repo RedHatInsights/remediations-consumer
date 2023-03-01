@@ -3,6 +3,7 @@
 import _ from 'lodash';
 import { Kafka, logLevel, LogEntry, SASLOptions } from 'kafkajs';
 import pino from 'pino';
+import * as fs from 'fs'
 
 import config from '../config';
 import log, { toPinoLogLevel } from '../util/log';
@@ -68,7 +69,7 @@ function configureBroker () {
             logCreator: pinoLogCreator,
             brokers: [`${config.kafka.host}:${config.kafka.port}`],
             connectionTimeout: config.kafka.connectionTimeout,
-            ssl: true,
+            ssl: {ca: fs.readFileSync(config.kafka.ssl.ca, 'utf-8')},
             sasl
         });
     }
