@@ -6,6 +6,7 @@ import version from './util/version';
 import log from './util/log';
 import * as format from './format';
 import * as _ from 'lodash';
+import { InstrumentationEvent } from 'kafkajs';
 
 process.on('unhandledRejection', (reason: any) => {
     log.fatal(reason);
@@ -37,7 +38,7 @@ export default async function start () {
 
     const { consumer, stop: stopKafka } = await kafka.start(filteredTopicDetails);
 
-    async function stop (e: Error | NodeJS.Signals | undefined) {
+    async function stop (e: Error | NodeJS.Signals | undefined | InstrumentationEvent<any>) {
         consumer.stop();
         process.off('SIGINT', stop);
         process.off('SIGTERM', stop);
