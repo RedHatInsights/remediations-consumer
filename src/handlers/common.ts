@@ -1,7 +1,7 @@
 import * as Joi from '@hapi/joi';
 import { Message } from 'kafkajs';
 
-export function parse<T> (message: Message): any {
+export function parse (message: Message): any {
     const stringValue = (message.value) ? message.value.toString() : null;
     if (typeof(stringValue) === 'string') {
         return JSON.parse(stringValue);

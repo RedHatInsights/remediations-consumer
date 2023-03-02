@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 export enum Status {
     PENDING = 'pending',
     ACKED = 'acked',

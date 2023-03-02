@@ -3,7 +3,6 @@
 import _ from 'lodash';
 import { Kafka, logLevel, LogEntry, SASLOptions } from 'kafkajs';
 import pino from 'pino';
-import * as fs from 'fs'
 
 import config from '../config';
 import log, { toPinoLogLevel } from '../util/log';
