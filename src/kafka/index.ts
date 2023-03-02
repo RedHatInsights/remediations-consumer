@@ -69,7 +69,7 @@ function configureBroker () {
             logCreator: pinoLogCreator,
             brokers: [`${config.kafka.host}:${config.kafka.port}`],
             connectionTimeout: config.kafka.connectionTimeout,
-            ssl: config.kafka.ssl.enabled ? {ca: config.kafka.ssl.ca} : false,
+            ssl: false,
             sasl
         });
     }
