@@ -64,15 +64,12 @@ function configureBroker () {
             };
         }
 
-        // eslint-disable-next-line no-console
-        console.log(`kafka.ca: ${config.kafka.ssl.ca}`);
-
         return new Kafka({
             logLevel: kafkaLogLevel(),
             logCreator: pinoLogCreator,
             brokers: [`${config.kafka.host}:${config.kafka.port}`],
             connectionTimeout: config.kafka.connectionTimeout,
-            ssl: {ca: fs.readFileSync(config.kafka.ssl.ca, 'utf-8')},
+            ssl: {ca: config.kafka.ssl.ca},
             sasl
         });
     }
