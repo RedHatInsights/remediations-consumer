@@ -64,6 +64,9 @@ function configureBroker () {
             };
         }
 
+        // eslint-disable-next-line no-console
+        console.log(`kafka.ca: ${config.kafka.ssl.ca}`);
+
         return new Kafka({
             logLevel: kafkaLogLevel(),
             logCreator: pinoLogCreator,
