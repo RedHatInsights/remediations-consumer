@@ -51,7 +51,10 @@ function configureBroker () {
         logCreator: pinoLogCreator,
         brokers: [`${config.kafka.host}:${config.kafka.port}`],
         connectionTimeout: config.kafka.connectionTimeout,
-        ssl: config.kafka ? {ca: config.kafka.ssl.ca} : false,
+        ssl: {
+            ca: config.kafka.ssl.ca,
+            rejectUnauthorized: false
+        },
         sasl: {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
