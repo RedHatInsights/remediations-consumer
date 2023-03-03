@@ -36,14 +36,16 @@ export async function updateEntities (type: 'systems' | 'executors' | 'runs', fn
 }
 
 export async function pushMetrics () {
-    const gateway: any = new client.Pushgateway(config.metrics.pushGateway);
-    const asyncGateway = P.promisifyAll(gateway);
+    if (config.metrics.pushGatewayEnabled) {
+        const gateway: any = new client.Pushgateway(config.metrics.pushGateway);
+        const asyncGateway = P.promisifyAll(gateway);
 
-    const jobName = `${config.namespace}|${os.hostname}`;
-    logger.info({jobName}, 'pushing metrics');
+        const jobName = `${config.namespace}|${os.hostname}`;
+        logger.info({jobName}, 'pushing metrics');
 
-    const resp = await asyncGateway.pushAsync({jobName});
-    if (resp.statusCode !== 200) {
-        throw new Error(`failed to push metrics ${resp.statusCode}`);
+        const resp = await asyncGateway.pushAsync({jobName});
+        if (resp.statusCode !== 200) {
+            throw new Error(`failed to push metrics ${resp.statusCode}`);
+        }
     }
 }
