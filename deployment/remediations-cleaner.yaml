@@ -78,6 +78,8 @@ objects:
                 value: remediations_cleaner_
               - name: METRICS_PUSH_GATEWAY
                 value: http://${PROMETHEUS_PUSHGATEWAY}
+              - name: METRICS_PUSH_GATEWAY_ENABLED
+                value: ${METRICS_PUSH_GATEWAY_ENABLED}
               image: quay.io/cloudservices/remediations-consumer:${IMAGE_TAG}
               imagePullPolicy: Always
               name: remediations-cleaner
@@ -123,6 +125,8 @@ parameters:
   value: Replace
 - name: PROMETHEUS_PUSHGATEWAY
   value: prometheus-push.mnm-ci.svc.cluster.local:9091
+- name: METRICS_PUSH_GATEWAY_ENABLED
+  value: 'true'
 - name: LOG_CW_ENABLED
   value: 'true'
 - description: Image tag
