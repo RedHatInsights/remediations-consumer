@@ -5,6 +5,7 @@ import * as tmp from 'tmp';
 import convict from 'convict';
 import format from '../config/formats';
 import convict_format_with_validator from 'convict-format-with-validator';
+import { bool } from '@hapi/joi';
 
 convict.addFormats({ ...convict_format_with_validator, format});
 
@@ -148,6 +149,11 @@ const config = convict({
             format: 'url',
             default: 'http://localhost:9091',
             env: 'METRICS_PUSH_GATEWAY'
+        },
+        pushGatewayEnabled: {
+            format: Boolean,
+            default: true,
+            env: 'METRICS_PUSH_GATEWAY_ENABLED'
         }
     },
 
