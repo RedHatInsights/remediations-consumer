@@ -72,13 +72,13 @@ objects:
             value: ${KAFKA_SSL_REJECT_UNAUTHORIZED}
           - name: KAFKA_CA
             value: ${KAFKA_CA}
-          - name: KAFKA_CA_KEY
+          - name: CLIENT_CA_KEY
             valueFrom:
               secretKeyRef:
                 key: key
                 name: kafka-cert
                 optional: true
-          - name: KAFKA_CA_CERT
+          - name: CLIENT_CA_CERT
             valueFrom:
               secretKeyRef:
                 key: cert

@@ -294,13 +294,13 @@ const config = convict({
             key: {
                 format: String,
                 default: '',
-                env: 'KAFKA_CA_KEY',
+                env: 'CLIENT_CA_KEY',
                 sensitive: true
             },
             cert: {
                 format: String,
                 default: '',
-                env: 'KAFKA_CA_CERT',
+                env: 'CLIENT_CA_CERT',
                 sensitive: true
             },
             rejectUnauthorized: {
