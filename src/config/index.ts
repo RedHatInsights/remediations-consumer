@@ -299,7 +299,7 @@ const config = convict({
             },
             rejectUnauthorized: {
                 format: Boolean,
-                default: true
+                default: true,
                 env: 'KAFKA_SSL_REJECT_UNAUTHORIZED'
             }
         },
