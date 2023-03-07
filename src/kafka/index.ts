@@ -54,6 +54,7 @@ function configureBroker () {
         ssl: {
             ca: config.kafka.ssl.ca,
             key: config.kafka.ssl.key,
+            cert: config.kafka.ssl.cert,
             rejectUnauthorized: config.kafka.ssl.rejectUnauthorized
         },
         sasl: {
