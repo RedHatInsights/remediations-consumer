@@ -72,6 +72,12 @@ objects:
                 key: key
                 name: kafka-cert
                 optional: true
+          - name: KAFKA_CA_CERT
+            valueFrom:
+              secretKeyRef:
+                key: cert
+                name: kafka-cert
+                optional: true
           - name: KAFKA_LOGGING
             value: ${KAFKA_LOGGING}
           - name: KAFKA_AUTOCOMMIT

@@ -297,6 +297,12 @@ const config = convict({
                 env: 'KAFKA_CA_KEY',
                 sensitive: true
             },
+            cert: {
+                format: String,
+                default: '',
+                env: 'KAFKA_CA_CERT',
+                sensitive: true
+            },
             rejectUnauthorized: {
                 format: Boolean,
                 default: true,
