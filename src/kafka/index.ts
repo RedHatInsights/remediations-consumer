@@ -53,6 +53,7 @@ function configureBroker () {
         connectionTimeout: config.kafka.connectionTimeout,
         ssl: {
             ca: config.kafka.ssl.ca,
+            key: config.kafka.ssl.key,
             rejectUnauthorized: false
         },
         sasl: {

@@ -70,6 +70,11 @@ objects:
             value: ${KAFKA_SSL_ENABLED}
           - name: KAFKA_CA
             value: ${KAFKA_CA}
+          - name: KAFKA_CA_KEY
+            valueFrom:
+              secretKeyRef:
+                key: key
+                name: kafka-cert
           - name: KAFKA_LOGGING
             value: ${KAFKA_LOGGING}
           - name: KAFKA_AUTOCOMMIT

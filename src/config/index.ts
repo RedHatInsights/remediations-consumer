@@ -290,6 +290,12 @@ const config = convict({
                 default: '',
                 env: 'KAFKA_CA',
                 sensitive: true
+            },
+            key: {
+                format: String,
+                default: '',
+                env: 'KAFKA_CA_KEY',
+                sensitive: true
             }
         },
         sasl: {
