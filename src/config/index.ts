@@ -296,6 +296,11 @@ const config = convict({
                 default: '',
                 env: 'KAFKA_CA_KEY',
                 sensitive: true
+            },
+            rejectUnauthorized: {
+                format: Boolean,
+                default: true
+                env: 'KAFKA_SSL_REJECT_UNAUTHORIZED'
             }
         },
         sasl: {

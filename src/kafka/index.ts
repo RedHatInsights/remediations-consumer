@@ -54,7 +54,7 @@ function configureBroker () {
         ssl: {
             ca: config.kafka.ssl.ca,
             key: config.kafka.ssl.key,
-            rejectUnauthorized: false
+            rejectUnauthorized: config.kafka.ssl.rejectUnauthorized
         },
         sasl: {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
