@@ -121,6 +121,8 @@ objects:
             value: remediations_cleaner_
           - name: METRICS_PUSH_GATEWAY
             value: http://${PROMETHEUS_PUSHGATEWAY}
+          - name: METRICS_PUSH_GATEWAY_ENABLED
+            value: ${METRICS_PUSH_GATEWAY_ENABLED}
         resources:
           limits:
             cpu: ${CPU_LIMIT}
@@ -169,6 +171,8 @@ parameters:
   name: IMAGE_TAG
   required: true
 - name: PROMETHEUS_PUSHGATEWAY
+- name: METRICS_PUSH_GATEWAY_ENABLED
+  value: 'true'
 - description: Cpu limit of cleaner job
   name: CPU_LIMIT
   value: 200m
