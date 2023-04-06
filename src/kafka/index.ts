@@ -70,20 +70,13 @@ function configureBroker () {
             username: config.kafka.sasl.username,
             password: config.kafka.sasl.password
         };
+
+        console.log(`client_config.sasl -> ${Object.keys(client_config.sasl)}`);
     }
 
-<<<<<<< Updated upstream
-    console.log(`client_config -> ${Object.keys(client_config)}`);
-
-=======
-<<<<<<< Updated upstream
-=======
     console.log(`client_config -> ${Object.keys(client_config)}`);
     console.log(`client_config.ssl -> ${Object.keys(client_config.ssl)}`);
-    console.log(`client_config.sasl -> ${Object.keys(client_config.sasl)}`);
 
->>>>>>> Stashed changes
->>>>>>> Stashed changes
     return new Kafka(client_config);
 }
 
