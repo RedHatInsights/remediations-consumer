@@ -72,6 +72,8 @@ function configureBroker () {
         };
     }
 
+    console.log(`client_config -> ${Object.keys(client_config)}`);
+
     return new Kafka(client_config);
 }
 

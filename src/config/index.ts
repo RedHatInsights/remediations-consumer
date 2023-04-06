@@ -401,11 +401,15 @@ if (acgConfig) {
         else console.log(`${item} NOT present in cdappconfig.yml`);
     });
 
+    console.log(`authtype = ${clowdAppConfig.kafka.brokers[0].authtype}`);
+
     if (clowdAppConfig.kafka.brokers[0].sasl) {
         ['username', 'password', 'securityProtocol', 'saslMechanism'].forEach(item => {
-            if (clowdAppConfig.kafka.brokers[0].sasl[item]) console.log(`${item} present in cdappconfig.yml`);
-            else console.log(`${item} NOT present in cdappconfig.yml`);
+            if (clowdAppConfig.kafka.brokers[0].sasl[item]) console.log(`sasl.${item} present in cdappconfig.yml`);
+            else console.log(`sasl.${item} NOT present in cdappconfig.yml`);
         });
+
+        console.log(`saslMechanism = ${clowdAppConfig.kafka.brokers[0].sasl.saslMechanism}`);
     }
 
     const data: any = {
