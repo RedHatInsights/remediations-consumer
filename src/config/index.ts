@@ -408,8 +408,17 @@ if (acgConfig) {
             if (clowdAppConfig.kafka.brokers[0].sasl[item]) console.log(`sasl.${item} present in cdappconfig.yml`);
             else console.log(`sasl.${item} NOT present in cdappconfig.yml`);
         });
+<<<<<<< Updated upstream
 
         console.log(`saslMechanism = ${clowdAppConfig.kafka.brokers[0].sasl.saslMechanism}`);
+=======
+<<<<<<< Updated upstream
+=======
+
+        console.log(`saslMechanism = ${clowdAppConfig.kafka.brokers[0].sasl.saslMechanism}`);
+        console.log(`securityProtocol = ${clowdAppConfig.kafka.brokers[0].sasl.securityProtocol}`);
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
     }
 
     const data: any = {
