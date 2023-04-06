@@ -395,6 +395,19 @@ if (acgConfig) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
     const clowdAppConfig = require(acgConfig); // eslint-disable-line security/detect-non-literal-require
 
+    // inspect cdappconfig.yml kafka settings...
+    ['hostname', 'port', 'cacert', 'authtype', 'securityProtocol'].forEach(item => {
+        if (clowdAppConfig.kafka.brokers[0][item]) console.log(`${item} present in cdappconfig.yml`);
+        else console.log(`${item} NOT present in cdappconfig.yml`);
+    });
+
+    if (clowdAppConfig.kafka.brokers[0].sasl) {
+        ['username', 'password', 'securityProtocol', 'saslMechanism'].forEach(item => {
+            if (clowdAppConfig.kafka.brokers[0].sasl[item]) console.log(`${item} present in cdappconfig.yml`);
+            else console.log(`${item} NOT present in cdappconfig.yml`);
+        });
+    }
+
     const data: any = {
         metrics: {
             port: clowdAppConfig.metricsPort
