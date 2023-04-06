@@ -53,16 +53,14 @@ function configureBroker () {
         connectionTimeout: config.kafka.connectionTimeout
     };
 
-    if (config.kafka.ssl.enabled) {
-        // eslint-disable-next-line no-console
-        console.log('including ssl in kafka client config');
-        client_config.ssl = {
-            ca: config.kafka.ssl.ca,
-            key: config.kafka.ssl.key,
-            cert: config.kafka.ssl.cert,
-            rejectUnauthorized: config.kafka.ssl.rejectUnauthorized
-        };
-    }
+    // eslint-disable-next-line no-console
+    console.log('including ssl in kafka client config');
+    client_config.ssl = {
+        ca: config.kafka.ssl.ca,
+        key: config.kafka.ssl.key,
+        cert: config.kafka.ssl.cert,
+        rejectUnauthorized: config.kafka.ssl.rejectUnauthorized
+    };
 
     if (config.kafka.sasl.mechanism) {
         // eslint-disable-next-line no-console
