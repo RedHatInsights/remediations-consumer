@@ -53,29 +53,17 @@ function configureBroker () {
         connectionTimeout: config.kafka.connectionTimeout
     };
 
-    // eslint-disable-next-line no-console
-    console.log('including ssl in kafka client config');
     client_config.ssl = {
-        ca: config.kafka.ssl.ca,
-        key: config.kafka.ssl.key,
-        cert: config.kafka.ssl.cert,
-        rejectUnauthorized: config.kafka.ssl.rejectUnauthorized
+        ca: config.kafka.ssl.ca
     };
 
-    if (config.kafka.sasl.mechanism) {
-        // eslint-disable-next-line no-console
-        console.log('including sasl in kafka client config');
+    if (config.kafka.sasl?.mechanism) {
         client_config.sasl = {
             mechanism: config.kafka.sasl.mechanism,
             username: config.kafka.sasl.username,
             password: config.kafka.sasl.password
         };
-
-        console.log(`client_config.sasl -> ${Object.keys(client_config.sasl)}`);
     }
-
-    console.log(`client_config -> ${Object.keys(client_config)}`);
-    console.log(`client_config.ssl -> ${Object.keys(client_config.ssl)}`);
 
     return new Kafka(client_config);
 }
