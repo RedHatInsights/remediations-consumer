@@ -54,11 +54,24 @@ function configureBroker () {
     };
 
     if (config.kafka.ssl.enabled) {
-        client_config.ssl = config.kafka.ssl;
+        // eslint-disable-next-line no-console
+        console.log('including ssl in kafka client config');
+        client_config.ssl = {
+            ca: config.kafka.ssl.ca,
+            key: config.kafka.ssl.key,
+            cert: config.kafka.ssl.cert,
+            rejectUnauthorized: config.kafka.ssl.rejectUnauthorized
+        };
     }
 
-    if (config.kafka.sasl) {
-        client_config.sasl = config.kafka.sasl;
+    if (config.kafka.sasl.mechanism) {
+        // eslint-disable-next-line no-console
+        console.log('including sasl in kafka client config');
+        client_config.sasl = {
+            mechanism: config.kafka.sasl.mechanism,
+            username: config.kafka.sasl.username,
+            password: config.kafka.sasl.password
+        };
     }
 
     return new Kafka(client_config);
