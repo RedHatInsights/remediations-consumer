@@ -46,25 +46,22 @@ const pinoLogCreator = (logLevel: logLevel) => {
 };
 
 function configureBroker () {
-    return new Kafka({
+    const client_config: any = {
         logLevel: kafkaLogLevel(),
         logCreator: pinoLogCreator,
         brokers: [`${config.kafka.host}:${config.kafka.port}`],
-        connectionTimeout: config.kafka.connectionTimeout,
-        ssl: {
-            ca: config.kafka.ssl.ca,
-            key: config.kafka.ssl.key,
-            cert: config.kafka.ssl.cert,
-            rejectUnauthorized: config.kafka.ssl.rejectUnauthorized
-        },
-        sasl: {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            mechanism: config.kafka.sasl.mechanism,
-            username: config.kafka.sasl.username,
-            password: config.kafka.sasl.password
-        }
-    });
+        connectionTimeout: config.kafka.connectionTimeout
+    };
+
+    if (config.kafka.ssl) {
+        client_config.ssl = config.kafka.ssl;
+    }
+
+    if (config.kafka.sasl) {
+        client_config.sasl = config.kafka.sasl;
+    }
+
+    return new Kafka(client_config);
 }
 
 function connect () {
