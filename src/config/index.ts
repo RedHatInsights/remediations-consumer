@@ -300,37 +300,37 @@ const config = convict({
             }
         },
         ssl: {
-            enabled: {
-                format: Boolean,
-                default: false,
-                env: 'KAFKA_SSL_ENABLED'
-            },
+            // enabled: { // TODO: remove me!
+            //     format: Boolean,
+            //     default: false,
+            //     env: 'KAFKA_SSL_ENABLED'
+            // },
             ca: {
                 format: String,
                 default: undefined,
                 env: 'KAFKA_CA',
                 sensitive: true,
                 nullable: true
-            },
-            key: {
-                format: String,
-                default: undefined,
-                env: 'CLIENT_CA_KEY',
-                sensitive: true,
-                nullable: true
-            },
-            cert: {
-                format: String,
-                default: undefined,
-                env: 'CLIENT_CA_CERT',
-                sensitive: true,
-                nullable: true
-            },
-            rejectUnauthorized: {
-                format: Boolean,
-                default: true,
-                env: 'KAFKA_SSL_REJECT_UNAUTHORIZED'
             }
+            // key: { // TDO: remove me!
+            //     format: String,
+            //     default: undefined,
+            //     env: 'CLIENT_CA_KEY',
+            //     sensitive: true,
+            //     nullable: true
+            // },
+            // cert: { // TDO: remove me!
+            //     format: String,
+            //     default: undefined,
+            //     env: 'CLIENT_CA_CERT',
+            //     sensitive: true,
+            //     nullable: true
+            // },
+            // rejectUnauthorized: { // TDO: remove me!
+            //     format: Boolean,
+            //     default: true,
+            //     env: 'KAFKA_SSL_REJECT_UNAUTHORIZED'
+            // }
         },
         sasl: {
             mechanism: {
@@ -351,13 +351,13 @@ const config = convict({
                 env: 'KAFKA_SASL_PASSWORD',
                 nullable: true,
                 sensitive: true
-            },
-            securityProtocol: {
-                format: String,
-                default: undefined,
-                env: 'KAFKA_SECURITY_PROTOCOL',
-                nullable: true
             }
+            // securityProtocol: {
+            //     format: String,
+            //     default: undefined,
+            //     env: 'KAFKA_SECURITY_PROTOCOL',
+            //     nullable: true
+            // }
         }
     },
 
@@ -394,24 +394,6 @@ const acgConfig = process.env.ACG_CONFIG;
 if (acgConfig) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
     const clowdAppConfig = require(acgConfig); // eslint-disable-line security/detect-non-literal-require
-
-    // inspect cdappconfig.yml kafka settings...
-    ['hostname', 'port', 'cacert', 'authtype', 'securityProtocol'].forEach(item => {
-        if (clowdAppConfig.kafka.brokers[0][item]) console.log(`${item} present in cdappconfig.yml`);
-        else console.log(`${item} NOT present in cdappconfig.yml`);
-    });
-
-    console.log(`authtype = ${clowdAppConfig.kafka.brokers[0].authtype}`);
-
-    if (clowdAppConfig.kafka.brokers[0].sasl) {
-        ['username', 'password', 'securityProtocol', 'saslMechanism'].forEach(item => {
-            if (clowdAppConfig.kafka.brokers[0].sasl[item]) console.log(`sasl.${item} present in cdappconfig.yml`);
-            else console.log(`sasl.${item} NOT present in cdappconfig.yml`);
-        });
-
-        console.log(`saslMechanism = ${clowdAppConfig.kafka.brokers[0].sasl.saslMechanism}`);
-        console.log(`securityProtocol = ${clowdAppConfig.kafka.brokers[0].sasl.securityProtocol}`);
-    }
 
     const data: any = {
         metrics: {
@@ -496,8 +478,8 @@ if (acgConfig) {
         data.kafka.sasl = {
             username: clowdAppConfig.kafka.brokers[0].sasl.username,
             password: clowdAppConfig.kafka.brokers[0].sasl.password,
-            mechanism: clowdAppConfig.kafka.brokers[0].sasl.saslMechanism,
-            securityProtocol: clowdAppConfig.kafka.brokers[0].sasl.securityProtocol
+            mechanism: clowdAppConfig.kafka.brokers[0].sasl.saslMechanism
+            // securityProtocol: clowdAppConfig.kafka.brokers[0].sasl.securityProtocol
         };
 
         data.kafka.ssl = {
@@ -508,7 +490,6 @@ if (acgConfig) {
     config.load(data);
 }
 
-// debug comment
 config.validate({strict: true});
 
 export default config.get();
