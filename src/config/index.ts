@@ -80,7 +80,7 @@ const config = convict({
         connection: {
             user: {
                 format: String,
-                default: 'postgres',
+                default: 'postgres_user',
                 env: 'DB_USERNAME'
             },
             password: {

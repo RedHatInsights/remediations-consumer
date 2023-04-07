@@ -20,9 +20,16 @@ services:
     restart: "no"
 
   db:
-    image: registry.access.redhat.com/rhscl/postgresql-10-rhel7
+    image: quay.io/cloudservices/postgresql-rds:14-1
     ports:
-      - "5432:5432"
+      - 5432:5432
     environment:
-      - POSTGRESQL_ADMIN_PASSWORD=remediations
+      - POSTGRESQL_USER=postgres_user
+      - POSTGRESQL_PASSWORD=remediations
+      - POSTGRESQL_DATABASE=remediations
+    healthcheck:
+      test: "psql -c 'SELECT datname FROM pg_database;'"
+      start_period: 3s
+      interval: 10s
+      retries: 6
 
