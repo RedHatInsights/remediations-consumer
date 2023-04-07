@@ -7,26 +7,6 @@ import formats from './formats';
 
 /* eslint-disable max-len */
 
-// prod example:
-//
-// {
-//     ...
-//     kafka: {
-//         brokers: [{
-//             hostname: '<hostname>',
-//             port: <port #>
-//         }],
-//         topics: [{
-//             name: 'platform.inventory.events',
-//             requestedName: 'platform.inventory.events'
-//         }, {
-//             name: 'platform.receptor-controller.responses',
-//             requestedName: 'platform.receptor-controller.responses'
-//         }]
-//     }
-//     ...
-// }
-
 convict.addFormat(formats);
 
 const config = convict({
@@ -300,15 +280,9 @@ const config = convict({
             }
         },
         ssl: {
-            ca: {
-                format: val => {
-                    return (typeof(val) === 'string') || (typeof(val) === 'boolean');
-                },
-                default: undefined,
-                env: 'KAFKA_CA',
-                sensitive: true,
-                nullable: true
-            }
+            format: '*',
+            default: false,
+            sensitive: true
         },
         sasl: {
             mechanism: {
@@ -330,12 +304,6 @@ const config = convict({
                 nullable: true,
                 sensitive: true
             }
-            // securityProtocol: {
-            //     format: String,
-            //     default: undefined,
-            //     env: 'KAFKA_SECURITY_PROTOCOL',
-            //     nullable: true
-            // }
         }
     },
 
