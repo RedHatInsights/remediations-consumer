@@ -306,7 +306,9 @@ const config = convict({
             //     env: 'KAFKA_SSL_ENABLED'
             // },
             ca: {
-                format: String,
+                format: val => {
+                    return (typeof(val) === 'string') || (typeof(val) === 'boolean');
+                },
                 default: undefined,
                 env: 'KAFKA_CA',
                 sensitive: true,
@@ -441,9 +443,11 @@ if (acgConfig) {
     }
 
     // Kafka settings
+    const broker = clowdAppConfig.kafka.brokers[0];
+
     data.kafka = {
-        host: clowdAppConfig.kafka.brokers[0].hostname,
-        port: clowdAppConfig.kafka.brokers[0].port.toString()
+        host: broker.hostname,
+        port: broker.port.toString()
     };
 
     data.kafka.topics = {
@@ -476,21 +480,18 @@ if (acgConfig) {
 
     if (_.get(clowdAppConfig, 'kafka.brokers[0].sasl', '') !== '') {
         data.kafka.sasl = {
-            username: clowdAppConfig.kafka.brokers[0].sasl.username,
-            password: clowdAppConfig.kafka.brokers[0].sasl.password,
-            mechanism: clowdAppConfig.kafka.brokers[0].sasl.saslMechanism
-            // securityProtocol: clowdAppConfig.kafka.brokers[0].sasl.securityProtocol
+            username: broker.sasl.username,
+            password: broker.sasl.password,
+            mechanism: broker.sasl.saslMechanism
         };
 
-        data.kafka.ssl = {
-            ca: clowdAppConfig.kafka.brokers[0].cacert
-        };
+        data.kafka.ssl = broker.cacert ? {ca: broker.cacert} : false;
     }
 
     config.load(data);
 }
 
-config.validate({strict: true});
+config.validate({allowed: 'strict'});
 
 export default config.get();
 export const sanitized = config.toString();
