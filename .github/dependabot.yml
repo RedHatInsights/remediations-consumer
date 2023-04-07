@@ -5,3 +5,9 @@ updates:
     directory: "/build"
     schedule:
       interval: "weekly"
+
+  # Check for updates to NPM packages
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
