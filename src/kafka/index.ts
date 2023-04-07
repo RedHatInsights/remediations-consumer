@@ -55,7 +55,6 @@ function configureBroker () {
 
     client_config.ssl = config.kafka.ssl;
     client_config.sasl = config.kafka.sasl;
-    console.log(`client_config = ${JSON.stringify(client_config)}`);
 
     return new Kafka(client_config);
 }
