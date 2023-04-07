@@ -300,11 +300,6 @@ const config = convict({
             }
         },
         ssl: {
-            // enabled: { // TODO: remove me!
-            //     format: Boolean,
-            //     default: false,
-            //     env: 'KAFKA_SSL_ENABLED'
-            // },
             ca: {
                 format: val => {
                     return (typeof(val) === 'string') || (typeof(val) === 'boolean');
@@ -314,25 +309,6 @@ const config = convict({
                 sensitive: true,
                 nullable: true
             }
-            // key: { // TDO: remove me!
-            //     format: String,
-            //     default: undefined,
-            //     env: 'CLIENT_CA_KEY',
-            //     sensitive: true,
-            //     nullable: true
-            // },
-            // cert: { // TDO: remove me!
-            //     format: String,
-            //     default: undefined,
-            //     env: 'CLIENT_CA_CERT',
-            //     sensitive: true,
-            //     nullable: true
-            // },
-            // rejectUnauthorized: { // TDO: remove me!
-            //     format: Boolean,
-            //     default: true,
-            //     env: 'KAFKA_SSL_REJECT_UNAUTHORIZED'
-            // }
         },
         sasl: {
             mechanism: {
