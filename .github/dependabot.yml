@@ -1,0 +1,7 @@
+version: 2
+updates:
+  # Check for latest Dockerfile parent image
+  - package-ecosystem: "docker"
+    directory: "/build"
+    schedule:
+      interval: "weekly"
