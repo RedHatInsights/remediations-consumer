@@ -53,8 +53,19 @@ function configureBroker () {
         connectionTimeout: config.kafka.connectionTimeout
     };
 
-    client_config.ssl = config.kafka.ssl ? config.kafka.ssl : false;
-    client_config.sasl = config.kafka.sasl;
+    if (config.kafka.ssl.enabled) {
+        client_config.ssl = {
+            ca: config.kafka.ssl.ca
+        };
+    }
+
+    if (config.kafka.sasl.enabled) {
+        client_config.sasl = {
+            mechanism: config.kafka.sasl.mechanism,
+            username: config.kafka.sasl.username,
+            password: config.kafka.sasl.password
+        };
+    }
 
     return new Kafka(client_config);
 }

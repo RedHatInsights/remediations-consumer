@@ -280,6 +280,10 @@ const config = convict({
             }
         },
         ssl: {
+            enabled: {
+                format: Boolean,
+                default: false
+            },
             ca: {
                 format: String,
                 default: undefined,
@@ -287,6 +291,10 @@ const config = convict({
             }
         },
         sasl: {
+            enabled: {
+                format: Boolean,
+                default: false
+            },
             mechanism: {
                 format: String,
                 default: undefined,
@@ -426,12 +434,18 @@ if (acgConfig) {
 
     if (_.get(clowdAppConfig, 'kafka.brokers[0].sasl', '') !== '') {
         data.kafka.sasl = {
+            enabled: true,
             username: broker.sasl.username,
             password: broker.sasl.password,
             mechanism: broker.sasl.saslMechanism
         };
+    }
 
-        data.kafka.ssl = broker.cacert ? {ca: broker.cacert} : false;
+    if (broker.cacert) {
+        data.kafka.ssl = {
+            enabled: true,
+            ca: broker.cacert
+        };
     }
 
     config.load(data);
