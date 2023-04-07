@@ -8,7 +8,6 @@ updates:
 
   # Check for updates to NPM packages
   - package-ecosystem: "npm"
-    target-branch: "package_updates"
     directory: "/"
     schedule:
       interval: "weekly"
