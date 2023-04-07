@@ -38,6 +38,8 @@ COPY --from=test /opt/app-root/src/dist/src ./dist/src
 
 USER 1001
 EXPOSE 9006
+
 ENV NODE_ENV=production
+ENV NODE_OPTIONS="--enable-source-maps"
 
 CMD [ "node", "dist/src/app.js" ]
