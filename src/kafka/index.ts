@@ -53,7 +53,7 @@ function configureBroker () {
         connectionTimeout: config.kafka.connectionTimeout
     };
 
-    client_config.ssl = config.kafka.ssl;
+    client_config.ssl = config.kafka.ssl ? config.kafka.ssl : false;
     client_config.sasl = config.kafka.sasl;
 
     return new Kafka(client_config);
