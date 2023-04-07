@@ -280,9 +280,11 @@ const config = convict({
             }
         },
         ssl: {
-            format: String,
-            default: undefined,
-            sensitive: true
+            ca: {
+                format: String,
+                default: undefined,
+                sensitive: true
+            }
         },
         sasl: {
             mechanism: {
