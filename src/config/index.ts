@@ -80,7 +80,7 @@ const config = convict({
         connection: {
             user: {
                 format: String,
-                default: 'postgres',
+                default: 'postgres_user',
                 env: 'DB_USERNAME'
             },
             password: {
@@ -282,54 +282,37 @@ const config = convict({
         ssl: {
             enabled: {
                 format: Boolean,
-                default: false,
-                env: 'KAFKA_SSL_ENABLED'
+                default: false
             },
             ca: {
                 format: String,
-                default: '',
-                env: 'KAFKA_CA',
+                default: undefined,
                 sensitive: true
-            },
-            key: {
-                format: String,
-                default: '',
-                env: 'CLIENT_CA_KEY',
-                sensitive: true
-            },
-            cert: {
-                format: String,
-                default: '',
-                env: 'CLIENT_CA_CERT',
-                sensitive: true
-            },
-            rejectUnauthorized: {
-                format: Boolean,
-                default: true,
-                env: 'KAFKA_SSL_REJECT_UNAUTHORIZED'
             }
         },
         sasl: {
+            enabled: {
+                format: Boolean,
+                default: false
+            },
             mechanism: {
                 format: String,
-                default: 'plain',
-                env: 'KAFKA_SASL_MECHANISM'
+                default: undefined,
+                env: 'KAFKA_SASL_MECHANISM',
+                nullable: true
             },
             username: {
                 format: String,
-                default: '',
-                env: 'KAFKA_SASL_USERNAME'
+                default: undefined,
+                env: 'KAFKA_SASL_USERNAME',
+                nullable: true
             },
             password: {
                 format: String,
-                default: '',
+                default: undefined,
                 env: 'KAFKA_SASL_PASSWORD',
+                nullable: true,
                 sensitive: true
-            },
-            securityProtocol: {
-                format: String,
-                default: '',
-                env: 'KAFKA_SECURITY_PROTOCOL'
             }
         }
     },
@@ -348,13 +331,17 @@ const config = convict({
     }
 });
 
-function processTopicName (cappconfig: any, key: string): string {
-    const output = cappconfig.kafka.topics.find(({ requestedName }: { requestedName: string }) => requestedName === key);
+function processTopicName(cappconfig: any, key: string): string {
+    const output = cappconfig.kafka.topics.find(({requestedName}: {
+        requestedName: string
+    }) => requestedName === key);
     return output ? output.name : '';
 }
 
-function processTopicEnabled (cappconfig: any, key: string): boolean {
-    return Boolean(cappconfig.kafka.topics.find(({ requestedName }: { requestedName: string }) => requestedName === key));
+function processTopicEnabled(cappconfig: any, key: string): boolean {
+    return Boolean(cappconfig.kafka.topics.find(({requestedName}: {
+        requestedName: string
+    }) => requestedName === key));
 }
 
 // load Clowder Config
@@ -394,9 +381,13 @@ if (acgConfig) {
     };
 
     if (clowdAppConfig.database.sslMode !== 'disable') {
-        data.db.ssl = { enabled: true };
+        data.db.ssl = {enabled: true};
 
-        const tmpobj = tmp.fileSync({ mode: 0o644, prefix: 'prefix-', postfix: '.txt' });
+        const tmpobj = tmp.fileSync({
+            mode: 0o644,
+            prefix: 'prefix-',
+            postfix: '.txt'
+        });
         // eslint-disable-next-line security/detect-non-literal-fs-filename
         fs.writeFileSync(tmpobj.name, clowdAppConfig.database.rdsCa, 'utf8');
 
@@ -406,13 +397,15 @@ if (acgConfig) {
     }
 
     // Kafka settings
+    const broker = clowdAppConfig.kafka.brokers[0];
+
     data.kafka = {
-        host: clowdAppConfig.kafka.brokers[0].hostname,
-        port: clowdAppConfig.kafka.brokers[0].port.toString()
+        host: broker.hostname,
+        port: broker.port.toString()
     };
 
     data.kafka.topics = {
-    // Kafka topic settings
+        // Kafka topic settings
         advisor: {
             topic: processTopicName(clowdAppConfig, 'platform.remediation-updates.advisor'),
             enabled: processTopicEnabled(clowdAppConfig, 'platform.remediation-updates.advisor')
@@ -441,22 +434,24 @@ if (acgConfig) {
 
     if (_.get(clowdAppConfig, 'kafka.brokers[0].sasl', '') !== '') {
         data.kafka.sasl = {
-            username: clowdAppConfig.kafka.brokers[0].sasl.username,
-            password: clowdAppConfig.kafka.brokers[0].sasl.password,
-            mechanism: clowdAppConfig.kafka.brokers[0].sasl.saslMechanism,
-            securityProtocol: clowdAppConfig.kafka.brokers[0].sasl.securityProtocol
+            enabled: true,
+            username: broker.sasl.username,
+            password: broker.sasl.password,
+            mechanism: broker.sasl.saslMechanism
         };
+    }
 
+    if (broker.cacert) {
         data.kafka.ssl = {
-            ca: clowdAppConfig.kafka.brokers[0].cacert
+            enabled: true,
+            ca: broker.cacert
         };
     }
 
     config.load(data);
 }
 
-// debug comment
-config.validate({ strict: true });
+config.validate({allowed: 'strict'});
 
 export default config.get();
 export const sanitized = config.toString();
