@@ -25,3 +25,13 @@ docker --config="$DOCKER_CONF" tag "${IMAGE}:${IMAGE_TAG}" "${IMAGE}:latest"
 docker --config="$DOCKER_CONF" push "${IMAGE}:latest"
 docker --config="$DOCKER_CONF" tag "${IMAGE}:${IMAGE_TAG}" "${IMAGE}:qa"
 docker --config="$DOCKER_CONF" push "${IMAGE}:qa"
+
+if [[ $GIT_BRANCH == *"security-compliance"*]]; then
+    docker --config="$DOCKER_CONF" tag "${IMAGE}:${IMAGE_TAG}" "${IMAGE}:security-compliance"
+    docker --config="$DOCKER_CONF" push "${IMAGE}:security-compliance"
+else
+    docker --config="$DOCKER_CONF" tag "${IMAGE}:${IMAGE_TAG}" "${IMAGE}:latest"
+    docker --config="$DOCKER_CONF" push "${IMAGE}:latest"
+    docker --config="$DOCKER_CONF" tag "${IMAGE}:${IMAGE_TAG}" "${IMAGE}:qa"
+    docker --config="$DOCKER_CONF" push "${IMAGE}:qa"
+fi
