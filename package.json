@@ -55,7 +55,7 @@
     "@types/pino-multi-stream": "^3.1.2",
     "@types/sinon": "^7.5.2",
     "@types/supertest": "^2.0.8",
-    "@types/tmp": "^0.2.0",
+    "@types/tmp": "^0.2.5",
     "@types/uuid": "^7.0.2",
     "@typescript-eslint/eslint-plugin": "^5.54",
     "@typescript-eslint/parser": "^5.54",
