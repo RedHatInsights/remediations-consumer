@@ -49,14 +49,21 @@ function configureBroker () {
     const client_config: any = {
         logLevel: kafkaLogLevel(),
         logCreator: pinoLogCreator,
-        brokers: [`${config.kafka.host}:${config.kafka.port}`],
+        brokers: config.kafka.brokers,
         connectionTimeout: config.kafka.connectionTimeout
     };
 
     if (config.kafka.ssl.enabled) {
-        client_config.ssl = {
-            ca: config.kafka.ssl.ca
-        };
+        if (config.kafka.ssl.ca) {
+            client_config.ssl = {
+                ca: config.kafka.ssl.ca
+            };
+        }
+
+        // if ssl enabled but no cert supplied set ssl = true, use baked-in cert per ADR-20
+        else {
+            client_config.ssl = true;
+        }
     }
 
     if (config.kafka.sasl.enabled) {

@@ -140,15 +140,9 @@ const config = convict({
     },
 
     kafka: {
-        host: {
-            format: String,
-            default: 'localhost',
-            env: 'KAFKA_HOST'
-        },
-        port: {
-            format: String,
-            default: '29092',
-            env: 'KAFKA_PORT'
+        brokers: {
+            format: Array,
+            default: []
         },
         autoCommit: {
             format: Boolean,
@@ -397,12 +391,11 @@ if (acgConfig) {
     }
 
     // Kafka settings
-    const broker = clowdAppConfig.kafka.brokers[0];
+    const kafka = clowdAppConfig.kafka;
+    const broker = kafka.brokers[0];
 
-    data.kafka = {
-        host: broker.hostname,
-        port: broker.port.toString()
-    };
+    // create array of host:port pairs from config for multi-broker support
+    data.kafka.brokers = _.map(kafka.brokers, broker => `${broker.hostname}:${broker.port}`);
 
     data.kafka.topics = {
         // Kafka topic settings
@@ -432,20 +425,24 @@ if (acgConfig) {
         }
     };
 
-    if (_.get(clowdAppConfig, 'kafka.brokers[0].sasl', '') !== '') {
-        data.kafka.sasl = {
-            enabled: true,
-            username: broker.sasl.username,
-            password: broker.sasl.password,
-            mechanism: broker.sasl.saslMechanism
-        };
-    }
+    // sasl, ssl and cacert options will be the same for all brokers, so we're just using
+    // the values from the first broker in the array...
 
-    if (broker.cacert) {
-        data.kafka.ssl = {
-            enabled: true,
-            ca: broker.cacert
-        };
+    switch (broker?.securityProtocol) {
+        case 'SASL_SSL':
+            data.kafka.sasl = {
+                enabled: true,
+                username: broker.sasl.username,
+                password: broker.sasl.password,
+                mechanism: broker.sasl.saslMechanism
+            };
+
+        // eslint-disable-next-line no-fallthrough
+        case 'SSL':
+            data.kafka.ssl = {
+                enabled: true,
+                ca: broker.cacert
+            };
     }
 
     config.load(data);
