@@ -142,7 +142,8 @@ const config = convict({
     kafka: {
         brokers: {
             format: Array,
-            default: []
+            default: ['localhost:29092'],
+            env: 'KAFKA_BROKERS'
         },
         autoCommit: {
             format: Boolean,
@@ -395,7 +396,7 @@ if (acgConfig) {
     const broker = kafka.brokers[0];
 
     // create array of host:port pairs from config for multi-broker support
-    data.kafka.brokers = _.map(kafka.brokers, broker => `${broker.hostname}:${broker.port}`);
+    data.kafka.brokers = _.map(kafka.brokers, broker_def => `${broker_def.hostname}:${broker_def.port}`);
 
     data.kafka.topics = {
         // Kafka topic settings
