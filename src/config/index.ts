@@ -396,6 +396,7 @@ if (acgConfig) {
     const broker = kafka.brokers[0];
 
     // create array of host:port pairs from config for multi-broker support
+    data.kafka = {};
     data.kafka.brokers = _.map(kafka.brokers, broker_def => `${broker_def.hostname}:${broker_def.port}`);
 
     data.kafka.topics = {
