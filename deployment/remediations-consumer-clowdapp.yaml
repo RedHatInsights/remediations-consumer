@@ -18,9 +18,6 @@ objects:
     - replicas: 64
       partitions: 64
       topicName: platform.inventory.events
-    - replicas: 3
-      partitions: 3
-      topicName: platform.receptor-controller.responses
     deployments:
     - name: remediations-consumer
       minReplicas: ${{NUM_REPLICAS}}

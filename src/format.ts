@@ -13,11 +13,6 @@ export function formatTopicDetails(): TopicConfig[] {
         handler: inventoryHandler,
         resetOffsets: config.kafka.topics.inventory.resetOffsets
     }, {
-        enabled: config.kafka.topics.receptor.enabled,
-        topic: config.kafka.topics.receptor.topic,
-        handler: receptorHandler,
-        resetOffsets: config.kafka.topics.receptor.resetOffsets
-    }, {
         enabled: config.kafka.topics.advisor.enabled,
         topic: config.kafka.topics.advisor.topic,
         handler: advisorHandler,
