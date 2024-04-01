@@ -18,7 +18,6 @@ async function run () {
     } finally {
         try {
             await probes.pushMetrics();
-            log.info('metrics sent');
         } finally {
             await stop();
         }
