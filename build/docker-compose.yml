@@ -40,7 +40,7 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
 
   db:
-    image: quay.io/cloudservices/postgresql-rds:14-1
+    image: quay.io/cloudservices/postgresql-rds:14
     ports:
       - 5432:5432
     environment:
