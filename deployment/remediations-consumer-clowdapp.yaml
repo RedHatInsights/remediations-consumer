@@ -98,10 +98,10 @@ objects:
             value: ${LOG_LEVEL}
           - name: METRICS_PREFIX
             value: remediations_cleaner_
-          - name: METRICS_GW_PROTOCOL
+          - name: METRICS_GW_SCHEME
             value: 'http://'
           - name: METRICS_PUSH_GATEWAY
-            value: ${METRICS_GW_PROTOCOL}${PROMETHEUS_PUSHGATEWAY}
+            value: ${METRICS_GW_SCHEME}${PROMETHEUS_PUSHGATEWAY}
           - name: METRICS_PUSH_GATEWAY_ENABLED
             value: ${METRICS_PUSH_GATEWAY_ENABLED}
         resources:
