@@ -41,11 +41,12 @@ export async function pushMetrics () {
         const asyncGateway = P.promisifyAll(gateway);
 
         const jobName = `${config.namespace}|${os.hostname}`;
-        logger.info({jobName}, 'pushing metrics');
-
         const resp = await asyncGateway.pushAsync({jobName});
         if (resp.statusCode !== 200) {
             throw new Error(`failed to push metrics ${resp.statusCode}`);
         }
+        log.info('metrics sent');
+    } else {
+        log.info(`metrics not enabled(METRICS_PUSH_GATEWAY_ENABLED = ${config.metrics.pushGatewayEnabled})`);
     }
 }

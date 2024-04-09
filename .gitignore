@@ -4,3 +4,4 @@ node_modules
 sonar-scanner.properties
 .scannerwork/
 artifacts
+.idea
