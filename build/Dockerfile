@@ -10,7 +10,7 @@ ENV APP_ROOT=/opt/app-root/src
 WORKDIR $APP_ROOT
 RUN mkdir -p $APP_ROOT/.npm/{_logs,_cacache} && chgrp -R 0 $APP_ROOT && chmod -R ug+rwX $APP_ROOT
 
-RUN npm install -g npm@10.7.0
+RUN npm install -g npm@10.8.1
 
 USER 1001
 
