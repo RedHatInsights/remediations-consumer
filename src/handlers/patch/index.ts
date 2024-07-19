@@ -55,7 +55,7 @@ export default async function onMessage (message: Message) {
             probes.patchIssueUnknown(host_id, issues);
         }
 
-        probes.patchUpdateSuccess(host_id, issues, 2); // TODO: Fix Probes
+        probes.patchUpdateSuccess(message, host_id, issues, 2); // TODO: Fix Probes
     } catch (e) {
         if (e instanceof Error) {
             probes.patchUpdateError(host_id, issues, e);

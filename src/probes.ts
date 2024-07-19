@@ -46,6 +46,7 @@ const counters = {
 
 export function incomingMessage (topic: string, message: Message) {
     log.trace({ message }, 'incoming message');
+    log.info({ message }, 'incoming message');
     counters.incoming.labels(topic).inc();
 };
 
@@ -98,8 +99,8 @@ export function lostUpdateMessage (message: ReceptorMessage<PlaybookRunUpdate>) 
     counters.lostMessage.inc()
 }
 
-export function advisorUpdateSuccess (host_id: string, issues: string[], references: number) {
-    log.info({ host_id, references }, 'advisor issues successfully updated');
+export function advisorUpdateSuccess (message: Message, host_id: string, issues: string[], references: number) {
+    log.info({ message, host_id, references }, 'advisor issues successfully updated');
     log.debug({ issues }, 'updated advisor issues');
     counters.advisor.labels('success').inc();
 };
@@ -124,8 +125,8 @@ export function advisorUpdateErrorParse (message: Message, err: Error) {
     counters.compliance.labels('error_parse').inc();
 };
 
-export function complianceUpdateSuccess (host_id: string, issues: string[], references: number) {
-    log.info({ host_id, references }, 'compliance issues successfully updated');
+export function complianceUpdateSuccess (message: Message, host_id: string, issues: string[], references: number) {
+    log.info({ message, host_id, references }, 'compliance issues successfully updated');
     log.debug({ issues }, 'updated compliance issues');
     counters.compliance.labels('success').inc();
 };
@@ -150,8 +151,8 @@ export function complianceUpdateErrorParse (message: Message, err: Error) {
     counters.compliance.labels('error_parse').inc();
 };
 
-export function patchUpdateSuccess (host_id: string, issues: string[], references: number) {
-    log.info({ host_id, references }, 'patch issues successfully updated');
+export function patchUpdateSuccess (message: Message, host_id: string, issues: string[], references: number) {
+    log.info({ message, host_id, references }, 'patch issues successfully updated');
     log.debug({ issues }, 'updated patch issues')
     counters.patch.labels('success').inc();
 };
@@ -176,8 +177,8 @@ export function patchUpdateErrorParse (message: Message, err: Error) {
     counters.patch.labels('error_parse').inc();
 };
 
-export function vulnerabilityUpdateSuccess (host_id: string, issues: string[], references: number) {
-    log.info({ host_id, references }, 'vulnerability issues successfully updated');
+export function vulnerabilityUpdateSuccess (message: Message, host_id: string, issues: string[], references: number) {
+    log.info({ message, host_id, references }, 'vulnerability issues successfully updated');
     log.debug({ issues }, 'updated vulnerabilitiy issues');
     counters.vulnerability.labels('success').inc();
 };

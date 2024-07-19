@@ -56,7 +56,7 @@ export default async function onMessage (message: Message) {
             probes.complianceIssueUnknown(host_id, issues);
         }
 
-        probes.complianceUpdateSuccess(host_id, issues, 2); // TODO: Fix Probes
+        probes.complianceUpdateSuccess(message, host_id, issues, 2); // TODO: Fix Probes
     } catch (e) {
         if (e instanceof Error) {
             probes.complianceUpdateError(host_id, issues, e);
