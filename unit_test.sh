@@ -55,7 +55,7 @@ DB_CONTAINER_ID=$(podman run -d \
 	--network "${NETWORK}" \
 	-e POSTGRESQL_USER="postgres_user" \
 	-e POSTGRESQL_PASSWORD="remediations" \
-	-e POSTGRESQL_DATABASE="remediations_consumer_test" \
+	-e POSTGRESQL_DATABASE="remediations" \
 	${DB_IMAGE} || echo "0")
 
 if [[ "$DB_CONTAINER_ID" == "0" ]]; then
