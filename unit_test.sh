@@ -55,7 +55,7 @@ DB_CONTAINER_ID=$(podman run -d \
 	--network "${NETWORK}" \
 	-e POSTGRESQL_USER="postgres_user" \
 	-e POSTGRESQL_PASSWORD="remediations" \
-	-e POSTGRESQL_DATABASE="remediations" \
+	-e POSTGRESQL_DATABASE="postgres" \
 	${DB_IMAGE} || echo "0")
 
 if [[ "$DB_CONTAINER_ID" == "0" ]]; then
@@ -100,7 +100,7 @@ fi
 #----------------
 echo '----> record results...'
 mkdir -p $WORKSPACE/artifacts
-podman cp $API_CONTAINER_ID:/opt/app-root/artifacts/. $WORKSPACE/artifacts
+podman cp $API_CONTAINER_ID:/opt/app-root/src/artifacts/. $WORKSPACE/artifacts
 
 echo '====> unit tests PASSED'
 
