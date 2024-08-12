@@ -1,23 +1,25 @@
 version: '3.4'
+
 services:
   remediations-consumer:
-#    image: quay.io/cloudservices/remediations-consumer:pr-157-2dfb8b2
     build:
       context: ../
       dockerfile: build/Dockerfile
-      target: test
-    command: sh -c "echo 'Waiting 10s for dependencies to start' && sleep 10 && npm run db:ims && npm start"
-    links:
+      target: dist
+    command: sh -c "echo 'Waiting 10s for dependencies to start' && sleep 10 && npm run db:ims && node dist/src/app.js"
+    depends_on:
       - db
+      - kafka
     ports:
       - "9006:9006"
     environment:
-      - NODE_ENV=development
-      - LOG_LEVEL=trace
-      - DB_HOST=db
-      - KAFKA_HOST=kafka:9092
-      - KAFKA_AUTOCOMMIT=true
-      - INVENTORY_TOPIC_ENABLED="true"
+      NODE_ENV: production
+      NODE_OPTIONS: --enable-source-maps
+      LOG_LEVEL: trace
+      DB_HOST: db
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_AUTOCOMMIT: true
+      INVENTORY_TOPIC_ENABLED: "true"
     restart: "no"
 
   zookeeper:
@@ -25,9 +27,13 @@ services:
     environment:
       - ZOOKEEPER_CLIENT_PORT=2181
       - ZOOKEEPER_SERVER_ID=1
+    ports:
+      - "2181:2181"
 
   kafka:
-    image: wurstmeister/kafka
+    image: confluentinc/cp-kafka
+    depends_on:
+      - zookeeper
     ports:
       - "29092:29092"
     environment:
@@ -35,7 +41,8 @@ services:
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-#      KAFKA_CREATE_TOPICS: "platform.inventory.events:3:1"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CREATE_TOPICS: "platform.inventory.events:3:1"
       KAFKA_ADVERTISED_HOST_NAME: 172.17.0.1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
 

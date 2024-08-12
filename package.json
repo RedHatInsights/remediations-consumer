@@ -18,7 +18,7 @@
     "lint": "eslint src/**/*.ts test/**/*.js",
     "start": "tsc && LOG_PRETTY=true node dist/src/app.js",
     "test": "tsc && npm run db:ims && NODE_ENV=test LOG_LEVEL=fatal jest -i",
-    "test:ci": "npm run db:ims && NODE_ENV=test LOG_LEVEL=fatal jest -i",
+    "test:ci": "npm run db:ims && NODE_ENV=test LOG_LEVEL=fatal jest -i --coverage",
     "verify": "npm-run-all lint coverage"
   },
   "author": "Jozef Hartinger",
@@ -40,7 +40,7 @@
     "prom-client": "^11.5.3",
     "tmp": "^0.2.1",
     "uuid": "^7.0.3",
-    "ws": "^7.5.3"
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@tsconfig/node16": "^1.0.3",
@@ -62,7 +62,7 @@
     "eslint": "^8.35",
     "eslint-plugin-jest": "^22.21.0",
     "eslint-plugin-security": "^1.4.0",
-    "jest": "^29.2.2",
+    "jest": "^29.7.0",
     "jest-junit": "^14.0.1",
     "should": "^13.2.3",
     "sinon": "^7.5.0",
