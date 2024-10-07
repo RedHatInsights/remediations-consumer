@@ -22,7 +22,7 @@ objects:
     - name: remediations-consumer
       minReplicas: ${{NUM_REPLICAS}}
       podSpec:
-        image: quay.io/cloudservices/remediations-consumer:${IMAGE_TAG}
+        image: ${IMAGE}:${IMAGE_TAG}
         livenessProbe:
           failureThreshold: 3
           httpGet:
@@ -144,6 +144,9 @@ parameters:
   value: 'false'
 - description: Image tag
   name: IMAGE_TAG
+  required: true
+- description: Image
+  name: IMAGE
   required: true
 - name: PROMETHEUS_PUSHGATEWAY
 - name: METRICS_PUSH_GATEWAY_ENABLED
