@@ -125,3 +125,4 @@ parameters:
 - description: Image
   name: IMAGE
   required: true
+  value: "quay.io/redhat-services-prod/insights-management-tenant/insights-remediations/remediations-consumer"
