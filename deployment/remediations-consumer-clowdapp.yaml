@@ -148,6 +148,7 @@ parameters:
 - description: Image
   name: IMAGE
   required: true
+value: "quay.io/redhat-services-prod/insights-management-tenant/insights-remediations/remediations-consumer"
 - name: PROMETHEUS_PUSHGATEWAY
 - name: METRICS_PUSH_GATEWAY_ENABLED
   value: 'true'
