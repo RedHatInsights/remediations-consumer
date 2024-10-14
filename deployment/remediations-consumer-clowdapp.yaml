@@ -84,7 +84,7 @@ objects:
       schedule: '@hourly'
       suspend: ${{CLEANER_SUSPEND}}
       podSpec:
-        image: quay.io/cloudservices/remediations-consumer:${IMAGE_TAG}
+        image: ${IMAGE}:${IMAGE_TAG}
         restartPolicy: Never
         command:
           - node
