@@ -58,6 +58,7 @@
     "@types/uuid": "^7.0.2",
     "@typescript-eslint/eslint-plugin": "^5.54",
     "@typescript-eslint/parser": "^5.54",
+    "clean-modules": "^3.1.1",
     "eslint": "^8.35",
     "eslint-plugin-jest": "^22.21.0",
     "eslint-plugin-security": "^1.4.0",

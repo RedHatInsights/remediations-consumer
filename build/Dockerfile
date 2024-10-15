@@ -32,6 +32,7 @@ COPY jest.config.js tsconfig.json ./
 COPY ./src ./src
 
 RUN npm ci
+RUN npx clean-modules -y
 
 RUN npm run compile
 
@@ -44,6 +45,7 @@ FROM packages AS dist
 COPY --from=test $APP_ROOT/dist ./dist
 
 RUN npm ci --omit=dev && npm cache clean --force
+RUN npx clean-modules -y
 
 EXPOSE 9006
 
