@@ -22,7 +22,7 @@ ENV HOME=$APP_ROOT
 FROM base AS packages
 
 COPY ./test ./test
-COPY package.json package-lock.json knexfile.js ./
+COPY package.json package-lock.json .cleanmodules knexfile.js ./
 
 #----------------------- test -----------------------
 
