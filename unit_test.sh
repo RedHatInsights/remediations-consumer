@@ -10,7 +10,7 @@ cd $APP_ROOT
 API_IMAGE="local/remediations-consumer-test-${IMAGE_TAG}"
 API_CONTAINER_NAME="remediations-consumer-test-${IMAGE_TAG}"
 
-DB_IMAGE="quay.io/cloudservices/postgresql-rds:14"
+DB_IMAGE="quay.io/cloudservices/postgresql-rds:16"
 DB_CONTAINER_NAME="remediations-consumer-db-${IMAGE_TAG}"
 
 NETWORK="remediations-consumer-test-${IMAGE_TAG}"
