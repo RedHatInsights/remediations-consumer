@@ -1,5 +1,6 @@
 [![Build Status](https://jenkins-jenkins.5a9f.insights-dev.openshiftapps.com/buildStatus/icon?job=insights-remediations/remediations-consumer-ci)](https://jenkins-jenkins.5a9f.insights-dev.openshiftapps.com/job/insights-remediations/job/remediations-consumer-ci/)
 
+
 # Remediations Consumer
 
 Kafka consumer that consumes messages produced by applications and updates state in Remediations database and Redis accordingly.
