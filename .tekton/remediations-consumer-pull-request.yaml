@@ -236,7 +236,7 @@ spec:
       - name: BUILD_ARGS_FILE
         value: $(params.build-args-file)
       - name: ACTIVATION_KEY
-        value: ''
+        value: activation-disabled
       runAfter:
       - prefetch-dependencies
       taskRef:
