@@ -4,6 +4,7 @@ FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10-1086 AS base
 
 RUN microdnf module enable nodejs:20 && \
     microdnf install -y nodejs --nodocs && \
+    microdnf upgrade -y && \
     microdnf clean all
 
 ENV APP_ROOT=/opt/app-root/src
