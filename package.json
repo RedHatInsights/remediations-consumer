@@ -73,6 +73,9 @@
   "overrides": {
     "pino-cloudwatch": {
       "async": "^3.2.6"
+    },
+    "npm-run-all": {
+      "cross-spawn": "^7.0.6"
     }
   }
 }
