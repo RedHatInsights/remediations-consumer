@@ -31,7 +31,7 @@ objects:
     - name: remediations-update-consumer
       minReplicas: ${{NUM_REPLICAS}}
       podSpec:
-        image: quay.io/cloudservices/remediations-consumer:${IMAGE_TAG}
+        image: ${IMAGE}:${IMAGE_TAG}
         livenessProbe:
           failureThreshold: 3
           httpGet:
@@ -122,3 +122,7 @@ parameters:
 - description: Image tag
   name: IMAGE_TAG
   required: true
+- description: Image
+  name: IMAGE
+  required: true
+  value: "quay.io/redhat-services-prod/insights-management-tenant/insights-remediations/remediations-consumer"

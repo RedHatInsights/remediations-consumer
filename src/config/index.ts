@@ -417,10 +417,6 @@ if (acgConfig) {
             topic: processTopicName(clowdAppConfig, 'platform.remediation-updates.patch'),
             enabled: processTopicEnabled(clowdAppConfig, 'platform.remediation-updates.patch')
         },
-        receptor: {
-            topic: processTopicName(clowdAppConfig, 'platform.receptor-controller.responses'),
-            enabled: processTopicEnabled(clowdAppConfig, 'platform.receptor-controller.responses')
-        },
         vulnerability: {
             topic: processTopicName(clowdAppConfig, 'platform.remediation-updates.vulnerability'),
             enabled: processTopicEnabled(clowdAppConfig, 'platform.remediation-updates.vulnerability')

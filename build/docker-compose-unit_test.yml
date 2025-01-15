@@ -6,11 +6,10 @@ services:
       context: ../
       dockerfile: build/Dockerfile
       target: test
-    command: sh -c "npm run test:ci && chmod -fR 777 artifacts"
-    volumes:
-      - ../artifacts:/opt/app-root/src/artifacts
-    links:
-      - db
+    command: sh -c "npm run test:ci"
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "9006:9006"
     environment:
@@ -20,7 +19,7 @@ services:
     restart: "no"
 
   db:
-    image: quay.io/cloudservices/postgresql-rds:14-1
+    image: quay.io/cloudservices/postgresql-rds:16
     ports:
       - 5432:5432
     environment:
@@ -28,8 +27,9 @@ services:
       - POSTGRESQL_PASSWORD=remediations
       - POSTGRESQL_DATABASE=remediations
     healthcheck:
-      test: "psql -c 'SELECT datname FROM pg_database;'"
-      start_period: 3s
+      test: [ "CMD-SHELL", "pg_isready" ]
       interval: 10s
+      timeout: 5s
+      start_period: 15s
       retries: 6
 

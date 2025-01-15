@@ -80,7 +80,7 @@ export async function updateIssues (knex: Knex, host_id: string, issues: string[
         'NOT IN (?) ' +
         `FROM remediation_issues ` +
         `WHERE remediation_issues.id = remediation_issue_systems.remediation_issue_id ` +
-        'AND remediation_issues.issue_id LIKE ?' +
+        'AND remediation_issues.issue_id LIKE ? ' +
         `AND remediation_issue_systems.system_id = ?`,
         [issues.join(','), prefix, host_id]
     );
