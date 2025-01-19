@@ -56,7 +56,7 @@
     "@types/supertest": "^2.0.8",
     "@types/tmp": "^0.2.0",
     "@types/uuid": "^7.0.2",
-    "@typescript-eslint/eslint-plugin": "^5.54",
+    "@typescript-eslint/eslint-plugin": "^8.20",
     "@typescript-eslint/parser": "^5.54",
     "clean-modules": "^3.1.1",
     "eslint": "^8.35",
