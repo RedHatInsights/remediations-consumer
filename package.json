@@ -76,6 +76,9 @@
     },
     "npm-run-all": {
       "cross-spawn": "^7.0.6"
+    },
+    "normalize-package-data": {
+      "semver": "^5.7.2"
     }
   }
 }
