@@ -4,6 +4,7 @@ import inventoryHandler from './handlers/inventory';
 import patchHandler from './handlers/patch';
 import receptorHandler from './handlers/receptor';
 import vulnerabilityHandler from './handlers/vulnerability';
+import playbookDispatcherHandler from './handlers/playbookDispatcher';
 import config from './config';
 
 export function formatTopicDetails(): TopicConfig[] {
@@ -32,6 +33,11 @@ export function formatTopicDetails(): TopicConfig[] {
         topic: config.kafka.topics.vulnerability.topic,
         handler: vulnerabilityHandler,
         resetOffsets: config.kafka.topics.vulnerability.resetOffsets
+    },{
+        enabled: config.kafka.topics.playbookDispatcher.enabled,
+        topic: config.kafka.topics.playbookDispatcher.topic,
+        handler: playbookDispatcherHandler,
+        resetOffsets: config.kafka.topics.playbookDispatcher.resetOffsets
     }];
 }
 
