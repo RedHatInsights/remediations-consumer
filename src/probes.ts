@@ -26,7 +26,8 @@ const counters = {
     compliance: createCounter('compliance_total', 'Total number of compliance update messages processed', 'result'),
     patch: createCounter('patch_total', 'Total number of patch update messages processed', 'result'),
     vulnerability: createCounter(
-        'vulnerability_total', 'Total number of vulnerability update messages processed', 'result')
+        'vulnerability_total', 'Total number of vulnerability update messages processed', 'result'),
+    playbookRuns: createCounter('playbook_run_update_total', 'Playbook run status updates', 'result', 'status')
 };
 
 // https://www.robustperception.io/existential-issues-with-metrics
@@ -35,6 +36,11 @@ const counters = {
 ['success', 'unknown_host', 'unknown_issue', 'error', 'error_parse'].forEach(value => counters.compliance.labels(value).inc(0));
 ['success', 'unknown_host', 'unknown_issue', 'error', 'error_parse'].forEach(value => counters.patch.labels(value).inc(0));
 ['success', 'unknown_host', 'unknown_issue', 'error', 'error_parse'].forEach(value => counters.vulnerability.labels(value).inc(0));
+['updated', 'not_found', 'error', 'error_parse'].forEach(result =>
+    ['success', 'failure', 'running', 'timeout'].forEach(
+        status => counters.playbookRuns.labels(result, status).inc(0)
+    )
+);
 ['error', 'error_parse', 'processed'].forEach(value => {
     ['playbook_run_ack', 'playbook_run_update', 'playbook_run_finished', 'playbook_run_cancel_ack', 'playbook_run_completed', 'unknown'].forEach(type => {
         counters.receptor.labels(value, type).inc(0);
@@ -201,3 +207,21 @@ export function vulnerabilityUpdateErrorParse (message: Message, err: Error) {
     log.error({ message, err }, 'error parsing vulnerability message');
     counters.vulnerability.labels('error_parse').inc();
 };
+
+export function playbookUpdateSuccess(run_id: string, status: 'success' | 'failure' | 'running' | 'timeout' | 'canceled') {
+    log.info({ run_id, status }, `playbook run ${status}`);
+    counters.playbookRuns.labels('updated', status).inc();
+}
+
+export function playbookRunUnknown(run_id: string, status: string) {
+    log.warn({ run_id, status }, 'playbook run not found in database');
+    counters.playbookRuns.labels('not_found', status).inc();
+}
+export function playbookUpdateError(run_id: string, status: string, err: Error) {
+    log.error({ run_id, status, err }, 'error updating playbook run');
+    counters.playbookRuns.labels('error', status).inc();
+}
+export function playbookUpdateErrorParse(message: Message, err: Error, status = 'unknown') {
+    log.error({ message, err }, 'error parsing playbook run message');
+    counters.playbookRuns.labels('error_parse', status).inc();
+}

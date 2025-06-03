@@ -272,6 +272,23 @@ const config = convict({
                     default: false,
                     env: 'VULNERABILITY_TOPIC_ENABLED'
                 }
+            },
+            playbookDispatcher: {
+                topic: {
+                    format: String,
+                    default: 'platform.playbook-dispatcher.runs',
+                    env: 'PLAYBOOK_DISPATCHER_TOPIC'
+                },
+                resetOffsets: {
+                    format: Boolean,
+                    default: false,
+                    env: 'PLAYBOOK_DISPATCHER_RESET_OFFSETS'
+                },
+                enabled: {
+                    format: Boolean,
+                    default: false,
+                    env: 'PLAYBOOK_DISPATCHER_TOPIC_ENABLED'
+                }
             }
         },
         ssl: {
@@ -420,6 +437,10 @@ if (acgConfig) {
         vulnerability: {
             topic: processTopicName(clowdAppConfig, 'platform.remediation-updates.vulnerability'),
             enabled: processTopicEnabled(clowdAppConfig, 'platform.remediation-updates.vulnerability')
+        },
+        playbookDispatcher: {
+            topic: processTopicName(clowdAppConfig, 'platform.playbook-dispatcher.runs'),
+            enabled: processTopicEnabled(clowdAppConfig, 'platform.playbook-dispatcher.runs')
         }
     };
 

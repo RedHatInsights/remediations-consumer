@@ -86,6 +86,12 @@ export async function updateIssues (knex: Knex, host_id: string, issues: string[
     );
 }
 
+export function updatePlaybookRunStatus(knex: Knex, run_id: string, status: string) {
+    return knex('playbook_runs')
+        .where({ id: run_id })
+        .update({ status: status });
+}
+
 export function stop () {
     if (knex !== null) {
         return knexInstance.destroy();
