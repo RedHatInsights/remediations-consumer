@@ -87,7 +87,7 @@ fi
 # run remediations-tests in container
 #-------------------------------------
 echo '----> run api tests...'
-podman exec $API_CONTAINER_ID /bin/bash -c 'echo ${DB_CONTAINER_NAME} && npm run test:ci'
+podman exec $API_CONTAINER_ID /bin/bash -c 'echo db=$DB_CONTAINER_NAME && npm run test:ci'
 TEST_RESULT=$?
 
 if [ $TEST_RESULT -ne 0 ]; then
