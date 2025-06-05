@@ -5,13 +5,13 @@ import * as db from '../../db';
 import * as probes from '../../probes';
 import { parse, validate } from '../common';
 
-const schema = Joi.object({
-    id: Joi.string().required(),
-    status: Joi.string().required()
-});
-
 // List of valid playbook run statuses
 const validStatuses = ['success', 'failure', 'running', 'timeout', 'canceled'] as const;
+
+const schema = Joi.object({
+    id: Joi.string().required(),
+    status: Joi.string().valid(...validStatuses).required()
+});
 
 function parseMessage(message: Message) {
     try {
@@ -46,14 +46,6 @@ export default async function onMessage(message: Message) {
 
         if (parsed) {
             const { id, status } = parsed;
-
-            // Check if the parsed status is valid (e.g., 'success', 'failure', etc.)
-            const statusIsValid = validStatuses.includes(status as any);
-            if (!statusIsValid) {
-                // If status is invalid, record the error and exit
-                probes.playbookUpdateErrorParse(message, new Error(`Invalid status value: ${status}`), status);
-                return;
-            }
 
             try {
                 // Attempt to update the playbook run status in the database
