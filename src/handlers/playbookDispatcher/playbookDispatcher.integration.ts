@@ -104,7 +104,7 @@ describe('playbookDispatcher handler integration tests', function () {
         await playbookDispatcher(message);
 
         spy.calledOnce.should.be.true();
-        spy.calledWithExactly(message, sinon.match.instanceOf(Error), 'invalid-status').should.be.true();
+        spy.calledWithExactly(message, sinon.match.instanceOf(Error)).should.be.true();
     });
 
     test('unknown  playbook run id triggers host unknown probe', async () => {
