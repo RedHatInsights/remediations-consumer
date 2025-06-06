@@ -79,6 +79,8 @@ objects:
             value: ${RECEPTOR_TOPIC_ENABLED}
           - name: VULNERABILITY_TOPIC_ENABLED
             value: ${VULNERABILITY_TOPIC_ENABLED}
+          - name: PLAYBOOK_DISPATCHER_TOPIC_ENABLED
+            value: ${PLAYBOOK_DISPATCHER_TOPIC_ENABLED}
     jobs:
     - name: cleaner
       schedule: '@hourly'
@@ -141,6 +143,8 @@ parameters:
 - name: RECEPTOR_TOPIC_ENABLED
   value: 'true'
 - name: VULNERABILITY_TOPIC_ENABLED
+  value: 'false'
+- name: PLAYBOOK_DISPATCHER_TOPIC_ENABLED
   value: 'false'
 - description: Image tag
   name: IMAGE_TAG
