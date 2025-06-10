@@ -209,8 +209,13 @@ export function vulnerabilityUpdateErrorParse (message: Message, err: Error) {
 };
 
 export function playbookUpdateSuccess(run_id: string, status: 'success' | 'failure' | 'running' | 'timeout' | 'canceled') {
-    log.info({ run_id, status }, `playbook run ${status}`);
+    log.info({ run_id, status }, `playbook run status updated on update ${status}`);
     counters.playbookRuns.labels('updated', status).inc();
+}
+
+export function playbookCreateSuccess(run_id: string, status: 'success' | 'failure' | 'running' | 'timeout' | 'canceled') {
+    log.info({ run_id, status }, `playbook run status updated on create ${status}`);
+    counters.playbookRuns.labels('created', status).inc();
 }
 
 export function playbookRunUnknown(run_id: string, status: string) {

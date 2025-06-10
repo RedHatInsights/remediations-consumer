@@ -9,10 +9,10 @@ import { v4 as uuidv4 } from 'uuid';
 let remediationId: string;
 let playbookRunId: string;
 
-const buildMessage = (status: string, runId: string = playbookRunId) => ({
+const buildMessage = (status: string, eventType: string = 'update', runId: string = playbookRunId) => ({
     topic: 'platform.playbook-dispatcher.runs',
     value: JSON.stringify({
-        event_type: 'update',
+        event_type: eventType,
         payload: {
             id: runId,
             org_id: '5318290',
@@ -30,7 +30,7 @@ const buildMessage = (status: string, runId: string = playbookRunId) => ({
     highWaterOffset: 1,
     key: runId,
     headers: {
-        event_type: 'update',
+        event_type: eventType,
         service: 'remediations',
         status: status,
         org_id: '5318290'
@@ -95,6 +95,22 @@ describe('playbookDispatcher handler integration tests', function () {
             .first();
 
         result.status.should.equal('timeout');
+    });
+
+    test('create event with running status', async () => {
+        const message = buildMessage('running', 'create');
+        const spy = getSandbox().spy(probes, 'playbookCreateSuccess');
+
+        await playbookDispatcher(message);
+
+        spy.calledOnce.should.be.true();
+        spy.calledWithExactly(playbookRunId, 'running').should.be.true();
+
+        const result = await db.get()('playbook_runs')
+            .where({ id: playbookRunId })
+            .first();
+
+        result.status.should.equal('running');
     });
 
     test('update with invalid status triggers error parse probe', async () => {
@@ -173,9 +189,9 @@ describe('playbookDispatcher handler integration tests', function () {
         ]);
 
         const messages = [
-            buildMessage('success', runId1),
-            buildMessage('failure', runId2),
-            buildMessage('running', runId3)
+            buildMessage('success', 'update', runId1),
+            buildMessage('failure', 'update', runId2),
+            buildMessage('running', 'update', runId3)
         ];
 
         const spy = getSandbox().spy(probes, 'playbookUpdateSuccess');
