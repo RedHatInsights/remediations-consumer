@@ -37,10 +37,9 @@ function parseMessage(message: Message) {
 export default async function onMessage(message: Message) {
     const eventType = message.headers?.event_type?.toString();
 
-    // Only handle 'update' events; ignore 'create', 'delete', and 'read' events
-    // 'create' is handled separately when playbook run is initially created because the status is always 'running'
+    // Only handle 'update' and 'create' events; ignore delete', and 'read' events
     // 'delete' and 'read' are irrelevant for status updates
-    if (eventType === 'update') {
+    if (eventType === 'create' || eventType === 'update') {
         const knex = db.get();
         const parsed = parseMessage(message) as { id: string; status: string };
 
@@ -55,7 +54,11 @@ export default async function onMessage(message: Message) {
                     // If no rows were updated, the playbook run ID wasn't found
                     probes.playbookRunUnknown(id, status);
                 } else {
-                    probes.playbookUpdateSuccess(id, status as typeof validStatuses[number]);
+                    if (eventType === 'create') {
+                        probes.playbookCreateSuccess(id, status as typeof validStatuses[number]);
+                    } else {
+                        probes.playbookUpdateSuccess(id, status as typeof validStatuses[number]);
+                    }
                 }
             } catch (err) {
                 if (err instanceof Error) {
