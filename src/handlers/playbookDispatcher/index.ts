@@ -10,61 +10,76 @@ const validStatuses = ['success', 'failure', 'running', 'timeout', 'canceled'] a
 
 const schema = Joi.object({
     id: Joi.string().required(),
-    status: Joi.string().valid(...validStatuses).required()
+    status: Joi.string().valid(...validStatuses).required(),
+    service: Joi.string().required(),
+    labels: Joi.object({
+        'playbook-run': Joi.string().required()
+    }).required()
 });
 
-function parseMessage(message: Message) {
+interface DispatcherRunMessage {
+    id: string;
+    status: typeof validStatuses[number];
+    remediations_run_id: string;
+}
+
+function parseMessage(message: Message): DispatcherRunMessage | undefined {
     try {
         const parsed = parse(message);
-        if (!parsed || !parsed.payload) {
-            probes.playbookUpdateErrorParse(message, new Error('Message parse failed or payload missing'));
+
+        if (!parsed?.payload) {
+            probes.dispatcherRunErrorParse(message, new Error('Message parse failed or payload missing'));
             return;
         }
 
-        const validated = validate(parsed.payload, schema);
+        const validated = validate(parsed.payload, schema) as unknown as {
+            id: string;
+            status: string;
+            service: string;
+            labels: { 'playbook-run': string };
+        };
+
         if (!validated) {
-            probes.playbookUpdateErrorParse(message, new Error('Schema validation failed'));
+            probes.dispatcherRunErrorParse(message, new Error('Schema validation failed'));
             return;
         }
-        return validated;
+
+        // Only process if service is 'remediations'
+        if (validated.service !== 'remediations') {
+            return;
+        }
+
+        return {
+            id: validated.id,
+            status: validated.status as typeof validStatuses[number],
+            remediations_run_id: validated.labels['playbook-run']
+        };
     } catch (err) {
         if (err instanceof Error) {
-            probes.playbookUpdateErrorParse(message, err);
+            probes.dispatcherRunErrorParse(message, err);
         }
     }
 }
 
 export default async function onMessage(message: Message) {
     const eventType = message.headers?.event_type?.toString();
+    if (eventType !== 'create' && eventType !== 'update') {
+        return;
+    }
 
-    // Only handle 'update' and 'create' events; ignore delete', and 'read' events
-    // 'delete' and 'read' are irrelevant for status updates
-    if (eventType === 'create' || eventType === 'update') {
-        const knex = db.get();
-        const parsed = parseMessage(message) as { id: string; status: string };
+    const parsed = parseMessage(message);
+    if (!parsed) {
+        return;
+    }
 
-        if (parsed) {
-            const { id, status } = parsed;
+    const { id, status, remediations_run_id } = parsed;
 
-            try {
-                // Attempt to update the playbook run status in the database
-                const updatedRows = await db.updatePlaybookRunStatus(knex, id, status);
-
-                if (updatedRows === 0) {
-                    // If no rows were updated, the playbook run ID wasn't found
-                    probes.playbookRunUnknown(id, status);
-                } else {
-                    if (eventType === 'create') {
-                        probes.playbookCreateSuccess(id, status as typeof validStatuses[number]);
-                    } else {
-                        probes.playbookUpdateSuccess(id, status as typeof validStatuses[number]);
-                    }
-                }
-            } catch (err) {
-                if (err instanceof Error) {
-                    probes.playbookUpdateError(id, status, err);
-                }
-            }
+    try {
+        await db.createOrUpdateDispatcherRun(db.get(), id, status, remediations_run_id);
+        probes.dispatcherRunSuccess(id, status);
+    } catch (err) {
+        if (err instanceof Error) {
+            probes.dispatcherRunError(id, status, err);
         }
     }
 }
