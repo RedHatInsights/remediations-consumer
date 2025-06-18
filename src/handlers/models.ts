@@ -59,3 +59,12 @@ export enum PlaybookRunSystem {
     connection_code = 'connection_code',
     execution_code = 'execution_code'
 }
+
+export enum DispatcherRun {
+    TABLE = 'dispatcher_runs',
+    dispatcher_run_id = 'dispatcher_run_id',
+    remediations_run_id = 'remediations_run_id',
+    status = 'status',
+    created_at = 'created_at',
+    updated_at = 'updated_at'
+}

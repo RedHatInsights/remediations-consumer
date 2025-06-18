@@ -86,10 +86,48 @@ export async function updateIssues (knex: Knex, host_id: string, issues: string[
     );
 }
 
-export function updatePlaybookRunStatus(knex: Knex, run_id: string, status: string) {
-    return knex('playbook_runs')
-        .where({ id: run_id })
-        .update({ status: status });
+/**
+ * Creates or updates a dispatcher run record
+ *
+ * If no dispatcher_run with the given ID exists, a new record is created —
+ * this happens for both 'create' and 'update' events
+ * 
+ * For 'create' events, we expect a `remediations_run_id` (which we get from the
+ * 'playbook-run' label in the message), which links the dispatcher_run to a playbook_run
+ * 
+ * For existing runs, only the status and updated timestamp are changed because
+ * it should already have a remediations_run_id
+ */
+export async function createOrUpdateDispatcherRun(
+    knex: Knex,
+    dispatcher_run_id: string,
+    status: string,
+    remediations_run_id?: string
+): Promise<'created' | 'updated'> {
+    const now = new Date();
+
+    const existing = await knex('dispatcher_runs')
+        .where({ dispatcher_run_id })
+        .first();
+
+    if (!existing) {
+        await knex('dispatcher_runs').insert({
+            dispatcher_run_id,
+            status,
+            remediations_run_id,
+            created_at: now,
+            updated_at: now
+        });
+        return 'created';
+    } else {
+        await knex('dispatcher_runs')
+            .where({ dispatcher_run_id })
+            .update({
+                status,
+                updated_at: now
+            });
+        return 'updated';
+    }
 }
 
 export function stop () {
