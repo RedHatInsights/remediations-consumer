@@ -86,10 +86,38 @@ export async function updateIssues (knex: Knex, host_id: string, issues: string[
     );
 }
 
-export function updatePlaybookRunStatus(knex: Knex, run_id: string, status: string) {
-    return knex('playbook_runs')
-        .where({ id: run_id })
-        .update({ status: status });
+/**
+ * Inserts or updates a dispatcher run record
+ *
+ * If no record with the given dispatcher_run_id exists, a new one is inserted with the
+ * provided status and remediations_run_id
+ *
+ * If a record already exists, only the status and updated_at fields are updated
+ * The remediations_run_id and created_at fields are left unchanged for existing records
+ *
+ * This handles both 'create' and 'update' events from playbook-dispatcher Kafka messages
+ */
+export async function createOrUpdateDispatcherRun(
+    knex: Knex,
+    dispatcher_run_id: string,
+    status: string,
+    remediations_run_id: string
+) {
+    const now = new Date();
+
+    await knex('dispatcher_runs')
+        .insert({
+            dispatcher_run_id,
+            status,
+            remediations_run_id,
+            created_at: now,
+            updated_at: now
+        })
+        .onConflict('dispatcher_run_id')
+        .merge({
+            status,
+            updated_at: now
+        });
 }
 
 export function stop () {
