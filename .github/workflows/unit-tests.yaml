@@ -1,0 +1,56 @@
+---
+name: Unit tests
+on:
+  push:
+    branches: ['master']
+  pull_request:
+    branches: ['master']
+
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    env:
+      DOCKERFILE: build/Dockerfile
+      TEST_IMAGE: localhost/test-image:latest
+      APP_ROOT: /opt/app-root
+
+    services:
+      postgres:
+        image: quay.io/cloudservices/postgresql-rds:16
+        env:
+          POSTGRESQL_USER: postgres_user
+          POSTGRESQL_PASSWORD: remediations
+          POSTGRESQL_DATABASE: remediationstest
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build test image
+        run:  podman build --target test -t ${{ env.TEST_IMAGE }} -f ${{ env.DOCKERFILE }} .
+
+      - name: Run tests
+        run: |
+          mkdir $GITHUB_WORKSPACE/artifacts && chmod a+rwx $GITHUB_WORKSPACE/artifacts
+          podman run \
+          --rm \
+          --user 0:0 \
+          --network host \
+          -e NODE_ENV="test" \
+          -v $GITHUB_WORKSPACE/artifacts/:/opt/app-root/artifacts/ \
+          ${{ env.TEST_IMAGE }} \
+          /bin/bash -c "npm run test:ci"
+
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: ${{ github.workspace }}/artifacts/
