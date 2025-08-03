@@ -36,7 +36,7 @@
     "pino": "^5.17.0",
     "pino-cloudwatch": "^0.7.0",
     "pino-multi-stream": "^5.0.0",
-    "pino-pretty": "^3.6.1",
+    "pino-pretty": "^13.1.1",
     "prom-client": "^11.5.3",
     "tmp": "^0.2.1",
     "uuid": "^7.0.3",
