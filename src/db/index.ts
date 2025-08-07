@@ -120,6 +120,34 @@ export async function createOrUpdateDispatcherRun(
         });
 }
 
+/**
+ * Updates an existing system record
+ *
+ * Only updates systems that already exist in the table (part of remediation plans)
+ * This function is used by the inventory consumer to update system details when
+ * inventory sends update events for systems we're tracking
+ */
+export async function updateSystem(
+    knex: Knex,
+    id: string,
+    hostname?: string,
+    display_name?: string,
+    ansible_hostname?: string
+) {
+    const now = new Date();
+
+    // Only update fields that are explicitly provided (undefined fields are ignored)
+    // This preserves existing data if inventory sends partial updates
+    const updateFields: any = { updated_at: now };
+    if (hostname) updateFields.hostname = hostname;
+    if (display_name) updateFields.display_name = display_name;
+    if (ansible_hostname) updateFields.ansible_hostname = ansible_hostname;
+
+    await knex('systems')
+        .where({ id })
+        .update(updateFields);
+}
+
 export function stop () {
     if (knex !== null) {
         return knexInstance.destroy();

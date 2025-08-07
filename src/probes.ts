@@ -16,7 +16,7 @@ function createCounter (name: string, help: string, ...labelNames: string[]) {
 
 const counters = {
     incoming: createCounter('messages_total', 'Total number of messages processed', 'topic'),
-    remove: createCounter('remove_total', 'Total number of inventory delete messages processed', 'result'),
+    inventory: createCounter('inventory_total', 'Total number of inventory messages processed', 'result', 'type'),
     receptor: createCounter('receptor_total', 'Total number of receptor messages processed', 'result', 'type'),
     executorNotFound: createCounter(
         'receptor_executor_not_found', 'Total number of cases when an executor is not found in a query', 'result'),
@@ -31,7 +31,13 @@ const counters = {
 };
 
 // https://www.robustperception.io/existential-issues-with-metrics
-['success', 'unknown_host', 'unknown_issue', 'error', 'error_parse'].forEach(value => counters.remove.labels(value).inc(0));
+['success', 'unknown', 'error'].forEach(result =>
+    ['delete', 'update'].forEach(type =>
+        counters.inventory.labels(result, type).inc(0)
+    )
+);
+// Parse errors don't have a specific operation type
+counters.inventory.labels('error_parse', 'unknown').inc(0);
 ['success', 'unknown_host', 'unknown_issue', 'error', 'error_parse'].forEach(value => counters.advisor.labels(value).inc(0));
 ['success', 'unknown_host', 'unknown_issue', 'error', 'error_parse'].forEach(value => counters.compliance.labels(value).inc(0));
 ['success', 'unknown_host', 'unknown_issue', 'error', 'error_parse'].forEach(value => counters.patch.labels(value).inc(0));
@@ -57,22 +63,32 @@ export function incomingMessage (topic: string, message: Message) {
 
 export function inventoryRemoveSuccess (id: string, references: number) {
     log.info({ id, references }, 'host removed');
-    counters.remove.labels('success').inc();
+    counters.inventory.labels('success', 'delete').inc();
 };
 
 export function inventoryRemoveUnknown (id: string) {
     log.debug({ id }, 'host not known');
-    counters.remove.labels('unknown').inc();
+    counters.inventory.labels('unknown', 'delete').inc();
 };
 
 export function inventoryRemoveError (id: string, err: Error) {
     log.error({ id, err }, 'error removing host');
-    counters.remove.labels('error').inc();
+    counters.inventory.labels('error', 'delete').inc();
 };
 
-export function inventoryRemoveErrorParse (message: Message, err: Error) {
+export function inventoryErrorParse (message: Message, err: Error) {
     log.error({ message, err }, 'error parsing inventory message');
-    counters.remove.labels('error_parse').inc();
+    counters.inventory.labels('error_parse', 'unknown').inc();
+};
+
+export function inventoryUpdateSuccess (id: string) {
+    log.info({ id }, 'system updated');
+    counters.inventory.labels('success', 'update').inc();
+};
+
+export function inventoryUpdateError (id: string, err: Error) {
+    log.error({ id, err }, 'error updating system');
+    counters.inventory.labels('error', 'update').inc();
 };
 
 export function receptorErrorParse (message: any, err: Error) {
