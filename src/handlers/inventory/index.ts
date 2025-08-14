@@ -30,9 +30,9 @@ const updateMessageSchema = Joi.object().keys({
     type: Joi.string().valid('updated').required(),
     host: Joi.object().keys({
         id: Joi.string().uuid().required(),
-        display_name: Joi.string().optional(),
-        ansible_host: Joi.string().optional(),
-        fqdn: Joi.string().optional()
+        display_name: Joi.string().allow(null).optional(),
+        ansible_host: Joi.string().allow(null).optional(),
+        fqdn: Joi.string().allow(null).optional()
     }).required()
 });
 
