@@ -43,7 +43,7 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "@tsconfig/node16": "^1.0.3",
+    "@tsconfig/node16": "^16.0.0",
     "@types/bluebird": "^3.5.37",
     "@types/convict-format-with-validator": "^6.0.2",
     "@types/hapi__joi": "^15.0.4",
