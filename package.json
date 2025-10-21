@@ -39,7 +39,7 @@
     "pino-pretty": "^3.6.1",
     "prom-client": "^11.5.3",
     "tmp": "0.2.4",
-    "uuid": "^7.0.3",
+    "uuid": "^13.0.0",
     "ws": "^8.18.0"
   },
   "devDependencies": {
