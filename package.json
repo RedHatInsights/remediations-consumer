@@ -38,7 +38,7 @@
     "pino-multi-stream": "^5.0.0",
     "pino-pretty": "^3.6.1",
     "prom-client": "^11.5.3",
-    "tmp": "0.2.4",
+    "tmp": "0.2.5",
     "uuid": "^7.0.3",
     "ws": "^8.18.0"
   },
