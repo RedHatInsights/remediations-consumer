@@ -47,24 +47,31 @@ export async function start (config: DbConfig): Promise<Knex> {
 }
 
 export async function deleteSystem (system_id: string, dryRun = false): Promise<number> {
-    const base = get()('remediation_issue_systems').where({ system_id });
+    const knex = get();
 
     if (dryRun) {
-        const query = base.count();
-        const sql = query.toSQL().toNative();
-        log.debug({ sql }, 'executing database query');
-        const result = (await query)[0].count;
-        if (typeof result === 'number') {
-            return result;
-        }
+        // Count how many rows would be affected in both tables
+        const [issueSystemsResult, systemsResult] = await Promise.all([
+            knex('remediation_issue_systems').where({ system_id }).count(),
+            knex('systems').where({ id: system_id }).count()
+        ]);
+        
+        const issueSystemsCount = typeof issueSystemsResult[0].count === 'number' 
+            ? issueSystemsResult[0].count 
+            : parseInt(issueSystemsResult[0].count as string);
+        const systemsCount = typeof systemsResult[0].count === 'number'
+            ? systemsResult[0].count
+            : parseInt(systemsResult[0].count as string);
 
-        return parseInt(result);
+        return issueSystemsCount + systemsCount;
     }
 
-    const query = base.delete();
-    const sql = query.toSQL().toNative();
-    log.debug({ sql }, 'executing database query');
-    return query;
+    // Use transaction to make sure both tables stay in sync so either both deletions succeed or both are rolled back
+    return knex.transaction(async (transaction) => {
+        const issueSystemsCount = await transaction('remediation_issue_systems').where({ system_id }).delete();
+        const systemsCount = await transaction('systems').where({ id: system_id }).delete();
+        return issueSystemsCount + systemsCount;
+    });
 }
 
 export async function findHostIssues (knex: Knex, host_id: string) {
