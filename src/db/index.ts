@@ -86,10 +86,66 @@ export async function updateIssues (knex: Knex, host_id: string, issues: string[
     );
 }
 
-export function updatePlaybookRunStatus(knex: Knex, run_id: string, status: string) {
-    return knex('playbook_runs')
-        .where({ id: run_id })
-        .update({ status: status });
+/**
+ * Inserts or updates a dispatcher run record
+ *
+ * If no record with the given dispatcher_run_id exists, a new one is inserted with the
+ * provided status and remediations_run_id
+ *
+ * If a record already exists, only the status and updated_at fields are updated
+ * The remediations_run_id and created_at fields are left unchanged for existing records
+ *
+ * This handles both 'create' and 'update' events from playbook-dispatcher Kafka messages
+ */
+export async function createOrUpdateDispatcherRun(
+    knex: Knex,
+    dispatcher_run_id: string,
+    status: string,
+    remediations_run_id: string
+) {
+    const now = new Date();
+
+    await knex('dispatcher_runs')
+        .insert({
+            dispatcher_run_id,
+            status,
+            remediations_run_id,
+            created_at: now,
+            updated_at: now
+        })
+        .onConflict('dispatcher_run_id')
+        .merge({
+            status,
+            updated_at: now
+        });
+}
+
+/**
+ * Updates an existing system record
+ *
+ * Only updates systems that already exist in the table (part of remediation plans)
+ * This function is used by the inventory consumer to update system details when
+ * inventory sends update events for systems we're tracking
+ */
+export async function updateSystem(
+    knex: Knex,
+    id: string,
+    hostname?: string,
+    display_name?: string,
+    ansible_hostname?: string
+) {
+    const now = new Date();
+
+    // Only update fields that are explicitly provided (undefined fields are ignored)
+    // This preserves existing data if inventory sends partial updates
+    const updateFields: any = { updated_at: now };
+    if (hostname) updateFields.hostname = hostname;
+    if (display_name) updateFields.display_name = display_name;
+    if (ansible_hostname) updateFields.ansible_hostname = ansible_hostname;
+
+    await knex('systems')
+        .where({ id })
+        .update(updateFields);
 }
 
 export function stop () {

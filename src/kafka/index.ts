@@ -1,13 +1,17 @@
 /* eslint-disable max-len */
 
 import _ from 'lodash';
-import { Kafka, logLevel, LogEntry } from 'kafkajs';
+import { Kafka, logLevel, LogEntry, CompressionTypes, CompressionCodecs } from 'kafkajs';
+import LZ4Codec from 'kafkajs-lz4';
 import pino from 'pino';
 
 import config from '../config';
 import log, { toPinoLogLevel } from '../util/log';
 import { TopicConfig } from '../format';
 import * as probes from '../probes';
+
+// Register LZ4 compression codec
+CompressionCodecs[CompressionTypes.LZ4] = () => new LZ4Codec();
 
 function kafkaLogLevel () {
     if (config.kafka.logging) {
@@ -91,14 +95,8 @@ function connect () {
 
 export async function start (topicConfig: TopicConfig[]) {
     const {consumer, stop} = await connect();
-    log.warn('Full topicConfig:', JSON.stringify(topicConfig, null, 2));
 
-    const topics = topicConfig.map(topic => {
-        if (!topic.topic) {
-            log.warn(`Topic entry missing 'topic' field: ${JSON.stringify(topic)}`);
-        }
-        return topic.topic;
-    });
+    const topics = topicConfig.map(topic => { return topic.topic; });
     log.info('TOPICS ENABLED', topics);
 
     await consumer.connect();
@@ -106,11 +104,6 @@ export async function start (topicConfig: TopicConfig[]) {
 
     // Subscribe to each enabled topic
     for (const topic of topicConfig) {
-        if (!topic.topic) {
-            log.warn(`Attempting to subscribe to an undefined topic: ${JSON.stringify(topic)}`);
-            continue;
-        }
-
         await consumer.subscribe({ topic: topic.topic });
     }
 

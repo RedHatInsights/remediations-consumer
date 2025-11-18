@@ -16,7 +16,7 @@ function createCounter (name: string, help: string, ...labelNames: string[]) {
 
 const counters = {
     incoming: createCounter('messages_total', 'Total number of messages processed', 'topic'),
-    remove: createCounter('remove_total', 'Total number of inventory delete messages processed', 'result'),
+    inventory: createCounter('inventory_total', 'Total number of inventory messages processed', 'result', 'type'),
     receptor: createCounter('receptor_total', 'Total number of receptor messages processed', 'result', 'type'),
     executorNotFound: createCounter(
         'receptor_executor_not_found', 'Total number of cases when an executor is not found in a query', 'result'),
@@ -27,18 +27,24 @@ const counters = {
     patch: createCounter('patch_total', 'Total number of patch update messages processed', 'result'),
     vulnerability: createCounter(
         'vulnerability_total', 'Total number of vulnerability update messages processed', 'result'),
-    playbookRuns: createCounter('playbook_run_update_total', 'Playbook run status updates', 'result', 'status')
+    dispatcherRun: createCounter('dispatcher_run_update_total', 'Dispatcher run status updates', 'result', 'status')
 };
 
 // https://www.robustperception.io/existential-issues-with-metrics
-['success', 'unknown_host', 'unknown_issue', 'error', 'error_parse'].forEach(value => counters.remove.labels(value).inc(0));
+['success', 'unknown', 'error'].forEach(result =>
+    ['delete', 'update'].forEach(type =>
+        counters.inventory.labels(result, type).inc(0)
+    )
+);
+// Parse errors don't have a specific operation type
+counters.inventory.labels('error_parse', 'unknown').inc(0);
 ['success', 'unknown_host', 'unknown_issue', 'error', 'error_parse'].forEach(value => counters.advisor.labels(value).inc(0));
 ['success', 'unknown_host', 'unknown_issue', 'error', 'error_parse'].forEach(value => counters.compliance.labels(value).inc(0));
 ['success', 'unknown_host', 'unknown_issue', 'error', 'error_parse'].forEach(value => counters.patch.labels(value).inc(0));
 ['success', 'unknown_host', 'unknown_issue', 'error', 'error_parse'].forEach(value => counters.vulnerability.labels(value).inc(0));
 ['updated', 'not_found', 'error', 'error_parse'].forEach(result =>
     ['success', 'failure', 'running', 'timeout'].forEach(
-        status => counters.playbookRuns.labels(result, status).inc(0)
+        status => counters.dispatcherRun.labels(result, status).inc(0)
     )
 );
 ['error', 'error_parse', 'processed'].forEach(value => {
@@ -57,22 +63,32 @@ export function incomingMessage (topic: string, message: Message) {
 
 export function inventoryRemoveSuccess (id: string, references: number) {
     log.info({ id, references }, 'host removed');
-    counters.remove.labels('success').inc();
+    counters.inventory.labels('success', 'delete').inc();
 };
 
 export function inventoryRemoveUnknown (id: string) {
     log.debug({ id }, 'host not known');
-    counters.remove.labels('unknown').inc();
+    counters.inventory.labels('unknown', 'delete').inc();
 };
 
 export function inventoryRemoveError (id: string, err: Error) {
     log.error({ id, err }, 'error removing host');
-    counters.remove.labels('error').inc();
+    counters.inventory.labels('error', 'delete').inc();
 };
 
-export function inventoryRemoveErrorParse (message: Message, err: Error) {
+export function inventoryErrorParse (message: Message, err: Error) {
     log.error({ message, err }, 'error parsing inventory message');
-    counters.remove.labels('error_parse').inc();
+    counters.inventory.labels('error_parse', 'unknown').inc();
+};
+
+export function inventoryUpdateSuccess (id: string) {
+    log.info({ id }, 'system updated');
+    counters.inventory.labels('success', 'update').inc();
+};
+
+export function inventoryUpdateError (id: string, err: Error) {
+    log.error({ id, err }, 'error updating system');
+    counters.inventory.labels('error', 'update').inc();
 };
 
 export function receptorErrorParse (message: any, err: Error) {
@@ -208,20 +224,17 @@ export function vulnerabilityUpdateErrorParse (message: Message, err: Error) {
     counters.vulnerability.labels('error_parse').inc();
 };
 
-export function playbookUpdateSuccess(run_id: string, status: 'success' | 'failure' | 'running' | 'timeout' | 'canceled') {
-    log.info({ run_id, status }, `playbook run ${status}`);
-    counters.playbookRuns.labels('updated', status).inc();
+export function dispatcherRunSuccess(run_id: string, status: 'success' | 'failure' | 'running' | 'timeout' | 'canceled') {
+    log.info({ run_id, status }, `Dispatcher run created or updated with status: ${status}`);
+    counters.dispatcherRun.labels('success', status).inc();
 }
 
-export function playbookRunUnknown(run_id: string, status: string) {
-    log.warn({ run_id, status }, 'playbook run not found in database');
-    counters.playbookRuns.labels('not_found', status).inc();
-}
-export function playbookUpdateError(run_id: string, status: string, err: Error) {
-    log.error({ run_id, status, err }, 'error updating playbook run');
-    counters.playbookRuns.labels('error', status).inc();
-}
-export function playbookUpdateErrorParse(message: Message, err: Error, status = 'unknown') {
-    log.error({ message, err }, 'error parsing playbook run message');
-    counters.playbookRuns.labels('error_parse', status).inc();
-}
+export function dispatcherRunError(run_id: string, status: string, err: Error) {
+    log.error({ run_id, status, err }, 'error updating dispatcher run');
+    counters.dispatcherRun.labels('error', status).inc();
+};
+
+export function dispatcherRunErrorParse(message: Message, err: Error, status = 'unknown') {
+    log.error({ message, err }, 'error parsing dispatcher run message');
+    counters.dispatcherRun.labels('error_parse', status).inc();
+};
