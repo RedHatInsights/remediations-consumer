@@ -4,5 +4,22 @@
   "baseBranches": ["master"],
   "tekton": {
     "schedule": ["at any time"]
-  }
+  },
+  "vulnerabilityAlerts": {
+    "enabled": true
+  },
+  "osvVulnerabilityAlerts": true,
+  "packageRules": [
+    {
+      "description": "Group minor/patch npm dependencies into a single PR",
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "npm dependencies"
+    },
+    {
+      "description": "Only process updates with high/critical vulnerabilities (CVSS >= 7.0), regardless of update type",
+      "matchPackagePatterns": [".*"],
+      "minimumVulnerabilityScore": 7.0
+    }
+  ]
 }
