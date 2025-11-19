@@ -66,12 +66,26 @@ export async function deleteSystem (system_id: string, dryRun = false): Promise<
         return issueSystemsCount + systemsCount;
     }
 
-    // Use transaction to make sure both tables stay in sync so either both deletions succeed or both are rolled back
-    return knex.transaction(async (transaction) => {
-        const issueSystemsCount = await transaction('remediation_issue_systems').where({ system_id }).delete();
-        const systemsCount = await transaction('systems').where({ id: system_id }).delete();
-        return issueSystemsCount + systemsCount;
-    });
+    let issueSystemsCount = 0;
+    let systemsCount = 0;
+
+    try {
+        issueSystemsCount = await knex('remediation_issue_systems').where({ system_id }).delete();
+    } catch (e) {
+        if (e instanceof Error) {
+            log.warn({ system_id, error: e }, 'Failed to delete from remediation_issue_systems');
+        }
+    }
+
+    try {
+        systemsCount = await knex('systems').where({ id: system_id }).delete();
+    } catch (e) {
+        if (e instanceof Error) {
+            log.warn({ system_id, error: e }, 'Failed to delete from systems table');
+        }
+    }
+
+    return issueSystemsCount + systemsCount;
 }
 
 export async function findHostIssues (knex: Knex, host_id: string) {
