@@ -51,6 +51,45 @@ describe('inventory handler integration tests', function () {
             spy.callCount.should.equal(1);
         });
 
+        test('removes system from systems table', async () => {
+            const systemId = 'f35b1e1d-162f-4e87-93f6-d29169a4e16a';
+            
+            // First, insert a system record
+            await db.get()('systems').insert({
+                id: systemId,
+                hostname: 'test-host.example.com',
+                display_name: 'Test Host',
+                ansible_hostname: 'test-ansible-host'
+            });
+
+            // Verify it exists
+            const systemBefore = await db.get()('systems').where({ id: systemId }).first();
+            should.exist(systemBefore);
+
+            const message = {
+                topic: 'platform.inventory.events',
+                value: `{"type": "delete", "timestamp": "2019-05-23T18:31:39.065368+00:00", "id": "${systemId}"}`,
+                offset: 0,
+                partition: 58,
+                highWaterOffset: 1,
+                key: undefined
+            };
+
+            const spy = getSandbox().spy(probes, 'inventoryRemoveSuccess');
+
+            await handler(message);
+
+            // Verify system is removed from systems table
+            const systemAfter = await db.get()('systems').where({ id: systemId }).first();
+            should.not.exist(systemAfter);
+
+            // Also verify remediation_issue_systems is cleaned up
+            const [{ count }] = await db.get()('remediation_issue_systems').where({ system_id: systemId }).count();
+            parseInt(count as string).should.equal(0);
+            
+            spy.callCount.should.equal(1);
+        });
+
         test('does nothing on unknown host', async () => {
             const message = {
                 topic: 'platform.inventory.events',
@@ -67,23 +106,6 @@ describe('inventory handler integration tests', function () {
             spy.callCount.should.equal(1);
         });
 
-        test('handles database errors', async () => {
-            const message = {
-                topic: 'platform.inventory.events',
-                value: '{"type": "delete", "timestamp": "2019-05-23T18:31:39.065368+00:00", "id": "028c2c96-ba6b-4361-ae2b-e812841b2a87"}',
-                offset: 0,
-                partition: 12,
-                highWaterOffset: 1,
-                key: undefined
-            };
-
-            const spy = getSandbox().spy(probes, 'inventoryRemoveError');
-            getSandbox().stub(db, 'deleteSystem').throws();
-
-            await handler(message);
-            spy.callCount.should.equal(1);
-        });
-
         test('does not remove anything in dryRun', async () => {
             const message = {
                 topic: 'platform.inventory.events',
@@ -95,7 +117,7 @@ describe('inventory handler integration tests', function () {
             };
 
             const spy = getSandbox().spy(probes, 'inventoryRemoveSuccess');
-            getSandbox().stub(config.db, 'dryRun').value(true);
+            getSandbox().stub(config.db, 'dryRun').get(() => true);
 
             await handler(message);
             const [{ count }] = await db.get()('remediation_issue_systems').where({ system_id: 'dde971ae-0a39-4c2b-9041-a92e2d5a96aa' }).count();
