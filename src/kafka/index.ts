@@ -1,13 +1,17 @@
 /* eslint-disable max-len */
 
 import _ from 'lodash';
-import { Kafka, logLevel, LogEntry } from 'kafkajs';
+import { Kafka, logLevel, LogEntry, CompressionTypes, CompressionCodecs } from 'kafkajs';
+import LZ4Codec from 'kafkajs-lz4';
 import pino from 'pino';
 
 import config from '../config';
 import log, { toPinoLogLevel } from '../util/log';
 import { TopicConfig } from '../format';
 import * as probes from '../probes';
+
+// Register LZ4 compression codec
+CompressionCodecs[CompressionTypes.LZ4] = () => new LZ4Codec();
 
 function kafkaLogLevel () {
     if (config.kafka.logging) {

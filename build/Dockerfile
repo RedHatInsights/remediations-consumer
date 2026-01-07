@@ -1,6 +1,6 @@
 #----------------------- base -----------------------
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6-1758184547 AS base
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1764794109 AS base
 
 RUN microdnf module enable -y nodejs:22 && \
     microdnf install -y nodejs npm --nodocs && \
@@ -29,6 +29,10 @@ COPY package.json package-lock.json .cleanmodules knexfile.js ./
 
 FROM packages AS test
 
+USER 0
+RUN microdnf install -y python3 gcc-c++ make --nodocs && microdnf clean all
+USER 1001
+
 COPY jest.config.js tsconfig.json ./
 COPY ./src ./src
 
@@ -44,9 +48,12 @@ ENV NODE_ENV=test
 FROM packages AS dist
 
 COPY --from=test $APP_ROOT/dist ./dist
+COPY --from=test $APP_ROOT/node_modules ./node_modules
 
-RUN npm ci --omit=dev && npm cache clean --force
-RUN npx clean-modules -y
+# Remove dev dependencies without needing to rebuild
+USER 0
+RUN npm prune --production && npm cache clean --force
+USER 1001
 
 EXPOSE 9006
 
