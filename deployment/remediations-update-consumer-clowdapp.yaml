@@ -85,8 +85,6 @@ objects:
             value: ${INVENTORY_TOPIC_ENABLED}
           - name: PATCH_TOPIC_ENABLED
             value: ${PATCH_TOPIC_ENABLED}
-          - name: RECEPTOR_TOPIC_ENABLED
-            value: ${RECEPTOR_TOPIC_ENABLED}
           - name: VULNERABILITY_TOPIC_ENABLED
             value: ${VULNERABILITY_TOPIC_ENABLED}
           - name: PLAYBOOK_DISPATCHER_TOPIC_ENABLED
@@ -120,8 +118,6 @@ parameters:
   value: 'false'
 - name: PATCH_TOPIC_ENABLED
   value: 'true'
-- name: RECEPTOR_TOPIC_ENABLED
-  value: 'false'
 - name: VULNERABILITY_TOPIC_ENABLED
   value: 'true'
 - name: PLAYBOOK_DISPATCHER_TOPIC_ENABLED

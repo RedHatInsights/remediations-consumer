@@ -20,27 +20,6 @@ const messages = [
         ]
     },
     {
-        topic: 'platform.receptor-controller.responses',
-        messages: [
-            { value: JSON.stringify({
-                account: '6377882',
-                sender: 'Job-1',
-                message_type: 'response',
-                message_id: 'a910d22d-ff4b-4178-9eec-2f04424983ff',
-                payload: {
-                    console: 'This host is not known by Satellite',
-                    host: 'system-1',
-                    playbook_run_id: '00598b4a-2be2-4924-9863-7710240f5c49',
-                    sequence: 1,
-                    type: 'playbook_run_update'
-                },
-                code: 0,
-                in_response_to: '65c0ba21-1015-4e7d-a6d6-4b530cbfb5bd',
-                serial: 2
-            })}
-        ]
-    },
-    {
         topic: 'platform.remediation-updates.advisor',
         messages: [
             { value: JSON.stringify({

@@ -239,23 +239,6 @@ const config = convict({
                     env: 'PATCH_TOPIC_ENABLED'
                 }
             },
-            receptor: {
-                topic: {
-                    format: String,
-                    default: 'platform.receptor-controller.responses',
-                    env: 'RECEPTOR_TOPIC'
-                },
-                resetOffsets: {
-                    format: Boolean,
-                    default: false,
-                    env: 'RECEPTOR_RESET_OFFSETS'
-                },
-                enabled: {
-                    format: Boolean,
-                    default: false,
-                    env: 'RECEPTOR_TOPIC_ENABLED'
-                }
-            },
             vulnerability: {
                 topic: {
                     format: String,

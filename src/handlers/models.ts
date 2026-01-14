@@ -30,36 +30,6 @@ export enum PlaybookRun {
     updated_at = 'updated_at'
 }
 
-export enum PlaybookRunExecutor {
-    TABLE = 'playbook_run_executors',
-    id = 'id',
-    playbook_run_id = 'playbook_run_id',
-    receptor_job_id = 'receptor_job_id',
-    receptor_node_id = 'receptor_node_id',
-    status = 'status',
-    updated_at = 'updated_at',
-    version = 'version',
-    text_update_full = 'text_update_full',
-    satellite_connection_code = 'satellite_connection_code',
-    satellite_connection_error = 'satellite_connection_error',
-    satellite_infrastructure_code = 'satellite_infrastructure_code',
-    satellite_infrastructure_error = 'satellite_infrastructure_error',
-}
-
-export enum PlaybookRunSystem {
-    TABLE = 'playbook_run_systems',
-    id = 'id',
-    playbook_run_executor_id = 'playbook_run_executor_id',
-    sequence = 'sequence',
-    status = 'status',
-    system_name = 'system_name',
-    console = 'console',
-    updated_at = 'updated_at',
-    version = 'version',
-    connection_code = 'connection_code',
-    execution_code = 'execution_code'
-}
-
 export enum DispatcherRun {
     TABLE = 'dispatcher_runs',
     dispatcher_run_id = 'dispatcher_run_id',
