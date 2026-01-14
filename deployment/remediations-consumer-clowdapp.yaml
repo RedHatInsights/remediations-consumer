@@ -75,42 +75,10 @@ objects:
             value: ${INVENTORY_TOPIC_ENABLED}
           - name: PATCH_TOPIC_ENABLED
             value: ${PATCH_TOPIC_ENABLED}
-          - name: RECEPTOR_TOPIC_ENABLED
-            value: ${RECEPTOR_TOPIC_ENABLED}
           - name: VULNERABILITY_TOPIC_ENABLED
             value: ${VULNERABILITY_TOPIC_ENABLED}
           - name: PLAYBOOK_DISPATCHER_TOPIC_ENABLED
             value: ${PLAYBOOK_DISPATCHER_TOPIC_ENABLED}
-    jobs:
-    - name: cleaner
-      schedule: '@hourly'
-      suspend: ${{CLEANER_SUSPEND}}
-      podSpec:
-        image: ${IMAGE}:${IMAGE_TAG}
-        restartPolicy: Never
-        command:
-          - node
-          - dist/src/cleaner/run.js
-        env:
-          - name: DB_SSL_ENABLED
-            value: ${DB_SSL_ENABLED}
-          - name: LOG_CW_LEVEL
-            value: ${LOG_LEVEL}
-          - name: LOG_LEVEL
-            value: ${LOG_LEVEL}
-          - name: METRICS_PREFIX
-            value: remediations_cleaner_
-          - name: METRICS_PUSH_GATEWAY
-            value: http://${PROMETHEUS_PUSHGATEWAY}
-          - name: METRICS_PUSH_GATEWAY_ENABLED
-            value: ${METRICS_PUSH_GATEWAY_ENABLED}
-        resources:
-          limits:
-            cpu: ${CPU_LIMIT}
-            memory: ${MEMORY_LIMIT}
-          requests:
-            cpu: 200m
-            memory: 256Mi
 parameters:
 - name: DRY_RUN
   value: 'false'
@@ -140,8 +108,6 @@ parameters:
   value: 'true'
 - name: PATCH_TOPIC_ENABLED
   value: 'false'
-- name: RECEPTOR_TOPIC_ENABLED
-  value: 'true'
 - name: VULNERABILITY_TOPIC_ENABLED
   value: 'false'
 - name: PLAYBOOK_DISPATCHER_TOPIC_ENABLED
@@ -153,14 +119,3 @@ parameters:
   name: IMAGE
   required: true
   value: "quay.io/redhat-services-prod/insights-management-tenant/insights-remediations/remediations-consumer"
-- name: PROMETHEUS_PUSHGATEWAY
-- name: METRICS_PUSH_GATEWAY_ENABLED
-  value: 'true'
-- description: Cpu limit of cleaner job
-  name: CPU_LIMIT
-  value: 200m
-- description: memory limit of cleaner job
-  name: MEMORY_LIMIT
-  value: 256Mi
-- name: CLEANER_SUSPEND
-  value: 'true'
