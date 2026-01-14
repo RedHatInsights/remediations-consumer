@@ -11,7 +11,10 @@ ENV APP_ROOT=/opt/app-root/src
 WORKDIR $APP_ROOT
 RUN mkdir -p $APP_ROOT/.npm/{_logs,_cacache} && chgrp -R 0 $APP_ROOT && chmod -R ug+rwX $APP_ROOT
 
-RUN npm install -g npm@11.4.2
+RUN npm install -g npm@^11.6.1 && \
+    microdnf remove -y npm && \
+    microdnf clean all && \
+    rm -rf /usr/share/npm /usr/lib/node_modules/npm
 
 USER 1001
 
