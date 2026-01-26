@@ -4,9 +4,6 @@ import log from './util/log';
 import { client } from './metrics';
 import config from './config';
 import { Message } from 'kafkajs'
-import { ReceptorMessage } from './handlers/receptor';
-import { PlaybookRunCancelAck } from './handlers/receptor/playbookRunCancelAck';
-import { PlaybookRunUpdate } from './handlers/receptor/playbookRunUpdate';
 
 function createCounter (name: string, help: string, ...labelNames: string[]) {
     return new client.Counter({
@@ -17,11 +14,6 @@ function createCounter (name: string, help: string, ...labelNames: string[]) {
 const counters = {
     incoming: createCounter('messages_total', 'Total number of messages processed', 'topic'),
     inventory: createCounter('inventory_total', 'Total number of inventory messages processed', 'result', 'type'),
-    receptor: createCounter('receptor_total', 'Total number of receptor messages processed', 'result', 'type'),
-    executorNotFound: createCounter(
-        'receptor_executor_not_found', 'Total number of cases when an executor is not found in a query', 'result'),
-    receptorCancelAck: createCounter('receptor_cancel_ack_total', 'Total number of playbook_run_cancel_ack messages', 'status'),
-    lostMessage: createCounter('lost_messages_total', 'Total number of updates lost when in DIFF mode'),
     advisor: createCounter('advisor_total', 'Total number of advisor update messages processed', 'result'),
     compliance: createCounter('compliance_total', 'Total number of compliance update messages processed', 'result'),
     patch: createCounter('patch_total', 'Total number of patch update messages processed', 'result'),
@@ -47,14 +39,6 @@ counters.inventory.labels('error_parse', 'unknown').inc(0);
         status => counters.dispatcherRun.labels(result, status).inc(0)
     )
 );
-['error', 'error_parse', 'processed'].forEach(value => {
-    ['playbook_run_ack', 'playbook_run_update', 'playbook_run_finished', 'playbook_run_cancel_ack', 'playbook_run_completed', 'unknown'].forEach(type => {
-        counters.receptor.labels(value, type).inc(0);
-    });
-});
-['playbook_run_ack', 'playbook_run_update', 'playbook_run_finished', 'playbook_run_completed'].forEach(value => counters.executorNotFound.labels(value).inc(0));
-
-['cancelling', 'finished', 'failure'].forEach(value => counters.receptorCancelAck.labels(value).inc(0));
 
 export function incomingMessage (topic: string, message: Message) {
     log.trace({ message }, 'incoming message');
@@ -90,35 +74,6 @@ export function inventoryUpdateError (id: string, err: Error) {
     log.error({ id, err }, 'error updating system');
     counters.inventory.labels('error', 'update').inc();
 };
-
-export function receptorErrorParse (message: any, err: Error) {
-    log.error({ message, err }, 'error parsing receptor message');
-    counters.receptor.labels('error_parse', 'unknown').inc();
-};
-
-export function receptorError (message: any, err: Error) {
-    log.error({ message, err }, 'error processing sat-receptor response');
-    counters.receptor.labels('error', message.payload.type).inc();
-};
-
-export function receptorProcessed (type: string) {
-    counters.receptor.labels('processed', type).inc();
-}
-
-export function noExecutorFound (responseType: string, criteria: Record<string, string>) {
-    log.warn({responseType, criteria}, 'no executor matched');
-    counters.executorNotFound.labels(responseType).inc();
-}
-
-export function receptorPlaybookRunCancelAck (message: ReceptorMessage<PlaybookRunCancelAck>) {
-    log.debug({message}, 'received playbook_run_cancel_ack');
-    counters.receptorCancelAck.labels(message.payload.status).inc();
-}
-
-export function lostUpdateMessage (message: ReceptorMessage<PlaybookRunUpdate>) {
-    log.warn({message}, 'lost update message before given message in sequence');
-    counters.lostMessage.inc()
-}
 
 export function advisorUpdateSuccess (host_id: string, issues: string[], references: number) {
     log.info({ host_id, references }, 'advisor issues successfully updated');

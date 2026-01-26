@@ -2,7 +2,6 @@ import advisorHandler from './handlers/advisor';
 import complianceHandler from './handlers/compliance';
 import inventoryHandler from './handlers/inventory';
 import patchHandler from './handlers/patch';
-import receptorHandler from './handlers/receptor';
 import vulnerabilityHandler from './handlers/vulnerability';
 import playbookDispatcherHandler from './handlers/playbookDispatcher';
 import config from './config';
