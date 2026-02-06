@@ -80,7 +80,7 @@
       "cross-spawn": "^7.0.6"
     },
     "normalize-package-data": {
-      "semver": "^5.7.2"
+      "semver": "^7.0.0"
     },
     "brace-expansion": "^2.0.2"
   }
