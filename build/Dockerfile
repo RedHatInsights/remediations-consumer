@@ -1,6 +1,6 @@
 #----------------------- base -----------------------
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1770267347 AS base
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1771346502 AS base
 
 RUN microdnf module enable -y nodejs:22 && \
     microdnf install -y nodejs npm --nodocs && \
