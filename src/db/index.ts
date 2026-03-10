@@ -153,7 +153,9 @@ export async function updateSystem(
     id: string,
     hostname?: string,
     display_name?: string,
-    ansible_hostname?: string
+    ansible_hostname?: string,
+    satellite_org_id?: string,
+    owner_id?: string
 ) {
     const now = new Date();
 
@@ -163,6 +165,8 @@ export async function updateSystem(
     if (hostname) updateFields.hostname = hostname;
     if (display_name) updateFields.display_name = display_name;
     if (ansible_hostname) updateFields.ansible_hostname = ansible_hostname;
+    if (satellite_org_id) updateFields.satellite_org_id = satellite_org_id;
+    if (owner_id) updateFields.owner_id = owner_id;
 
     await knex('systems')
         .where({ id })

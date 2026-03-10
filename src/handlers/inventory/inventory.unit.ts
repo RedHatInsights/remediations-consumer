@@ -182,6 +182,108 @@ describe('inventory handler unit tests', function () {
             await handler(message);
             inventoryErrorParse.callCount.should.equal(1);
         });
+
+        test('parses message with satellite_org_id and owner_id', async () => {
+            const message = {
+                topic: 'platform.inventory.events',
+                value: JSON.stringify({
+                    "type": "updated",
+                    "timestamp": "2019-05-23T18:31:39.065368+00:00",
+                    "host": {
+                        "id": "6cfa75ee-5ba9-442e-9557-6dbbf33593c4",
+                        "display_name": "test-host",
+                        "fqdn": "test-host.example.com",
+                        "ansible_host": "test-host-ansible",
+                        "facts": [
+                            {
+                                "namespace": "satellite",
+                                "facts": {
+                                    "organization_id": "sat-org-123"
+                                }
+                            }
+                        ],
+                        "system_profile": {
+                            "owner_id": "owner-456"
+                        }
+                    }
+                }),
+                offset: 0,
+                partition: 58,
+                highWaterOffset: 1,
+                key: undefined
+            };
+
+            await handler(message);
+            inventoryErrorParse.callCount.should.equal(0);
+        });
+
+        test('parses message with multiple fact namespaces', async () => {
+            const message = {
+                topic: 'platform.inventory.events',
+                value: JSON.stringify({
+                    "type": "updated",
+                    "timestamp": "2019-05-23T18:31:39.065368+00:00",
+                    "host": {
+                        "id": "6cfa75ee-5ba9-442e-9557-6dbbf33593c4",
+                        "display_name": "test-host",
+                        "facts": [
+                            {
+                                "namespace": "satellite",
+                                "facts": {
+                                    "organization_id": "sat-org-123",
+                                    "virtual_host_uuid": "some-uuid"
+                                }
+                            },
+                            {
+                                "namespace": "rhsm",
+                                "facts": {
+                                    "some_field": "some_value"
+                                }
+                            }
+                        ]
+                    }
+                }),
+                offset: 0,
+                partition: 58,
+                highWaterOffset: 1,
+                key: undefined
+            };
+
+            await handler(message);
+            inventoryErrorParse.callCount.should.equal(0);
+        });
+
+        test('parses message without satellite facts', async () => {
+            const message = {
+                topic: 'platform.inventory.events',
+                value: JSON.stringify({
+                    "type": "updated",
+                    "timestamp": "2019-05-23T18:31:39.065368+00:00",
+                    "host": {
+                        "id": "6cfa75ee-5ba9-442e-9557-6dbbf33593c4",
+                        "display_name": "test-host",
+                        "facts": [
+                            {
+                                "namespace": "rhsm",
+                                "facts": {
+                                    "some_field": "some_value"
+                                }
+                            }
+                        ],
+                        "system_profile": {
+                            "owner_id": "owner-456"
+                        }
+                    }
+                }),
+                offset: 0,
+                partition: 58,
+                highWaterOffset: 1,
+                key: undefined
+            };
+
+            await handler(message);
+            inventoryErrorParse.callCount.should.equal(0);
+        });
     });
 
     describe('unsupported events', () => {

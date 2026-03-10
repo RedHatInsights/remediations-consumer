@@ -11,6 +11,11 @@ interface RemoveMessage {
     type: string;
 }
 
+interface FactNamespace {
+    namespace: string;
+    facts: Record<string, unknown>;
+}
+
 interface UpdateMessage {
     type: 'updated';
     host: {
@@ -18,6 +23,10 @@ interface UpdateMessage {
         display_name?: string;
         ansible_host?: string;
         fqdn?: string;
+        facts?: FactNamespace[];
+        system_profile?: {
+            owner_id?: string;
+        };
     };
 }
 
@@ -32,7 +41,16 @@ const updateMessageSchema = Joi.object().keys({
         id: Joi.string().uuid().required(),
         display_name: Joi.string().allow(null).optional(),
         ansible_host: Joi.string().allow(null).optional(),
-        fqdn: Joi.string().allow(null).optional()
+        fqdn: Joi.string().allow(null).optional(),
+        facts: Joi.array().items(
+            Joi.object().keys({
+                namespace: Joi.string().required(),
+                facts: Joi.object().unknown(true).required()
+            })
+        ).optional(),
+        system_profile: Joi.object().keys({
+            owner_id: Joi.string().allow(null).optional()
+        }).unknown(true).optional()
     }).required()
 });
 
@@ -101,12 +119,20 @@ async function handleUpdateEvent(event: UpdateMessage) {
         // - fqdn: hostname (DNS identity)
         // - display_name: display_name (human-friendly name)
         // - ansible_host: ansible_hostname (connectivity address)
+        // - facts[namespace=satellite].facts.organization_id: satellite_org_id
+        // - system_profile.owner_id: owner_id
+        const satelliteFacts = host.facts?.find(f => f.namespace === 'satellite');
+        const satelliteOrgId = satelliteFacts?.facts?.organization_id as string | undefined;
+        const ownerId = host.system_profile?.owner_id;
+
         await db.updateSystem(
             knex,
             host.id,
             host.fqdn,
             host.display_name,
-            host.ansible_host
+            host.ansible_host,
+            satelliteOrgId,
+            ownerId
         );
 
         probes.inventoryUpdateSuccess(host.id);
