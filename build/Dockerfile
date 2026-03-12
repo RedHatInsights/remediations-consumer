@@ -2,16 +2,21 @@
 
 FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1771346502 AS base
 
-RUN microdnf module enable -y nodejs:22 && \
+# Install Node.js and npm RPM packages
+# Upgrade the packages to the latest versions
+# Install npm@11.11.1 globally so that we can control the version of npm that we use
+# Remove the RPM npm package installed by microdnf
+# Clean up the package manager
+RUN microdnf module enable -y nodejs:24 && \
     microdnf install -y nodejs npm --nodocs && \
     microdnf upgrade -y && \
+    npm install -g npm@11.11.1 && \
+    microdnf remove -y npm && \
     microdnf clean all
 
 ENV APP_ROOT=/opt/app-root/src
 WORKDIR $APP_ROOT
 RUN mkdir -p $APP_ROOT/.npm/{_logs,_cacache} && chgrp -R 0 $APP_ROOT && chmod -R ug+rwX $APP_ROOT
-
-RUN npm install -g npm@11.4.2
 
 USER 1001
 
