@@ -26,7 +26,7 @@
   "dependencies": {
     "@hapi/joi": "^15.1.1",
     "bluebird": "^3.7.2",
-    "convict": "^6.2.4",
+    "convict": "^6.2.5",
     "convict-format-with-validator": "^6.2.0",
     "kafkajs": "^2.2.4",
     "kafkajs-lz4": "^1.0.0",
