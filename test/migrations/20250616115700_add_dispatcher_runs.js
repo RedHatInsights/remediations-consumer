@@ -2,10 +2,10 @@ export function up(knex) {
     return knex.schema.createTable('dispatcher_runs', function (table) {
         table.uuid('dispatcher_run_id').primary().notNullable();
         table.uuid('remediations_run_id').notNullable()
-            .references('id')
-            .inTable('playbook_runs')
-            .onDelete('CASCADE')
-            .onUpdate('CASCADE');
+        .references('id')
+        .inTable('playbook_runs')
+        .onDelete('CASCADE')
+        .onUpdate('CASCADE');
 
         table.enum('status', [
             'pending',
@@ -26,5 +26,5 @@ export function up(knex) {
 
 export function down(knex) {
     return knex.schema.dropTable('dispatcher_runs')
-        .raw('DROP TYPE IF EXISTS enum_dispatcher_runs_status');
+    .raw('DROP TYPE IF EXISTS enum_dispatcher_runs_status');
 }

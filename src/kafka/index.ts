@@ -2,6 +2,7 @@
 
 import _ from 'lodash';
 import { Kafka, logLevel, LogEntry, CompressionTypes, CompressionCodecs } from 'kafkajs';
+// @ts-expect-error - kafkajs-lz4 doesn't have type definitions
 import LZ4Codec from 'kafkajs-lz4';
 import pino from 'pino';
 

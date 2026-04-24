@@ -7,6 +7,9 @@ import { Message } from 'kafkajs';
 import { validate, parse } from '../common';
 
 const COMPLIANCE_PREFIX = 'ssg%';
+const ISSUE_ID_PATTERN = /^[a-zA-Z0-9_:|.\-\s]+$/;
+const MAX_ISSUE_ID_LENGTH = 500;
+const MAX_ISSUES_ARRAY_SIZE = 1000;
 
 interface ComplianceUpdate {
     host_id: string;
@@ -14,8 +17,19 @@ interface ComplianceUpdate {
 }
 
 const schema = Joi.object().keys({
-    host_id: Joi.string().required(),
-    issues: Joi.array().items(Joi.string()).required()
+    host_id: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+    issues: Joi.array()
+        .items(
+            Joi.string()
+                .max(MAX_ISSUE_ID_LENGTH)
+                .regex(ISSUE_ID_PATTERN)
+                .required()
+        )
+        .min(0)
+        .max(MAX_ISSUES_ARRAY_SIZE)
+        .required()
 });
 
 function parseMessage (message: Message): ComplianceUpdate | undefined {

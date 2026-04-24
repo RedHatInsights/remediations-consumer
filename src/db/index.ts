@@ -55,9 +55,9 @@ export async function deleteSystem (system_id: string, dryRun = false): Promise<
             knex('remediation_issue_systems').where({ system_id }).count(),
             knex('systems').where({ id: system_id }).count()
         ]);
-        
-        const issueSystemsCount = typeof issueSystemsResult[0].count === 'number' 
-            ? issueSystemsResult[0].count 
+
+        const issueSystemsCount = typeof issueSystemsResult[0].count === 'number'
+            ? issueSystemsResult[0].count
             : parseInt(issueSystemsResult[0].count as string);
         const systemsCount = typeof systemsResult[0].count === 'number'
             ? systemsResult[0].count
@@ -95,15 +95,78 @@ export async function findHostIssues (knex: Knex, host_id: string) {
     .where(RemediationIssueSystems.system_id, EQ, host_id);
 }
 
+/**
+ * Validates issue_id format to prevent SQL injection and malformed data
+ *
+ * Valid formats based on seed data:
+ * - advisor:CVE_2017_6074_kernel|KERNEL_CVE_2017_6074
+ * - ssg:rhel7|standard|xccdf_org.ssgproject.content_rule_service_autofs_disabled
+ * - patch:RHBA-2019:0689
+ * - vulnerabilities:CVE-2018-5716
+ *
+ * @param issueId The issue ID to validate
+ * @returns true if valid, false otherwise
+ */
+function validateIssueId(issueId: string): boolean {
+    // Allow only safe characters: alphanumeric, hyphens, underscores,
+    // pipes, colons, dots - no SQL special characters
+    const ISSUE_ID_PATTERN = /^[a-zA-Z0-9_:|.\-\s]+$/;
+
+    // Prevent DoS from excessively long strings
+    const MAX_ISSUE_ID_LENGTH = 500;
+
+    // Type and emptiness checks
+    if (typeof issueId !== 'string' || issueId.length === 0) {
+        return false;
+    }
+
+    // Length check
+    if (issueId.length > MAX_ISSUE_ID_LENGTH) {
+        log.warn({ issueId: issueId.substring(0, 100) + '...' }, 'Issue ID exceeds maximum length');
+        return false;
+    }
+
+    // Pattern check - blocks all SQL special characters
+    if (!ISSUE_ID_PATTERN.test(issueId)) {
+        log.warn({ issueId }, 'Issue ID contains invalid characters');
+        return false;
+    }
+
+    // Block SQL comment markers specifically
+    if (issueId.includes('--') || issueId.includes('/*') || issueId.includes('*/')) {
+        log.warn({ issueId }, 'Issue ID contains SQL comment markers');
+        return false;
+    }
+
+    return true;
+}
+
 export async function updateIssues (knex: Knex, host_id: string, issues: string[], prefix: string) {
+    // Validate all issue IDs before processing
+    const invalidIssues = issues.filter(issue => !validateIssueId(issue));
+    if (invalidIssues.length > 0) {
+        log.warn({ invalidIssues, host_id }, 'Rejecting update due to invalid issue IDs');
+        throw new Error(`Invalid issue IDs detected: ${invalidIssues.join(', ')}`);
+    }
+
+    // Create individual placeholders for each issue
+    const placeholders = issues.length > 0
+        ? issues.map(() => '?').join(',')
+        : '';
+
+    const notInClause = issues.length > 0
+        ? `remediation_issues.issue_id NOT IN (${placeholders})`
+        : 'TRUE';
+
+    // Each issue gets its own parameter - proper parameterization
     return knex.raw(
-        `UPDATE remediation_issue_systems SET resolved = remediation_issues.issue_id ` +
-        'NOT IN (?) ' +
-        `FROM remediation_issues ` +
-        `WHERE remediation_issues.id = remediation_issue_systems.remediation_issue_id ` +
-        'AND remediation_issues.issue_id LIKE ? ' +
-        `AND remediation_issue_systems.system_id = ?`,
-        [issues.join(','), prefix, host_id]
+        `UPDATE remediation_issue_systems
+         SET resolved = ${notInClause}
+         FROM remediation_issues
+         WHERE remediation_issues.id = remediation_issue_systems.remediation_issue_id
+         AND remediation_issues.issue_id LIKE ?
+         AND remediation_issue_systems.system_id = ?`,
+        [...issues, prefix, host_id]
     );
 }
 
@@ -127,18 +190,18 @@ export async function createOrUpdateDispatcherRun(
     const now = new Date();
 
     await knex('dispatcher_runs')
-        .insert({
-            dispatcher_run_id,
-            status,
-            remediations_run_id,
-            created_at: now,
-            updated_at: now
-        })
-        .onConflict('dispatcher_run_id')
-        .merge({
-            status,
-            updated_at: now
-        });
+    .insert({
+        dispatcher_run_id,
+        status,
+        remediations_run_id,
+        created_at: now,
+        updated_at: now
+    })
+    .onConflict('dispatcher_run_id')
+    .merge({
+        status,
+        updated_at: now
+    });
 }
 
 /**
@@ -160,13 +223,15 @@ export async function updateSystem(
     // Only update fields that are explicitly provided (undefined fields are ignored)
     // This preserves existing data if inventory sends partial updates
     const updateFields: any = { updated_at: now };
-    if (hostname) updateFields.hostname = hostname;
-    if (display_name) updateFields.display_name = display_name;
-    if (ansible_hostname) updateFields.ansible_hostname = ansible_hostname;
+    if (hostname) {updateFields.hostname = hostname;}
+
+    if (display_name) {updateFields.display_name = display_name;}
+
+    if (ansible_hostname) {updateFields.ansible_hostname = ansible_hostname;}
 
     await knex('systems')
-        .where({ id })
-        .update(updateFields);
+    .where({ id })
+    .update(updateFields);
 }
 
 export function stop () {
