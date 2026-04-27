@@ -4,6 +4,7 @@ import * as db from '../../db';
 import * as _ from 'lodash';
 import { Message } from 'kafkajs';
 import { validate, parse } from '../common';
+import { ISSUE_ID_PATTERN, MAX_ISSUE_ID_LENGTH, MAX_ISSUES_ARRAY_SIZE } from '../../validation/issueId';
 
 const ADVISOR_PREFIX = 'advisor%';
 
@@ -13,8 +14,19 @@ interface AdvisorUpdate {
 }
 
 const schema = Joi.object().keys({
-    host_id: Joi.string().required(),
-    issues: Joi.array().items(Joi.string()).required()
+    host_id: Joi.string()
+        .guid({ version: ['uuidv4'] })
+        .required(),
+    issues: Joi.array()
+        .items(
+            Joi.string()
+                .max(MAX_ISSUE_ID_LENGTH)
+                .regex(ISSUE_ID_PATTERN)
+                .required()
+        )
+        .min(0)
+        .max(MAX_ISSUES_ARRAY_SIZE)
+        .required()
 });
 
 function parseMessage (message: Message): AdvisorUpdate | undefined {
