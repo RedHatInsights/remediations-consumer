@@ -5,11 +5,9 @@ import * as P from 'bluebird';
 import * as _ from 'lodash';
 import { Message } from 'kafkajs';
 import { validate, parse } from '../common';
+import { ISSUE_ID_PATTERN, MAX_ISSUE_ID_LENGTH, MAX_ISSUES_ARRAY_SIZE } from '../../validation/issueId';
 
 const COMPLIANCE_PREFIX = 'ssg%';
-const ISSUE_ID_PATTERN = /^[a-zA-Z0-9_:|.\-\s]+$/;
-const MAX_ISSUE_ID_LENGTH = 500;
-const MAX_ISSUES_ARRAY_SIZE = 1000;
 
 interface ComplianceUpdate {
     host_id: string;
