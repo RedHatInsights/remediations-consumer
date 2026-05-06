@@ -1,6 +1,7 @@
 import log from '../util/log';
 import { knex, Knex } from 'knex';
 import { RemediationIssues, RemediationIssueSystems } from '../handlers/models';
+import { validateIssueId } from '../validation/issueId';
 
 const EQ = '=';
 
@@ -55,9 +56,9 @@ export async function deleteSystem (system_id: string, dryRun = false): Promise<
             knex('remediation_issue_systems').where({ system_id }).count(),
             knex('systems').where({ id: system_id }).count()
         ]);
-        
-        const issueSystemsCount = typeof issueSystemsResult[0].count === 'number' 
-            ? issueSystemsResult[0].count 
+
+        const issueSystemsCount = typeof issueSystemsResult[0].count === 'number'
+            ? issueSystemsResult[0].count
             : parseInt(issueSystemsResult[0].count as string);
         const systemsCount = typeof systemsResult[0].count === 'number'
             ? systemsResult[0].count
@@ -96,14 +97,37 @@ export async function findHostIssues (knex: Knex, host_id: string) {
 }
 
 export async function updateIssues (knex: Knex, host_id: string, issues: string[], prefix: string) {
+    const invalidIssues = issues.filter(issue => !validateIssueId(issue));
+    if (invalidIssues.length > 0) {
+        log.warn({ invalidIssues, host_id }, 'Rejecting update due to invalid issue IDs');
+        throw Object.assign(
+            new Error('Invalid issue IDs detected'),
+            { data: { invalidIssues } }
+        );
+    }
+
+    if (issues.length === 0) {
+        return knex.raw(
+            `UPDATE remediation_issue_systems
+             SET resolved = TRUE
+             FROM remediation_issues
+             WHERE remediation_issues.id = remediation_issue_systems.remediation_issue_id
+             AND remediation_issues.issue_id LIKE ?
+             AND remediation_issue_systems.system_id = ?`,
+            [prefix, host_id]
+        );
+    }
+
+    const placeholders = issues.map(() => '?').join(',');
+
     return knex.raw(
-        `UPDATE remediation_issue_systems SET resolved = remediation_issues.issue_id ` +
-        'NOT IN (?) ' +
-        `FROM remediation_issues ` +
-        `WHERE remediation_issues.id = remediation_issue_systems.remediation_issue_id ` +
-        'AND remediation_issues.issue_id LIKE ? ' +
-        `AND remediation_issue_systems.system_id = ?`,
-        [issues.join(','), prefix, host_id]
+        `UPDATE remediation_issue_systems
+         SET resolved = remediation_issues.issue_id NOT IN (${placeholders})
+         FROM remediation_issues
+         WHERE remediation_issues.id = remediation_issue_systems.remediation_issue_id
+         AND remediation_issues.issue_id LIKE ?
+         AND remediation_issue_systems.system_id = ?`,
+        [...issues, prefix, host_id]
     );
 }
 
@@ -127,18 +151,18 @@ export async function createOrUpdateDispatcherRun(
     const now = new Date();
 
     await knex('dispatcher_runs')
-        .insert({
-            dispatcher_run_id,
-            status,
-            remediations_run_id,
-            created_at: now,
-            updated_at: now
-        })
-        .onConflict('dispatcher_run_id')
-        .merge({
-            status,
-            updated_at: now
-        });
+    .insert({
+        dispatcher_run_id,
+        status,
+        remediations_run_id,
+        created_at: now,
+        updated_at: now
+    })
+    .onConflict('dispatcher_run_id')
+    .merge({
+        status,
+        updated_at: now
+    });
 }
 
 /**
@@ -160,13 +184,15 @@ export async function updateSystem(
     // Only update fields that are explicitly provided (undefined fields are ignored)
     // This preserves existing data if inventory sends partial updates
     const updateFields: any = { updated_at: now };
-    if (hostname) updateFields.hostname = hostname;
-    if (display_name) updateFields.display_name = display_name;
-    if (ansible_hostname) updateFields.ansible_hostname = ansible_hostname;
+    if (hostname) {updateFields.hostname = hostname;}
+
+    if (display_name) {updateFields.display_name = display_name;}
+
+    if (ansible_hostname) {updateFields.ansible_hostname = ansible_hostname;}
 
     await knex('systems')
-        .where({ id })
-        .update(updateFields);
+    .where({ id })
+    .update(updateFields);
 }
 
 export function stop () {

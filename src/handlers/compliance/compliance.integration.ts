@@ -142,4 +142,67 @@ describe('compliance handler integration tests', function () {
         await handler(message);
         spy.callCount.should.equal(1);
     });
+
+    describe('SQL injection security tests', () => {
+        test('rejects SQL injection with DROP TABLE', async () => {
+            const message = {
+                topic: 'platform.remediation-updates.compliance',
+                value: JSON.stringify({
+                    host_id: 'dde971ae-0a39-4c2b-9041-a92e2d5a96bb',
+                    issues: ["ssg:rhel7'; DROP TABLE remediation_issues; --"]
+                }),
+                offset: 0,
+                partition: 58,
+                highWaterOffset: 1,
+                key: undefined
+            };
+
+            const spy = getSandbox().spy(probes, 'complianceUpdateErrorParse');
+            await handler(message);
+            spy.callCount.should.equal(1);
+
+            const tableExists = await db.get().schema.hasTable('remediation_issues');
+            tableExists.should.be.true();
+        });
+
+        test('rejects issues with single quotes', async () => {
+            const message = {
+                topic: 'platform.remediation-updates.compliance',
+                value: JSON.stringify({
+                    host_id: 'dde971ae-0a39-4c2b-9041-a92e2d5a96bb',
+                    issues: ["ssg:test'malicious"]
+                }),
+                offset: 0,
+                partition: 58,
+                highWaterOffset: 1,
+                key: undefined
+            };
+
+            const spy = getSandbox().spy(probes, 'complianceUpdateErrorParse');
+            await handler(message);
+            spy.callCount.should.equal(1);
+        });
+
+        test('handles large number of valid issues', async () => {
+            const issues = Array.from({ length: 50 }, (_, i) =>
+                `ssg:rhel7|standard|rule_${i.toString().padStart(5, '0')}`
+            );
+
+            const message = {
+                topic: 'platform.remediation-updates.compliance',
+                value: JSON.stringify({
+                    host_id: 'dde971ae-0a39-4c2b-9041-a92e2d5a96bb',
+                    issues
+                }),
+                offset: 0,
+                partition: 58,
+                highWaterOffset: 1,
+                key: undefined
+            };
+
+            const spy = getSandbox().spy(probes, 'complianceUpdateSuccess');
+            await handler(message);
+            spy.callCount.should.equal(1);
+        });
+    });
 });
