@@ -64,4 +64,19 @@ describe('compliance handler unit tests', function () {
         await handler(message);
         complianceUpdateErrorParse.callCount.should.equal(1);
     });
+
+    test('handles empty issues array', async () => {
+        const message = {
+            topic: 'platform.remediation-updates.compliance',
+            value: '{"host_id": "47c686b1-c359-44a9-bd2f-1c111c0533db", "issues": []}',
+            offset: 0,
+            partition: 58,
+            highWaterOffset: 1,
+            key: undefined
+        };
+
+        await handler(message);
+        // Empty issues array should be valid - parse error should NOT be called
+        complianceUpdateErrorParse.callCount.should.equal(0);
+    });
 });

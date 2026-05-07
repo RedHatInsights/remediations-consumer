@@ -22,7 +22,6 @@ const schema = Joi.object().keys({
             Joi.string()
                 .max(MAX_ISSUE_ID_LENGTH)
                 .regex(ISSUE_ID_PATTERN)
-                .required()
         )
         .min(0)
         .max(MAX_ISSUES_ARRAY_SIZE)
