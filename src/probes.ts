@@ -11,6 +11,18 @@ function createCounter (name: string, help: string, ...labelNames: string[]) {
     });
 }
 
+export function sanitizeMessageForLogging(message: Message, maxLength: number = 1000) {
+    const valueBuffer = Buffer.isBuffer(message.value) ? message.value : Buffer.from(message.value || '');
+    const value = valueBuffer.toString('utf8');
+    return {
+        partition: message.partition,
+        timestamp: message.timestamp,
+        size: valueBuffer.length,
+        valueTruncated: value.substring(0, maxLength) + (value.length > maxLength ? '...' : ''),
+        hasKey: message.key !== null && message.key !== undefined
+    };
+}
+
 const counters = {
     incoming: createCounter('messages_total', 'Total number of messages processed', 'topic'),
     inventory: createCounter('inventory_total', 'Total number of inventory messages processed', 'result', 'type'),
@@ -41,7 +53,7 @@ counters.inventory.labels('error_parse', 'unknown').inc(0);
 );
 
 export function incomingMessage (topic: string, message: Message) {
-    log.trace({ message }, 'incoming message');
+    log.trace({ message: sanitizeMessageForLogging(message) }, 'incoming message');
     counters.incoming.labels(topic).inc();
 };
 
@@ -61,7 +73,7 @@ export function inventoryRemoveError (id: string, err: Error) {
 };
 
 export function inventoryErrorParse (message: Message, err: Error) {
-    log.error({ message, err }, 'error parsing inventory message');
+    log.error({ message: sanitizeMessageForLogging(message), err }, 'error parsing inventory message');
     counters.inventory.labels('error_parse', 'unknown').inc();
 };
 
@@ -97,7 +109,7 @@ export function advisorUpdateError (host_id: string, issues: string[], err: Erro
 };
 
 export function advisorUpdateErrorParse (message: Message, err: Error) {
-    log.error({ message, err }, 'error parsing advisor message');
+    log.error({ message: sanitizeMessageForLogging(message), err }, 'error parsing advisor message');
     counters.compliance.labels('error_parse').inc();
 };
 
@@ -123,7 +135,7 @@ export function complianceUpdateError (host_id: string, issues: Array<string>, e
 };
 
 export function complianceUpdateErrorParse (message: Message, err: Error) {
-    log.error({ message, err }, 'error parsing compliance message');
+    log.error({ message: sanitizeMessageForLogging(message), err }, 'error parsing compliance message');
     counters.compliance.labels('error_parse').inc();
 };
 
@@ -149,7 +161,7 @@ export function patchUpdateError (host_id: string, issues: Array<string>, err: E
 };
 
 export function patchUpdateErrorParse (message: Message, err: Error) {
-    log.error({ message, err }, 'error parsing patch message');
+    log.error({ message: sanitizeMessageForLogging(message), err }, 'error parsing patch message');
     counters.patch.labels('error_parse').inc();
 };
 
@@ -175,7 +187,7 @@ export function vulnerabilityUpdateError (host_id: string, issues: Array<string>
 };
 
 export function vulnerabilityUpdateErrorParse (message: Message, err: Error) {
-    log.error({ message, err }, 'error parsing vulnerability message');
+    log.error({ message: sanitizeMessageForLogging(message), err }, 'error parsing vulnerability message');
     counters.vulnerability.labels('error_parse').inc();
 };
 
@@ -190,6 +202,6 @@ export function dispatcherRunError(run_id: string, status: string, err: Error) {
 };
 
 export function dispatcherRunErrorParse(message: Message, err: Error, status = 'unknown') {
-    log.error({ message, err }, 'error parsing dispatcher run message');
+    log.error({ message: sanitizeMessageForLogging(message), err }, 'error parsing dispatcher run message');
     counters.dispatcherRun.labels('error_parse', status).inc();
 };
