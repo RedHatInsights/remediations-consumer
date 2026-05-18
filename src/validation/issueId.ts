@@ -1,8 +1,8 @@
 import log from '../util/log';
 
-export const ISSUE_ID_PATTERN = /^[a-zA-Z0-9_:|.\-\s]+$/;
+export const ISSUE_ID_PATTERN = /^[a-zA-Z0-9_:|.\-\s+]+$/;
 export const MAX_ISSUE_ID_LENGTH = 500;
-export const MAX_ISSUES_ARRAY_SIZE = 1000;
+export const MAX_ISSUES_ARRAY_SIZE = 5000;
 
 export function validateIssueId(issueId: string): boolean {
     if (typeof issueId !== 'string' || issueId.length === 0) {
