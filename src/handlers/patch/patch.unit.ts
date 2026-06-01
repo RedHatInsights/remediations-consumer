@@ -112,8 +112,8 @@ describe('patch handler unit tests', function () {
         patchUpdateErrorParse.callCount.should.equal(0);
     });
 
-    test('handles exactly 5000 issues (at limit)', async () => {
-        const issues = Array(5000).fill('patch:test-0:1.0-1.el8.x86_64');
+    test('handles exactly 50000 issues (at limit)', async () => {
+        const issues = Array(50000).fill('patch:test-0:1.0-1.el8.x86_64');
         const message = {
             topic: 'platform.remediation-updates.patch',
             value: JSON.stringify({
@@ -130,8 +130,8 @@ describe('patch handler unit tests', function () {
         patchUpdateErrorParse.callCount.should.equal(0);
     });
 
-    test('rejects 5001 issues (over limit)', async () => {
-        const issues = Array(5001).fill('patch:test-0:1.0-1.el8.x86_64');
+    test('rejects 50001 issues (over limit)', async () => {
+        const issues = Array(50001).fill('patch:test-0:1.0-1.el8.x86_64');
         const message = {
             topic: 'platform.remediation-updates.patch',
             value: JSON.stringify({

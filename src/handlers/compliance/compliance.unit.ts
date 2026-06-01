@@ -112,8 +112,8 @@ describe('compliance handler unit tests', function () {
         complianceUpdateErrorParse.callCount.should.equal(0);
     });
 
-    test('handles exactly 5000 issues (at limit)', async () => {
-        const issues = Array(5000).fill('ssg:test-issue');
+    test('handles exactly 50000 issues (at limit)', async () => {
+        const issues = Array(50000).fill('ssg:test-issue');
         const message = {
             topic: 'platform.remediation-updates.compliance',
             value: JSON.stringify({
@@ -130,8 +130,8 @@ describe('compliance handler unit tests', function () {
         complianceUpdateErrorParse.callCount.should.equal(0);
     });
 
-    test('rejects 5001 issues (over limit)', async () => {
-        const issues = Array(5001).fill('ssg:test-issue');
+    test('rejects 50001 issues (over limit)', async () => {
+        const issues = Array(50001).fill('ssg:test-issue');
         const message = {
             topic: 'platform.remediation-updates.compliance',
             value: JSON.stringify({
