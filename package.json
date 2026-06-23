@@ -41,7 +41,7 @@
     "prom-client": "^11.5.3",
     "tmp": "0.2.7",
     "uuid": "^7.0.3",
-    "ws": "^8.18.0"
+    "ws": "^8.20.1"
   },
   "devDependencies": {
     "@tsconfig/node16": "^1.0.3",
