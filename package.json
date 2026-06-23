@@ -77,7 +77,8 @@
       "async": "^3.2.6"
     },
     "npm-run-all": {
-      "cross-spawn": "^7.0.6"
+      "cross-spawn": "^7.0.6",
+      "shell-quote": "^1.8.4"
     },
     "normalize-package-data": {
       "semver": "^5.7.2"
