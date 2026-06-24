@@ -1,9 +1,15 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>konflux-ci/mintmaker//config/renovate/renovate.json"],
-  "baseBranches": ["master"],
+  "extends": [
+    "github>konflux-ci/mintmaker//config/renovate/renovate.json"
+  ],
+  "baseBranchPatterns": [
+    "master"
+  ],
   "tekton": {
-    "schedule": ["at any time"]
+    "schedule": [
+      "at any time"
+    ]
   },
   "vulnerabilityAlerts": {
     "enabled": true
@@ -12,7 +18,10 @@
   "packageRules": [
     {
       "description": "Disable minor and patch updates",
-      "matchUpdateTypes": ["minor", "patch"],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "enabled": false
     }
   ]
