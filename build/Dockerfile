@@ -1,6 +1,6 @@
 #----------------------- base -----------------------
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.8-1779809423 AS base
+FROM registry.access.redhat.com/ubi9/ubi-minimal:1781496842 AS base
 
 # Install Node.js and npm RPM packages
 # Upgrade the packages to the latest versions
