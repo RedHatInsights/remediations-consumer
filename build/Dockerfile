@@ -4,13 +4,13 @@ FROM registry.access.redhat.com/ubi9/ubi-minimal:1784092978 AS base
 
 # Install Node.js and npm RPM packages
 # Upgrade the packages to the latest versions
-# Install npm@11.11.1 globally so that we can control the version of npm that we use
+# Install npm@11.18.0 globally so that we can control the version of npm that we use
 # Remove the RPM npm package installed by microdnf
 # Clean up the package manager
 RUN microdnf module enable -y nodejs:24 && \
     microdnf install -y nodejs npm --nodocs && \
     microdnf upgrade -y && \
-    npm install -g npm@11.11.1 && \
+    npm install -g npm@11.18.0 && \
     microdnf remove -y npm && \
     microdnf clean all
 
