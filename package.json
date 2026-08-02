@@ -30,7 +30,7 @@
     "convict-format-with-validator": "^6.2.0",
     "kafkajs": "^2.2.4",
     "kafkajs-lz4": "^1.0.0",
-    "knex": "^3.0.0",
+    "knex": "^3.3.0",
     "lodash": "^4.18.1",
     "npm-run-all2": "6.2.6",
     "pg": "^8.8.0",
