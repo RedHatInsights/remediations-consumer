@@ -17,12 +17,62 @@
   "osvVulnerabilityAlerts": true,
   "packageRules": [
     {
-      "description": "Disable minor and patch updates",
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
+      "description": "Disable all routine npm version bumps. Dockerfile and tekton updates are unaffected. The next rule re-enables npm updates that fix known vulnerabilities.",
+      "matchBaseBranches": [
+        "master"
+      ],
+      "matchManagers": [
+        "npm"
       ],
       "enabled": false
+    },
+    {
+      "description": "Re-enable npm updates only when Renovate marks them as vulnerability alerts (isVulnerabilityAlert), i.e. [SECURITY] PRs from GitHub/OSV.",
+      "matchBaseBranches": [
+        "master"
+      ],
+      "matchManagers": [
+        "npm"
+      ],
+      "matchJsonata": [
+        "$exists(isVulnerabilityAlert) and isVulnerabilityAlert = true"
+      ],
+      "enabled": true
+    },
+    {
+      "description": "Disable routine GitHub Actions version bumps. The next rule re-enables Action updates that fix known vulnerabilities.",
+      "matchBaseBranches": [
+        "master"
+      ],
+      "matchManagers": [
+        "github-actions"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Re-enable GitHub Actions updates only when Renovate marks them as vulnerability alerts (isVulnerabilityAlert), i.e. [SECURITY] PRs.",
+      "matchBaseBranches": [
+        "master"
+      ],
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchJsonata": [
+        "$exists(isVulnerabilityAlert) and isVulnerabilityAlert = true"
+      ],
+      "enabled": true
+    },
+    {
+      "description": "Allow Dockerfile base image updates on an immediate schedule so MintMaker can open Konflux image bump PRs regularly.",
+      "matchBaseBranches": [
+        "master"
+      ],
+      "matchManagers": [
+        "dockerfile"
+      ],
+      "schedule": [
+        "at any time"
+      ]
     }
   ]
 }
